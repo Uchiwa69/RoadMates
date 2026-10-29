@@ -87,6 +87,9 @@ export default function Expenses({ group }) {
               <h3>{expense.libelle}</h3>
               <p><strong>Catégorie :</strong> {expense.categorie} · <strong>Montant :</strong> {formatEuros(expense.montantCentimes)}</p>
               <p><strong>Date de réservation :</strong> {expense.dateReservation}</p>
+              <p className={expense.parts.every((part) => part.payee) ? 'badge' : 'groupe-statut-attente'}>
+                {expense.parts.every((part) => part.payee) ? 'Complète' : 'En attente'}
+              </p>
               <ul className="groupe-parts">
                 {expense.parts.map((part) => {
                   const member = users.find((user) => user.id === part.userId)
