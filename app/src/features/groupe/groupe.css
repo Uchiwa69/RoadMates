@@ -3,6 +3,7 @@
 .groupe-liste { display: grid; gap: 12px; }
 .groupe-formulaire { display: grid; gap: 10px; max-width: 560px; }
 .groupe-formulaire textarea { resize: vertical; }
+.groupe-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .groupe-aide { margin: 0; color: var(--c-texte-2); font-size: .9rem; }
 .profil-carte { display: grid; gap: 8px; }
 .profil-carte p { margin: 0; }
