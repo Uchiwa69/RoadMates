@@ -1,0 +1,51 @@
+/* SOCLE PARTAGÉ — styles de base. Chaque partie met ses styles dans son dossier. */
+:root {
+  --c-fond: #f7f8fa;
+  --c-surface: #ffffff;
+  --c-texte: #1d2433;
+  --c-texte-2: #5a6475;
+  --c-primaire: #1f5f8b;
+  --c-primaire-texte: #ffffff;
+  --c-bord: #d5dbe3;
+  --c-succes: #1e7a46;
+  --c-alerte: #9a5b00;
+  --c-erreur: #b3261e;
+  --rayon: 10px;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--c-texte);
+  background: var(--c-fond);
+  line-height: 1.5;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--c-fond); }
+a { color: var(--c-primaire); }
+
+.header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px;
+  padding: 12px 16px; background: var(--c-surface); border-bottom: 1px solid var(--c-bord);
+}
+.logo { font-weight: 700; font-size: 1.2rem; text-decoration: none; }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.nav a { text-decoration: none; color: var(--c-texte-2); padding: 4px 0; }
+.nav a.active { color: var(--c-primaire); font-weight: 600; border-bottom: 2px solid var(--c-primaire); }
+.demo { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: .9rem; color: var(--c-texte-2); }
+.demo select { margin-left: 6px; }
+
+.main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+.carte { background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); padding: 16px; }
+.btn {
+  display: inline-block; padding: 10px 16px; border-radius: var(--rayon); border: none; cursor: pointer;
+  background: var(--c-primaire); color: var(--c-primaire-texte); font: inherit; font-weight: 600; text-decoration: none;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondaire { background: transparent; color: var(--c-primaire); border: 1px solid var(--c-primaire); }
+.btn-lien { background: none; border: none; color: var(--c-primaire); cursor: pointer; font: inherit; text-decoration: underline; }
+.badge { display: inline-block; font-size: .8rem; padding: 2px 8px; border-radius: 999px; background: #e3f1e8; color: var(--c-succes); }
+.erreur { color: var(--c-erreur); }
+.vide { color: var(--c-texte-2); font-style: italic; }
+.a-faire { padding: 12px; border: 2px dashed var(--c-bord); border-radius: var(--rayon); color: var(--c-texte-2); }
+
+input, select, textarea { font: inherit; padding: 8px; border: 1px solid var(--c-bord); border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--c-primaire); outline-offset: 2px; }
