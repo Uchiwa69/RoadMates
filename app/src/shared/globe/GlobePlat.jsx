@@ -4,7 +4,9 @@ import { geoDistance, geoOrthographic, geoPath } from 'd3-geo'
 import { PAYS_GEO, VUE_INITIALE, focusPays } from './monde.js'
 import { COULEURS_GLOBE, SELECTION, etiquettesVisibles } from './rendu.js'
 
-export default function GlobePlat({ largeur, hauteur, theme, pays, villeActive, points, arcs, villes, onPays, onVille }) {
+export default function GlobePlat({
+  largeur, hauteur, theme, pays, villeActive, points, arcs, villes, onPays, onVille, etiquettes = 'actives',
+}) {
   const c = COULEURS_GLOBE[theme] ?? COULEURS_GLOBE.light
   const focus = (pays && focusPays(pays)) || VUE_INITIALE
   const rayon = (Math.min(largeur, hauteur) / 2) * 0.86
@@ -62,7 +64,7 @@ export default function GlobePlat({ largeur, hauteur, theme, pays, villeActive, 
         })}
         <path d={chemin({ type: 'Sphere' })} fill="url(#globe-plat-ombre)" pointerEvents="none" />
       </svg>
-      {etiquettesVisibles(villes, villeActive, focus.lng).filter((v) => visible(v.lng, v.lat)).map((v) => {
+      {etiquettesVisibles(villes, villeActive, focus.lng, etiquettes).filter((v) => visible(v.lng, v.lat)).map((v) => {
         const [x, y] = projection([v.lng, v.lat])
         return (
           <button
@@ -70,7 +72,7 @@ export default function GlobePlat({ largeur, hauteur, theme, pays, villeActive, 
             type="button"
             tabIndex={-1}
             aria-hidden="true"
-            className={`globe-ville globe-ville--${v.cote}${v.ville === villeActive ? ' globe-ville--active' : ''}${v.nb ? '' : ' globe-ville--vide'}`}
+            className={`globe-ville globe-ville--${v.cote}${v.actif || v.ville === villeActive ? ' globe-ville--active' : ''}${v.nb ? '' : ' globe-ville--vide'}`}
             style={{ left: x, top: y }}
             onClick={() => onVille?.(v)}
           >

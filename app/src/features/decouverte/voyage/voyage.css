@@ -1,0 +1,94 @@
+/* Déclarer un voyage : parcours en trois temps, sélecteur d'étapes au globe, dates, récapitulatif. */
+.nouveau {
+  --ciel-carte: linear-gradient(165deg,
+    light-dark(#FFF1E8, #0B1020) 0%, light-dark(#FFD9C4, #111A3A) 55%, light-dark(#FFA992, #3A2140) 100%);
+  display: grid; gap: var(--e-6);
+}
+.nouveau__entete { display: grid; gap: var(--e-2); }
+.nouveau__entete h1 { margin: 0; }
+.nouveau__intro { margin: 0 0 var(--e-4); color: var(--texte-2); }
+.nouveau__entete .ui-stepper { max-width: 560px; margin: 0; }
+
+.nouveau__pas { display: grid; gap: var(--e-6); animation: nouveau-entree var(--d-lent) var(--ease); }
+@keyframes nouveau-entree { from { opacity: 0; transform: translateY(8px); } }
+.nouveau__titre { display: flex; align-items: center; gap: var(--e-2); margin: 0; font-size: 1.6rem; }
+.nouveau__titre svg { color: var(--primaire-texte); }
+.nouveau__titre:focus { outline: none; }
+.nouveau__titre:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.nouveau__aide { margin: 0; color: var(--texte-2); }
+.nouveau__nom { border-radius: var(--r-xl); }
+
+.nouveau__actions {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-3);
+  padding-top: var(--e-2);
+}
+.nouveau__actions > :only-child { margin-left: auto; }
+
+/* ---------- Sélecteur d'étapes ---------- */
+.picker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--e-6); align-items: start; }
+.picker__controles { display: grid; gap: var(--e-5); min-width: 0; }
+.picker__controles .ui-combo__input { min-height: 56px; border-radius: var(--r-rond); }
+.picker__info { margin: 0; color: var(--texte-2); }
+
+.picker__pays, .picker__itineraire {
+  display: grid; gap: var(--e-3); padding: var(--e-5); border-radius: var(--r-xl);
+  background: var(--surface); border: 1px solid var(--bord); box-shadow: var(--ombre-1);
+}
+.picker__pays-titre, .picker__itineraire-titre { margin: 0; font-weight: 650; display: flex; align-items: center; gap: var(--e-2); }
+.picker__compte { margin-left: auto; font-size: .85rem; color: var(--texte-2); font-weight: 600; }
+.picker__villes { display: flex; flex-wrap: wrap; gap: var(--e-2); margin: 0; padding: 0; list-style: none; }
+
+.picker__etapes { display: grid; gap: var(--e-2); margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.picker__etape {
+  display: flex; align-items: center; gap: var(--e-3);
+  padding: 8px 8px 8px 12px; border-radius: var(--r-l); background: var(--surface-2); border: 1px solid var(--bord);
+  animation: nouveau-entree var(--d-moyen) var(--ease);
+}
+.picker__num {
+  display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #C2412F, #A51F55); color: #FFFFFF; font-weight: 800; font-size: .85rem;
+}
+.picker__ville { display: grid; font-weight: 700; flex: 1; min-width: 0; }
+.picker__ville-pays { font-weight: 500; font-size: .85rem; color: var(--texte-2); }
+.picker__retirer {
+  display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%;
+  border: none; background: transparent; color: var(--texte-2); cursor: pointer;
+}
+.picker__retirer:hover { background: var(--erreur-doux); color: var(--erreur); }
+
+.picker__globe, .nouveau__recap-globe {
+  position: sticky; top: calc(var(--haut-entete) + var(--e-4));
+  height: 540px; border-radius: var(--r-xl); overflow: hidden;
+  background: var(--ciel-carte); box-shadow: var(--ombre-2); border: 1px solid var(--bord);
+}
+
+/* ---------- Dates ---------- */
+.nouveau__dates { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: var(--e-4); margin: 0; padding: 0; list-style: none; }
+.nouveau__etape { margin: 0; padding: var(--e-5); }
+.nouveau__legende {
+  float: left; width: 100%; padding: 0; margin-bottom: var(--e-4);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2);
+  font-family: var(--police-titre); font-size: 1.15rem; font-weight: 650;
+}
+.nouveau__legende + * { clear: both; }
+.nouveau__legende-pays { font-family: var(--police-texte); font-size: .85rem; font-weight: 500; color: var(--texte-2); }
+
+/* ---------- Récapitulatif ---------- */
+.nouveau__recap { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+.nouveau__recap-texte { display: grid; gap: var(--e-5); }
+.nouveau__resume { display: grid; gap: var(--e-4); padding: var(--e-6); }
+.nouveau__resume-nom { margin: 0; font-family: var(--police-titre); font-size: 1.6rem; font-weight: 650; }
+.nouveau__resume-meta { margin: calc(var(--e-3) * -1) 0 0; color: var(--texte-2); }
+.nouveau__recap-globe { height: 460px; }
+
+/* ---------- Mobile et tablette ---------- */
+@media (max-width: 900px) {
+  .picker, .nouveau__recap { grid-template-columns: minmax(0, 1fr); }
+  .picker__globe, .nouveau__recap-globe { position: relative; top: auto; height: 320px; }
+}
+@media (max-width: 767px) {
+  .nouveau__titre { font-size: 1.35rem; }
+  .nouveau__actions { flex-direction: column-reverse; align-items: stretch; }
+  .nouveau__actions .ui-btn { width: 100%; }
+  .nouveau__etape { padding: var(--e-4); }
+}

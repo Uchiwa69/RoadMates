@@ -6,7 +6,7 @@ import { ArrowRight, Globe2, MapPin, Search, X } from 'lucide-react'
 import { useDb } from '../../../shared/db.js'
 import { useCurrentUser } from '../../../shared/session.js'
 import { paths } from '../../../shared/paths.js'
-import { normaliser } from '../../../shared/texte.js'
+import { filtrerEtClasser, normaliser } from '../../../shared/texte.js'
 import { PAYS, nomPays } from '../../../shared/globe/pays.js'
 import GlobeTerre from '../../../shared/globe/Globe.jsx'
 import { Button, Combobox, Field } from '../../../shared/ui/index.js'
@@ -15,12 +15,6 @@ import { arcsVoyages, pointsVoyageurs, villesDuPays } from '../globe.js'
 
 const ISO_DE_VILLE = new Map(VILLES.map((v) => [v.ville, v.iso]))
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`
-
-function classer(liste, q, cle) {
-  return liste
-    .filter((x) => normaliser(x[cle]).includes(q))
-    .sort((a, b) => Number(normaliser(b[cle]).startsWith(q)) - Number(normaliser(a[cle]).startsWith(q)))
-}
 
 export default function Hero() {
   const db = useDb((d) => d)
@@ -72,11 +66,11 @@ export default function Hero() {
 
   const q = normaliser(saisie)
   const suggestions = q ? [
-    ...classer(VILLES, q, 'ville').slice(0, 4).map((v) => {
+    ...filtrerEtClasser(VILLES, q, 'ville').slice(0, 4).map((v) => {
       const nb = points.find((p) => p.ville === v.ville)?.nb ?? 0
       return { id: `v-${v.ville}`, label: v.ville, detail: nb ? `${v.pays} · ${pluriel(nb, 'voyageur')}` : v.pays, icon: MapPin, ville: v }
     }),
-    ...classer(PAYS, q, 'nom').slice(0, 4).map((p) => {
+    ...filtrerEtClasser(PAYS, q, 'nom').slice(0, 4).map((p) => {
       const nb = voyageursParPays.get(p.iso2)?.size ?? 0
       return { id: `p-${p.iso2}`, label: p.nom, detail: nb ? pluriel(nb, 'voyageur') : 'Pays', icon: Globe2, iso2: p.iso2 }
     }),

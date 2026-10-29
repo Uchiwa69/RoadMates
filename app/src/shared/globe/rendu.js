@@ -38,13 +38,23 @@ export function creerEtiquetteVille(d, active, cote, onClic) {
   return ancre
 }
 
-// Étiquettes affichées sur le globe : les villes où quelqu'un passe, plus la ville choisie.
-// Chacune part du côté extérieur du pays (ouest à gauche, est à droite) pour limiter
-// les chevauchements, comme Lagos et Faro à 60 km l'une de l'autre.
-export function etiquettesVisibles(villes, villeActive, centreLng) {
+// Étiquettes affichées sur le globe. Mode « actives » (vitrine) : les villes où quelqu'un
+// passe et les villes choisies. Mode « toutes » (sélecteur d'étapes) : toutes les villes du pays.
+// Chacune part du côté extérieur du pays (ouest à gauche, est à droite) ; si une voisine
+// proche occupe déjà ce côté (Lisbonne et Sintra), elle passe de l'autre côté.
+export function etiquettesVisibles(villes, villeActive, centreLng, mode = 'actives') {
+  const placees = []
+  const proche = (a, b) => Math.abs(a.lat - b.lat) < 1 && Math.abs(a.lng - b.lng) < 2.5
   return villes
-    .filter((v) => v.nb > 0 || v.ville === villeActive)
-    .map((v) => ({ ...v, cote: v.lng < centreLng ? 'gauche' : 'droite' }))
+    .filter((v) => mode === 'toutes' || v.nb > 0 || v.actif || v.ville === villeActive)
+    .sort((a, b) => Number(!!b.actif) - Number(!!a.actif) || b.nb - a.nb)
+    .map((v) => {
+      let cote = v.lng < centreLng ? 'gauche' : 'droite'
+      if (placees.some((p) => p.cote === cote && proche(p, v))) cote = cote === 'gauche' ? 'droite' : 'gauche'
+      const e = { ...v, cote }
+      placees.push(e)
+      return e
+    })
 }
 
 // Recul et décalage de la caméra pour un pays : un peu plus loin sur mobile, et le pays

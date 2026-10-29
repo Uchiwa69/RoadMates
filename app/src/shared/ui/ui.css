@@ -224,3 +224,34 @@
 .ui-combo__opt-label { font-weight: 650; }
 .ui-combo__opt-detail { margin-left: auto; color: var(--texte-2); font-size: .85rem; text-align: right; }
 .ui-combo__vide { padding: 12px; color: var(--texte-2); }
+
+/* ---------- PlageDates ---------- */
+.ui-plage { display: grid; gap: var(--e-4); }
+.ui-plage__champs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
+.ui-plage__champs input { padding-inline: 10px; }
+.ui-plage__erreur { order: -1; padding: 10px 12px; border-radius: var(--r-m); background: var(--erreur-doux); }
+.ui-cal { padding: var(--e-3); border-radius: var(--r-l); background: var(--surface-2); border: 1px solid var(--bord); user-select: none; }
+.ui-cal__tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--e-2); }
+.ui-cal__mois { font-weight: 700; text-transform: capitalize; }
+.ui-cal__nav {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent; color: var(--texte); cursor: pointer;
+}
+.ui-cal__nav:hover { background: var(--fond-2); }
+.ui-cal__grille { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 2px; }
+.ui-cal__entete { padding: 4px 0; text-align: center; font-size: .75rem; font-weight: 700; color: var(--texte-2); }
+.ui-cal__jour {
+  position: relative; height: 40px; border: none; background: transparent; color: var(--texte);
+  font: inherit; font-size: .9rem; font-weight: 550; cursor: pointer; border-radius: var(--r-m);
+}
+.ui-cal__jour:hover:not(:disabled) { background: var(--primaire-doux); }
+.ui-cal__jour--passe { color: var(--texte-2); opacity: .45; cursor: not-allowed; text-decoration: line-through; }
+.ui-cal__jour--autre { background: var(--violet-doux); border-radius: 0; }
+.ui-cal__jour--dedans { background: var(--primaire-doux); color: var(--primaire-texte); border-radius: 0; }
+.ui-cal__jour--debut, .ui-cal__jour--fin { background: var(--primaire); color: var(--sur-primaire); font-weight: 750; }
+.ui-cal__jour--debut { border-radius: var(--r-m) 0 0 var(--r-m); }
+.ui-cal__jour--fin { border-radius: 0 var(--r-m) var(--r-m) 0; }
+.ui-cal__jour--debut.ui-cal__jour--fin { border-radius: var(--r-m); }
+.ui-cal__jour--debut:hover:not(:disabled), .ui-cal__jour--fin:hover:not(:disabled) { background: var(--primaire-hover); }
+.ui-cal__legende { display: flex; align-items: center; gap: 6px; margin: var(--e-2) 0 0; font-size: .8rem; color: var(--texte-2); }
+.ui-cal__pastille { width: 22px; height: 10px; border-radius: var(--r-rond); background: var(--violet-doux); }

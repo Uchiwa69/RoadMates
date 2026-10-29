@@ -8,6 +8,7 @@ import { COULEURS_GLOBE, SELECTION, creerEtiquetteVille, etiquettesVisibles, vue
 
 export default function GlobeWebGL({
   largeur, hauteur, theme, mouvementReduit, pays, villeActive, points, arcs, villes, onPays, onVille, rotation = true,
+  etiquettes: modeEtiquettes = 'actives',
 }) {
   const globe = useRef(null)
   const conteneur = useRef(null)
@@ -18,8 +19,8 @@ export default function GlobeWebGL({
   const compact = largeur < 560
   const focus = pays ? focusPays(pays) : null
   const etiquettes = useMemo(
-    () => (focus ? etiquettesVisibles(villes, villeActive, focus.lng) : []),
-    [villes, villeActive, focus],
+    () => (focus ? etiquettesVisibles(villes, villeActive, focus.lng, modeEtiquettes) : []),
+    [villes, villeActive, focus, modeEtiquettes],
   )
 
   useEffect(() => {
@@ -127,7 +128,7 @@ export default function GlobeWebGL({
         htmlLat="lat"
         htmlLng="lng"
         htmlAltitude={0.035}
-        htmlElement={(d) => creerEtiquetteVille(d, d.ville === villeActive, d.cote, (v) => rappels.current.onVille?.(v))}
+        htmlElement={(d) => creerEtiquetteVille(d, d.actif || d.ville === villeActive, d.cote, (v) => rappels.current.onVille?.(v))}
         htmlTransitionDuration={0}
       />
     </div>
