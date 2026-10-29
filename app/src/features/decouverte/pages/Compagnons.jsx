@@ -1,10 +1,13 @@
 // US-05 — les voyageurs dont l'itinéraire croise le mien, avant le départ.
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Compass, Filter, MapPin, Route } from 'lucide-react'
 import { useDb } from '../../../shared/db.js'
 import { useCurrentUser } from '../../../shared/session.js'
 import { paths } from '../../../shared/paths.js'
+import { Button, EmptyState, EntetePage } from '../../../shared/ui/index.js'
 import { itinerairesCommuns } from '../matching.js'
+import { formatPeriode } from '../dates.js'
 import VoyageurCarte from '../VoyageurCarte.jsx'
 import Filtres from '../Filtres.jsx'
 import { appliquerFiltres, FILTRES_VIDES } from '../filtres.js'
@@ -19,9 +22,12 @@ export default function Compagnons() {
   if (mesVoyages.length === 0) {
     return (
       <section>
-        <h1>Itinéraires communs</h1>
-        <p className="vide">Déclarez un voyage pour voir qui fait le même trajet que vous.</p>
-        <Link to={paths.nouveauVoyage} className="btn">Déclarer un voyage</Link>
+        <EntetePage surtitre="Compagnons de route" titre="Itinéraires communs" />
+        <EmptyState
+          icon={Route}
+          titre="Déclarez un voyage pour voir qui fait le même trajet que vous."
+          action={<Button to={paths.nouveauVoyage}>Déclarer un voyage</Button>}
+        />
       </section>
     )
   }
@@ -33,32 +39,59 @@ export default function Compagnons() {
   const total = parVoyage.reduce((s, v) => s + v.visibles.length, 0)
 
   return (
-    <section>
-      <h1>Itinéraires communs</h1>
+    <section className="compagnons">
+      <EntetePage surtitre="Compagnons de route" titre="Itinéraires communs">
+        <p>Les voyageurs qui partagent au moins une étape avec vous, le même jour au même endroit.</p>
+      </EntetePage>
+
       <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} total={total} />
-      {parVoyage.map(({ voyage, tous, visibles }) => {
-        return (
-          <div key={voyage.id}>
-            <h2>{voyage.destination}</h2>
-            {tous.length === 0 && (
-              <p className="vide">
-                Aucun itinéraire commun pour l'instant.{' '}
-                <Link to={paths.destination(voyage.etapes[0].ville)}>Voir qui sera à {voyage.etapes[0].ville}</Link>
-              </p>
-            )}
-            {tous.length > 0 && visibles.length === 0 && <p className="vide">Aucun voyageur ne correspond à ces filtres.</p>}
-            <ul className="liste">
-              {visibles.map((r) => (
-                <VoyageurCarte
-                  key={r.user.id}
-                  resultat={r}
-                  resume={`${r.nbEtapes} étape${r.nbEtapes > 1 ? 's' : ''} sur ${voyage.etapes.length} en commun`}
-                />
+
+      {parVoyage.map(({ voyage, tous, visibles }) => (
+        <section key={voyage.id} className="compagnons__voyage" aria-labelledby={`voyage-${voyage.id}`}>
+          <div className="compagnons__voyage-tete">
+            <h2 id={`voyage-${voyage.id}`}>{voyage.destination}</h2>
+            <ul className="compagnons__etapes" aria-label={`Étapes de ${voyage.destination}`}>
+              {voyage.etapes.map((e) => (
+                <li key={`${e.ville}-${e.debut}`}>
+                  <Link to={paths.destination(e.ville)} className="compagnons__etape">
+                    <MapPin size={14} aria-hidden="true" />
+                    {e.ville} <span className="compagnons__etape-dates">{formatPeriode(e)}</span>
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>
-        )
-      })}
+
+          {tous.length === 0 && (
+            <EmptyState
+              icon={Compass}
+              titre="Aucun itinéraire commun pour l'instant"
+              action={<Button to={paths.destination(voyage.etapes[0].ville)} variant="secondaire">Voir qui sera à {voyage.etapes[0].ville}</Button>}
+            >
+              <p>Personne ne fait encore le même trajet. Sur place, d'autres voyageurs seront peut-être dans la même ville.</p>
+            </EmptyState>
+          )}
+          {tous.length > 0 && visibles.length === 0 && (
+            <EmptyState
+              icon={Filter}
+              titre="Aucun voyageur ne correspond à ces filtres."
+              action={<Button variant="secondaire" onClick={() => setFiltres(FILTRES_VIDES)}>Réinitialiser les filtres</Button>}
+            />
+          )}
+
+          <ul className="ui-grille">
+            {visibles.map((r, i) => (
+              <VoyageurCarte
+                key={r.user.id}
+                rang={i}
+                resultat={r}
+                score={{ valeur: r.nbEtapes, total: voyage.etapes.length }}
+                resume={`${r.nbEtapes} étape${r.nbEtapes > 1 ? 's' : ''} sur ${voyage.etapes.length} en commun`}
+              />
+            ))}
+          </ul>
+        </section>
+      ))}
     </section>
   )
 }

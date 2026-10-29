@@ -255,3 +255,26 @@
 .ui-cal__jour--debut:hover:not(:disabled), .ui-cal__jour--fin:hover:not(:disabled) { background: var(--primaire-hover); }
 .ui-cal__legende { display: flex; align-items: center; gap: 6px; margin: var(--e-2) 0 0; font-size: .8rem; color: var(--texte-2); }
 .ui-cal__pastille { width: 22px; height: 10px; border-radius: var(--r-rond); background: var(--violet-doux); }
+
+/* ---------- EntetePage ---------- */
+.ui-page-tete { display: grid; gap: var(--e-3); margin-bottom: var(--e-6); }
+.ui-page-tete__ligne { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--e-4); }
+.ui-page-tete__texte { display: grid; gap: var(--e-2); min-width: 0; max-width: 680px; }
+.ui-page-tete__surtitre {
+  margin: 0; font-size: .8rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--primaire-texte);
+}
+.ui-page-tete__titre { margin: 0; }
+.ui-page-tete__desc { color: var(--texte-2); }
+.ui-page-tete__desc p { margin: 0; }
+.ui-page-tete__actions { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+
+/* Lien de retour discret, en haut de page */
+.ui-retour {
+  justify-self: start; display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px 6px 8px; margin-left: -8px; border-radius: var(--r-rond);
+  color: var(--texte-2); font-weight: 600; text-decoration: none;
+}
+.ui-retour:hover { background: var(--fond-2); color: var(--texte); }
+
+/* Grille de cartes, apparition en cascade */
+.ui-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--e-4); margin: 0; padding: 0; list-style: none; }
