@@ -18,6 +18,14 @@ export default function Expenses({ group }) {
   const [dateReservation, setDateReservation] = useState('')
   const [error, setError] = useState('')
 
+  function payPart(expenseId) {
+    updateDb((db) => {
+      const expense = db.expenses.find((candidate) => candidate.id === expenseId && candidate.groupId === group.id)
+      const part = expense?.parts.find((candidate) => candidate.userId === currentUser?.id)
+      if (part && !part.payee) part.payee = true
+    })
+  }
+
   function createExpense(event) {
     event.preventDefault()
     const cleanLabel = libelle.trim()
@@ -85,6 +93,9 @@ export default function Expenses({ group }) {
                   return <li key={part.userId}>{member?.prenom ?? 'Membre'} : {formatEuros(part.montantCentimes)} — {part.payee ? 'Payée' : 'À payer'}</li>
                 })}
               </ul>
+              {expense.parts.some((part) => part.userId === currentUser?.id && !part.payee) && (
+                <button className="btn" type="button" onClick={() => payPart(expense.id)}>Payer ma part</button>
+              )}
             </article>
           ))}
         </div>
