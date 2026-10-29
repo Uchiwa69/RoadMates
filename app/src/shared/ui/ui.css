@@ -200,8 +200,11 @@
 }
 .ui-toast__fermer:hover { background: color-mix(in srgb, var(--fond) 15%, transparent); }
 @keyframes ui-toast-entree { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+/* Mobile : en haut, pour ne masquer ni la barre d'onglets ni les boutons d'action fixés en bas */
 @media (max-width: 767px) {
-  .ui-toasts { bottom: calc(var(--haut-onglets) + var(--e-4) + env(safe-area-inset-bottom)); }
+  .ui-toasts { bottom: auto; top: calc(56px + var(--e-2)); }
+  .ui-toast { animation-name: ui-toast-entree-haut; }
+  @keyframes ui-toast-entree-haut { from { opacity: 0; transform: translateY(-12px) scale(.98); } }
 }
 
 /* ---------- Combobox ---------- */

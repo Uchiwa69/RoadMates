@@ -10,8 +10,8 @@ export function ToastProvider({ children }) {
   const fermer = useCallback((id) => setToasts((ts) => ts.filter((t) => t.id !== id)), [])
   const toast = useCallback((message) => {
     const id = ++compteur.current
-    setToasts((ts) => [...ts.slice(-2), { id, message }])
-    setTimeout(() => fermer(id), 4000)
+    setToasts((ts) => [...ts.slice(-1), { id, message }])
+    setTimeout(() => fermer(id), 3500)
   }, [fermer])
   const valeur = useMemo(() => ({ toast }), [toast])
 

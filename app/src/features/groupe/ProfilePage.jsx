@@ -1,33 +1,61 @@
-import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+// US-08 — profil d'un voyageur et demande de contact.
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, BadgeCheck, Check, Clock, Inbox, Languages, Send, ShieldCheck, UserRoundX, Users } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { paths } from '../../shared/paths.js'
+import { Avatar, Badge, Button, Card, EmptyState, Field, Textarea, Timeline, useToast } from '../../shared/ui/index.js'
+import { formatPeriode } from './format.js'
+
+const MAX = 300
 
 export default function ProfilePage() {
   const { userId } = useParams()
+  const navigate = useNavigate()
+  const toast = useToast()
   const user = useDb((db) => db.users.find((candidate) => candidate.id === userId) ?? null)
-  const trips = useDb((db) => db.trips.filter((trip) => trip.userId === userId))
+  const trips = useDb((db) => db.trips)
   const requests = useDb((db) => db.requests)
   const currentUser = useCurrentUser()
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const formulaire = useRef(null)
+  const zone = useRef(null)
+  const [formulaireVisible, setFormulaireVisible] = useState(true)
 
-  if (!user) {
-    return <section className="groupe-page"><h1>Profil introuvable</h1><p>Ce voyageur n’existe pas.</p></section>
-  }
-
-  const connected = requests.some((request) =>
+  const connected = !!user && requests.some((request) =>
     request.statut === 'acceptee' &&
     ((request.fromId === currentUser?.id && request.toId === user.id) ||
       (request.fromId === user.id && request.toId === currentUser?.id)),
   )
-  const outgoing = requests.some((request) =>
+  const outgoing = !!user && requests.some((request) =>
     request.fromId === currentUser?.id && request.toId === user.id && request.statut === 'en_attente',
   )
-  const incoming = requests.some((request) =>
+  const incoming = !!user && requests.some((request) =>
     request.fromId === user.id && request.toId === currentUser?.id && request.statut === 'en_attente',
   )
+  const peutDemander = !!user && !!currentUser && currentUser.id !== user.id && !connected && !outgoing && !incoming
+
+  // Mobile : le bouton « Demander le contact » reste visible tant que le formulaire est hors écran.
+  useEffect(() => {
+    if (!peutDemander || !formulaire.current) return
+    const io = new IntersectionObserver(([e]) => setFormulaireVisible(e.isIntersecting), { threshold: 0.3 })
+    io.observe(formulaire.current)
+    return () => io.disconnect()
+  }, [peutDemander])
+
+  if (!user) {
+    return (
+      <EmptyState icon={UserRoundX} titre="Profil introuvable" action={<Button to={paths.compagnons}>Voir mes compagnons</Button>}>
+        <p>Ce voyageur n’existe pas.</p>
+      </EmptyState>
+    )
+  }
+
+  const sesVoyages = trips.filter((trip) => trip.userId === userId)
+  const mesEtapes = trips.filter((trip) => trip.userId === currentUser?.id).flatMap((trip) => trip.etapes)
+  const enCommun = (etape) => mesEtapes.some((e) => e.ville === etape.ville && e.debut <= etape.fin && etape.debut <= e.fin)
 
   function sendRequest(event) {
     event.preventDefault()
@@ -36,11 +64,11 @@ export default function ProfilePage() {
       setError('Ajoutez un message de présentation avant d’envoyer la demande.')
       return
     }
-    if (trimmedMessage.length > 300) {
+    if (trimmedMessage.length > MAX) {
       setError('Le message ne peut pas dépasser 300 caractères.')
       return
     }
-    if (!currentUser || currentUser.id === user.id || connected || outgoing || incoming) return
+    if (!peutDemander) return
 
     updateDb((db) => {
       db.requests.push({
@@ -54,60 +82,119 @@ export default function ProfilePage() {
     })
     setMessage('')
     setError('')
+    toast(`Demande envoyée à ${user.prenom}.`)
+  }
+
+  const allerAuFormulaire = () => {
+    formulaire.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    zone.current?.focus({ preventScroll: true })
   }
 
   return (
-    <section className="groupe-page">
-      <Link to={paths.compagnons}>← Retour aux compagnons</Link>
-      <h1>{user.prenom}</h1>
-      <div className="carte profil-carte">
-        <p><strong>Âge :</strong> {user.age} ans</p>
-        <p><strong>Langues :</strong> {user.langues?.length ? user.langues.join(', ') : 'Non renseignées'}</p>
-        <p><strong>Bio :</strong> {user.bio || 'Aucune présentation.'}</p>
-        {user.verifie && <p><span className="badge">Vérifié</span></p>}
+    <section className="profil">
+      <button type="button" className="ui-retour" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(paths.compagnons))}>
+        <ArrowLeft size={18} aria-hidden="true" /> Retour
+      </button>
+
+      <div className="profil__grille">
+        <div className="profil__principal">
+          <Card className="profil__tete">
+            <div className="profil__fond" aria-hidden="true" />
+            <Avatar user={user} taille={96} />
+            <div className="profil__identite">
+              <h1 className="profil__nom">{user.prenom}</h1>
+              <p className="profil__age">{user.age} ans</p>
+              <div className="profil__badges">
+                {user.verifie
+                  ? <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>
+                  : <Badge ton="neutre">Identité non vérifiée</Badge>}
+                {connected && <Badge ton="primaire" icon={Users}>En contact</Badge>}
+              </div>
+            </div>
+            <p className="profil__langues">
+              <Languages size={18} aria-hidden="true" />
+              {user.langues?.length ? `Parle ${user.langues.join(', ')}` : 'Langues non renseignées'}
+            </p>
+            <blockquote className="profil__bio">{user.bio || 'Aucune présentation.'}</blockquote>
+          </Card>
+
+          <section aria-labelledby="etapes-titre" className="profil__section">
+            <h2 id="etapes-titre">Étapes de voyage</h2>
+            {sesVoyages.length === 0 ? <p className="profil__vide">Aucun voyage déclaré pour le moment.</p> : (
+              <div className="profil__voyages">
+                {sesVoyages.map((trip) => (
+                  <Card key={trip.id} as="article" className="profil__voyage">
+                    <h3>{trip.destination}</h3>
+                    <Timeline
+                      items={[...trip.etapes].sort((a, b) => a.debut.localeCompare(b.debut)).map((etape, index) => ({
+                        key: `${trip.id}-${etape.ville}-${index}`,
+                        titre: `${etape.ville}${etape.pays ? `, ${etape.pays}` : ''}`,
+                        sousTitre: formatPeriode(etape.debut, etape.fin),
+                        extra: enCommun(etape) && currentUser?.id !== user.id
+                          ? <Badge ton="primaire" className="profil__commun">Vous y êtes aussi</Badge>
+                          : null,
+                      }))}
+                    />
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <aside className="profil__contact" aria-labelledby="contact-titre">
+          <Card className="profil__contact-carte">
+            <h2 id="contact-titre">Contact</h2>
+            {connected ? (
+              <>
+                <Badge ton="succes" icon={Check}>En contact</Badge>
+                <p className="profil__aide">Vous pouvez l’ajouter à un groupe pour discuter et partager les frais.</p>
+                <Button to={paths.groupes} variant="secondaire">Voir mes groupes</Button>
+              </>
+            ) : outgoing ? (
+              <>
+                <Badge ton="alerte" icon={Clock}>Demande envoyée</Badge>
+                <p className="profil__aide">{user.prenom} peut accepter ou refuser. Vous pourrez discuter après acceptation.</p>
+              </>
+            ) : incoming ? (
+              <>
+                <p className="profil__aide">Cette personne vous a écrit.</p>
+                <Button to={paths.demandes} icon={Inbox}>Voir la demande</Button>
+              </>
+            ) : currentUser?.id === user.id ? (
+              <p className="profil__aide">C’est votre profil.</p>
+            ) : (
+              <form ref={formulaire} className="profil__form" onSubmit={sendRequest} noValidate>
+                <Field
+                  label="Message de présentation (300 caractères maximum)"
+                  aide={`${message.length}/${MAX} caractères`}
+                  error={error}
+                >
+                  <Textarea
+                    ref={zone}
+                    value={message}
+                    maxLength={MAX}
+                    rows={5}
+                    placeholder={`Bonjour ${user.prenom}, on a des étapes en commun…`}
+                    onChange={(event) => { setMessage(event.target.value); setError('') }}
+                  />
+                </Field>
+                <p className="profil__rassurance">
+                  <ShieldCheck size={16} aria-hidden="true" />
+                  Aucun message ne peut être échangé avant que {user.prenom} accepte.
+                </p>
+                <Button type="submit" icon={Send} className="ui-btn--plein">Demander le contact</Button>
+              </form>
+            )}
+          </Card>
+        </aside>
       </div>
 
-      <h2>Étapes de voyage</h2>
-      {trips.length === 0 ? <p className="vide">Aucun voyage déclaré pour le moment.</p> : (
-        <div className="groupe-liste">
-          {trips.map((trip) => (
-            <article className="carte" key={trip.id}>
-              <h3>{trip.destination}</h3>
-              {trip.etapes?.length ? (
-                <ol>
-                  {trip.etapes.map((etape, index) => (
-                    <li key={`${trip.id}-${etape.ville}-${index}`}>
-                      {etape.ville}{etape.pays ? `, ${etape.pays}` : ''} — {etape.debut} au {etape.fin}
-                    </li>
-                  ))}
-                </ol>
-              ) : <p>{trip.destination}</p>}
-            </article>
-          ))}
+      {peutDemander && !formulaireVisible && (
+        <div className="profil__cta-mobile">
+          <Button onClick={allerAuFormulaire} icon={Send} className="ui-btn--plein">Demander le contact</Button>
         </div>
       )}
-
-      <h2>Contact</h2>
-      {connected ? <p className="badge">En contact</p>
-        : outgoing ? <p className="badge">Demande envoyée</p>
-          : incoming ? <p>Cette personne vous a écrit. <Link to={paths.demandes}>Voir la demande</Link></p>
-            : currentUser?.id === user.id ? <p className="vide">C’est votre profil.</p>
-              : (
-                <form className="groupe-formulaire" onSubmit={sendRequest}>
-                  <label htmlFor="message-contact">Message de présentation (300 caractères maximum)</label>
-                  <textarea
-                    id="message-contact"
-                    value={message}
-                    maxLength={300}
-                    rows={4}
-                    onChange={(event) => { setMessage(event.target.value); setError('') }}
-                    aria-describedby="compteur-message erreur-contact"
-                  />
-                  <p id="compteur-message" className="groupe-aide">{message.length}/300 caractères</p>
-                  {error && <p id="erreur-contact" className="erreur" role="alert">{error}</p>}
-                  <button className="btn" type="submit">Demander le contact</button>
-                </form>
-              )}
     </section>
   )
 }
