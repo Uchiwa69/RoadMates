@@ -15,7 +15,7 @@ confidentialite: Document pédagogique
 
 | Version | Date | Contenu | Auteurs |
 | --- | --- | --- | --- |
-| v1.0 | 29/10/2026 | §1 à §13 en brouillon, annexe A (guide d'entretien non encore mené), §14 à tenir | ⚠️ À COMPLÉTER |
+| v1.0 | 29/10/2026 | §1 à §13 en brouillon, annexe A (guide d'entretien non encore mené), §14 à tenir ; alignée sur la vision produit v1.0 (cible prioritaire, EF-21 à EF-24, R5) | ⚠️ À COMPLÉTER |
 
 <!-- saut-de-page -->
 
@@ -30,12 +30,15 @@ RoadMates est un projet de startup fictif, porté par l'équipe dans le cadre d'
 - Un voyageur solo paie seul ce qui se partage : location de voiture, essence, excursion avec guide, chambre privée. ⚠️ À VÉRIFIER À L'ENTRETIEN — part du budget concernée.
 - Il ne sait pas qui, parmi les autres voyageurs, fait le même trajet ou se trouve dans la même ville aux mêmes dates.
 - Les outils existants sont éclatés : réseaux sociaux de routards peu actifs, chats limités aux clients d'une auberge, applications d'hébergement chez l'habitant devenues payantes, covoiturage limité au trajet.
-- La peur de la mauvaise rencontre freine le passage à l'acte, en particulier chez les voyageuses solo. ⚠️ À VÉRIFIER À L'ENTRETIEN.
+- La peur de la mauvaise rencontre freine le passage à l'acte, en particulier chez les voyageuses solo : la sécurité est le premier frein pour 66 % des femmes (sondage Tourlane-Ifop, vision produit §3.2). ⚠️ À VÉRIFIER À L'ENTRETIEN auprès de notre cible.
+
+**Tendance de marché (recherche documentaire du 29/10/2026, vision produit §3.2)** : 74 % des Français ont déjà voyagé seuls et 41 % prévoient de repartir dans les 12 mois (Skyscanner, 2026). Ces chiffres viennent de sondages commerciaux : ils donnent une tendance, pas une statistique officielle.
 
 **Ce qui est demandé par l'équipe (atelier du 29/10/2026)** :
 
 - Angle : petit budget (partager voiture, activités) et compagnon d'itinéraire (trouver avant le départ quelqu'un qui fait le même voyage, voir sur place les voyageurs venus d'ailleurs présents dans la même ville ou le même pays).
 - Cible : voyageurs solo de tous âges, avec des filtres.
+- Cible prioritaire retenue pour le MVP (vision produit §3.3) : les voyageurs solo de 18 à 30 ans, au budget serré, en séjours courts en Europe, avec une attention particulière aux voyageuses. Persona principal : Léa, 23 ans, étudiante Erasmus. Les 30–45 ans (Karim) sont visés en V1, les plus de 55 ans (Monique) en V2.
 - Paiement intégré pour le partage des frais.
 - Modèle économique : partenariats.
 - Supports : web et mobile.
@@ -84,8 +87,9 @@ L'objectif n°1 est **O-01** : sans mise en relation, ni le partage des frais ni
 - Liste des voyageurs présents dans la même ville ou le même pays aux mêmes dates.
 - Filtres par âge, langue et genre.
 - Demande de contact, puis messagerie ouverte après acceptation mutuelle.
-- Dépenses partagées (voiture, activité) avec paiement intégré de sa part.
+- Dépenses partagées (voiture, activité) avec paiement intégré de sa part ; réservation lancée seulement quand toutes les parts sont payées.
 - Signalement, blocage et avis après un voyage commun.
+- Suggestion de lieux publics pour le premier rendez-vous.
 - Offres des partenaires dans la ville de destination.
 - Application web responsive et applications mobiles iOS et Android.
 
@@ -103,6 +107,7 @@ L'objectif n°1 est **O-01** : sans mise en relation, ni le partage des frais ni
 - Suggestions de compagnons par IA selon le rythme, le budget et l'itinéraire (V2).
 - Programme de voyage commun généré à plusieurs (V2).
 - Traduction automatique des messages (V2).
+- Amis de route : être alerté quand un ancien compagnon part vers la même destination (V2).
 
 ### Recommandations
 
@@ -112,6 +117,7 @@ L'objectif n°1 est **O-01** : sans mise en relation, ni le partage des frais ni
 | R2 | Une application de mise en relation vide n'a aucune valeur pour le premier inscrit (effet réseau) | Lancement sur une ville pilote — ⚠️ À COMPLÉTER (Lyon proposé) — avec les auberges partenaires comme canal d'acquisition | Densité de voyageurs suffisante pour obtenir des contacts — sert O-01 et O-03 |
 | R3 | Encaisser l'argent des voyageurs pour le reverser ferait de RoadMates un établissement de paiement soumis à agrément | Paiement intégré via une plateforme de paiement pour places de marché (Stripe Connect envisagé), qui porte la conformité | Paiement intégré sans agrément propre — sert O-02 |
 | R4 | La peur de la mauvaise rencontre freine l'usage | Messagerie ouverte seulement après acceptation mutuelle, identité vérifiée affichée par un badge | Rencontres consenties, profils vérifiés — sert O-04 et O-01 |
+| R5 | Exiger la pièce d'identité dès l'inscription fait abandonner le voyageur avant qu'il ait vu s'il y a du monde sur sa destination | Consultation des voyageurs et des itinéraires communs sans vérification ; pièce d'identité demandée seulement à la première demande de contact (EF-02, EF-09) | Le voyageur constate la valeur avant l'effort de vérification — sert O-01 |
 
 ## §5 · Exigences fonctionnelles
 
@@ -119,7 +125,7 @@ L'objectif n°1 est **O-01** : sans mise en relation, ni le partage des frais ni
 | --- | --- | --- | --- | --- |
 | EF-01 | Le voyageur crée un compte avec une adresse e-mail vérifiée | Must | Given un formulaire d'inscription rempli, When je clique sur le lien reçu, Then mon compte est actif en moins de 2 minutes | Équipe, atelier du 29/10 |
 | EF-02 | Le voyageur fait vérifier son identité par une pièce officielle, au moment de sa première demande de contact | Must | Given un compte actif non vérifié, When je veux envoyer une demande de contact, Then l'application me demande ma pièce d'identité et un selfie ; après validation, un badge « vérifié » s'affiche sur mon profil | Équipe, recommandation R4 |
-| EF-03 | Le voyageur déclare un voyage avec une destination et des dates | Must | Given un compte actif, vérifié ou non, When je saisis Lisbonne du 10 au 17 juillet, Then le voyage apparaît dans mon profil | Équipe, atelier du 29/10 |
+| EF-03 | Le voyageur déclare un voyage avec une destination et des dates | Must | Given un compte actif, vérifié ou non, When je saisis Lisbonne du 10 au 17 juillet, Then le voyage apparaît dans mon profil, la saisie d'un voyage d'un week-end prenant moins d'1 minute | Équipe, atelier du 29/10 |
 | EF-04 | Le voyageur voit les autres voyageurs présents dans la même ville aux mêmes dates | Must | Given 3 voyageurs déclarés à Lisbonne avec au moins 1 jour commun avec mes dates, When j'ouvre la destination, Then les 3 profils s'affichent | Équipe, atelier du 29/10 |
 | EF-05 | Le voyageur voit, avant son départ, les voyageurs qui ont un itinéraire commun | Must | Given un voyageur dont 2 étapes sur 3 coïncident avec les miennes, When je consulte mes compagnons possibles, Then il apparaît avec le nombre d'étapes communes | Équipe, atelier du 29/10 |
 | EF-06 | Le voyageur filtre les profils par tranche d'âge | Should | Given un filtre 25–35 ans, When j'affiche la liste, Then aucun profil hors de cette tranche n'apparaît | Équipe, atelier du 29/10 |
@@ -137,6 +143,10 @@ L'objectif n°1 est **O-01** : sans mise en relation, ni le partage des frais ni
 | EF-18 | Le voyageur propose une activité ouverte que d'autres voyageurs rejoignent | Could | Given une activité « kayak samedi 10h, 4 places », When 4 voyageurs la rejoignent, Then elle s'affiche « complète » | Équipe, LATER §4 |
 | EF-19 | Le voyageur reçoit des suggestions de compagnons calculées par IA | Could | Given un profil « petit budget, culture », When j'ouvre mes suggestions, Then 5 profils classés par compatibilité s'affichent avec la raison du classement | Équipe, LATER §4 |
 | EF-20 | Le voyageur est remboursé si une activité partagée est annulée | Could | Given une activité annulée par son créateur, When l'annulation est confirmée, Then ma part est remboursée sous 7 jours | Équipe, proposition |
+| EF-21 | La réservation d'une dépense partagée n'est lancée qu'une fois toutes les parts payées | Must | Given une dépense de 240 € dont 3 parts sur 4 sont payées, When la 4e part reste impayée, Then la dépense reste « en attente », aucune réservation n'est faite et aucune somme n'est reversée au créateur | Vision produit, §4.2 phase 5 |
+| EF-22 | Les avis d'un voyage commun ne sont publiés qu'une fois que tous les membres ont noté | Should | Given un voyage commun à 3 voyageurs, When 2 sur 3 ont noté, Then aucun avis n'est visible ; When le 3e note, Then les 3 avis s'affichent | Vision produit, §4.2 phase 8 |
+| EF-23 | L'application suggère des lieux publics pour un premier rendez-vous | Should | Given un premier rendez-vous planifié à Lagos, When je choisis le lieu, Then au moins 2 lieux publics sont proposés, et je peux saisir un autre lieu | Vision produit, §4.2 phase 6 |
+| EF-24 | Le voyageur est alerté quand un ami de route déclare un voyage vers la même destination | Could | Given Inès dans mes amis de route, When elle déclare un voyage avec au moins 1 jour commun avec l'un de mes voyages, Then je reçois une notification | Vision produit, §4.2 phase 8 |
 
 ## §6 · Exigences non fonctionnelles
 
@@ -187,12 +197,14 @@ Hypothèse : une équipe classique réalisant le MVP complet destiné à la prod
 | Lot | Charge (j) |
 | --- | --- |
 | Cadrage & conception (maquettes, parcours) | 5 |
-| Front web et mobile (code partagé) | 24 |
-| Back & API (comptes, voyages, messagerie, dépenses) | 20 |
+| Front web et mobile (code partagé) | 27 |
+| Back & API (comptes, voyages, messagerie, dépenses) | 25 |
 | Intégrations (paiement, vérification d'identité, SMS) | 12 |
 | Recette & déploiement (dont publication sur les stores) | 8 |
-| Gestion de projet | 10 |
-| **Total** | **79** |
+| Gestion de projet (≈ 15 % des autres lots) | 12 |
+| **Total** | **89** |
+
+Les charges des EF-21 à EF-24 (+8 j, réparties en front +3 j et back +5 j) sont des propositions à valider par l'équipe (annexe B).
 
 PERT sur les trois tâches les plus incertaines :
 
@@ -208,8 +220,9 @@ E total = 17,7 j · σ total = √(1,7² + 1,0² + 1,3²) ≈ 2,4 j · engagemen
 
 | | Build (code sur mesure) | Buy (SaaS de place de marché, ex. Sharetribe) | Low-code (ex. Bubble) |
 | --- | --- | --- | --- |
-| Coût initial | 79 j × TJM — ⚠️ À COMPLÉTER | Faible | Faible à moyen |
-| Coût récurrent | Hébergement + maintenance | Abonnement — prix ⚠️ À VÉRIFIER | Licence — prix ⚠️ À VÉRIFIER |
+| Coût initial | 89 j × TJM — ⚠️ À COMPLÉTER | Faible | Faible à moyen |
+| Coût récurrent | Hébergement + maintenance | Sharetribe offre Live : 259 $/mois, ou 199 $/mois en annuel ; offre Build à 39 $/mois pour tester (grille refondue en octobre 2026) | Bubble web + mobile : Starter 59 $/mois, Growth 209 $/mois en annuel (sources tierces, août 2026) |
+| Sur 3 ans | 102,4 × TJM + exploitation (§12) | ≈ 7 164 $ d'abonnement Live en annuel, hors frais d'usage | ≈ 7 524 $ de licence Growth, hors développement |
 | Adéquation | Totale (itinéraires communs, filtres, dépenses partagées) | Partielle : pensé pour vendre un service, pas pour mettre en relation des voyageurs | Bonne pour un prototype web, faible pour des applications mobiles publiées |
 | Réversibilité | Totale | À négocier | Faible |
 
@@ -241,9 +254,36 @@ E total = 17,7 j · σ total = √(1,7² + 1,0² + 1,3²) ≈ 2,4 j · engagemen
 
 ### MoSCoW
 
-Effort des exigences fonctionnelles : Must 41 j sur 70 j, soit **59 %** — sous la limite de 60 %. Chaque Must sert O-01 ou O-04 : sans compte vérifié, sans voyage déclaré, sans liste de voyageurs et sans messagerie consentie, aucune mise en relation n'a lieu. Le paiement des parts (EF-10, EF-11) est Must car c'est le partage des frais qui distingue RoadMates d'un réseau social de voyageurs.
+Effort des exigences fonctionnelles : Must 43 j sur 78 j, soit **55 %** — sous la limite de 60 %. Chaque Must sert O-01, O-02 ou O-04 : sans compte, sans voyage déclaré, sans liste de voyageurs et sans messagerie consentie, aucune mise en relation n'a lieu. Le paiement des parts (EF-10, EF-11, EF-21) est Must car c'est le partage des frais qui distingue RoadMates d'un réseau social de voyageurs.
+
+| Must | Justification |
+| --- | --- |
+| EF-01 · inscription | Sans compte, aucun voyage ni contact — O-01 |
+| EF-02 · vérification d'identité | Condition de confiance avant tout contact — O-04 |
+| EF-03 · déclarer un voyage | C'est la donnée qui permet la mise en relation — O-01 |
+| EF-04 · voyageurs dans la même ville | Cœur de la promesse « sur place » — O-01 |
+| EF-05 · itinéraire commun | Cœur de la promesse « avant le départ » — O-01 |
+| EF-09 · contact après acceptation | Seul canal de mise en relation, consenti — O-01, O-04 |
+| EF-10 · dépense partagée | Différenciateur face aux réseaux de routards — O-02 |
+| EF-11 · paiement de sa part | Sans paiement intégré, le partage repose sur la confiance — O-02 |
+| EF-21 · réservation après paiement complet | Évite qu'un membre défaillant engage les autres — O-02, R-04 |
+| EF-12 · signalement | Exigé par les stores pour les contenus entre utilisateurs — O-04 |
+| EF-13 · blocage | Exigé par les stores, protège d'un contact insistant — O-04 |
+| ENF-01 · liste en ≤ 2 s | La liste est l'écran le plus consulté — O-01 |
+| ENF-02 · aucune donnée de carte chez RoadMates | Condition pour ne pas relever de PCI-DSS — R3 |
+| ENF-03 · 2FA modération | Les modérateurs voient les signalements et les profils — O-04 |
+| ENF-04 · iOS 16+ / Android 10+ | Supports demandés à l'atelier — §8 |
+| ENF-09 · 4 navigateurs | Support web demandé à l'atelier — §8 |
+| ENF-05 · reversement via une plateforme de paiement | Condition légale du paiement intégré (DSP2) — R3 |
+| ENF-08 · signalement traité en ≤ 24 h | Condition de publication sur les stores — O-04 |
+| RSE-01 · localisation à la ville | Évite la traque — O-04, RGPD |
+| RSE-02 · suppression des pièces d'identité | Minimisation imposée par le RGPD |
+| RSE-03 · 0 traceur publicitaire | Cohérent avec le modèle sans publicité — §4 OUT |
+| RSE-04 · RGAA sur les parcours critiques | European Accessibility Act |
 
 ### Valeur / effort
+
+Seuils : valeur forte ≥ 4, effort faible ≤ 4 j.
 
 | Exigence | Valeur (1-5) | Objectif servi | Effort (j) | Quadrant |
 | --- | --- | --- | --- | --- |
@@ -256,20 +296,24 @@ Effort des exigences fonctionnelles : Must 41 j sur 70 j, soit **59 %** — sous
 | EF-10 · dépense partagée | 4 | O-02 | 4 | Quick win |
 | EF-11 · paiement de sa part | 4 | O-02 | 8 | Gros projet |
 | EF-12, EF-13 · signaler, bloquer | 5 | O-04 | 2 | Quick win |
-| EF-06 à EF-08 · filtres | 3 | O-01 | 3 | Quick win |
+| EF-06 à EF-08 · filtres | 4 | O-01, O-04 (filtre « femmes uniquement » visible dès le premier écran, vision §3.3) | 3 | Quick win |
 | EF-14 · partage du rendez-vous | 4 | O-04 | 3 | Quick win |
 | EF-15 · avis | 3 | O-04 | 3 | Bouche-trou |
 | EF-16, EF-17 · offres partenaires | 4 | O-03 | 5 | Gros projet |
 | EF-18 · activités ouvertes | 3 | O-01 | 4 | Bouche-trou |
 | EF-19 · suggestions par IA | 2 | O-01 | 8 | Piège à temps — reporté |
 | EF-20 · remboursement automatique | 2 | O-02 | 3 | Bouche-trou |
+| EF-21 · réservation après paiement complet | 4 | O-02 | 2 | Quick win |
+| EF-22 · avis publiés quand tous ont noté | 3 | O-04 | 1 | Bouche-trou |
+| EF-23 · lieux publics suggérés | 4 | O-04 | 2 | Quick win |
+| EF-24 · amis de route | 2 | O-01 | 3 | Bouche-trou |
 
 ### Roadmap
 
 - **Prototype — 29/10/2026 après-midi (agents IA)** : EF-01, EF-03, EF-04, EF-05, EF-09, EF-10, avec paiement simulé. Objectif : démontrer la vision devant le jury.
-- **MVP — ⚠️ À COMPLÉTER** : EF-01 à EF-05, EF-09 à EF-13, ENF-01 à ENF-05, ENF-08, RSE-01 à RSE-04. Test du MVP : mis en production demain dans la ville pilote, un voyageur trouve un compagnon et partage une dépense avec lui — O-01 est servi.
-- **V1** : EF-06 à EF-08, EF-14 à EF-18, ENF-06, ENF-07, RSE-05 à RSE-07.
-- **V2** : EF-19, EF-20, programme de voyage commun, traduction des messages.
+- **MVP — ⚠️ À COMPLÉTER** : EF-01 à EF-05, EF-09 à EF-13, EF-21, ENF-01 à ENF-05, ENF-08, RSE-01 à RSE-04. Test du MVP : mis en production demain dans la ville pilote, un voyageur trouve un compagnon et partage une dépense avec lui — O-01 est servi.
+- **V1** : EF-06 à EF-08, EF-14 à EF-18, EF-22, EF-23, ENF-06, ENF-07, RSE-05 à RSE-07.
+- **V2** : EF-19, EF-20, EF-24, programme de voyage commun, traduction des messages.
 - **Won't** : hébergement chez l'habitant, vente de billets, fonctions de rencontre amoureuse, publicité, GPS en temps réel (§4).
 
 ## §11 · Livrables & planning
@@ -292,13 +336,13 @@ Le budget est reporté à plus tard par l'équipe : les montants dépendent du T
 | Poste | Charge (j) | TJM | Coût |
 | --- | --- | --- | --- |
 | Cadrage & conception | 5 | ⚠️ À COMPLÉTER | 5 × TJM |
-| Front web et mobile | 24 | ⚠️ À COMPLÉTER | 24 × TJM |
-| Back & API | 20 | ⚠️ À COMPLÉTER | 20 × TJM |
+| Front web et mobile | 27 | ⚠️ À COMPLÉTER | 27 × TJM |
+| Back & API | 25 | ⚠️ À COMPLÉTER | 25 × TJM |
 | Intégrations | 12 | ⚠️ À COMPLÉTER | 12 × TJM |
 | Recette & déploiement | 8 | ⚠️ À COMPLÉTER | 8 × TJM |
-| Gestion de projet | 10 | ⚠️ À COMPLÉTER | 10 × TJM |
-| **Sous-total** | **79** | | **79 × TJM** |
-| Marge d'aléas (15 %) | | | 11,9 × TJM |
+| Gestion de projet | 12 | ⚠️ À COMPLÉTER | 12 × TJM |
+| **Sous-total** | **89** | | **89 × TJM** |
+| Marge d'aléas (15 %) | | | 13,4 × TJM |
 | Comptes développeur (Apple 99 $/an, Google 25 $ une fois) | | | ≈ 125 $ la 1re année |
 
 ### Faire tourner — par mois
@@ -310,11 +354,11 @@ Le budget est reporté à plus tard par l'équipe : les montants dépendent du T
 | Vérification d'identité (coût par vérification) | ⚠️ À VÉRIFIER auprès du prestataire |
 | Frais du prestataire de paiement (par transaction) | ⚠️ À VÉRIFIER — refacturés au voyageur ou absorbés : ⚠️ À COMPLÉTER |
 | Modération (temps humain) | ⚠️ À COMPLÉTER |
-| TMA (≈ 15 % du build par an, lissé) | ≈ 1 × TJM |
+| TMA (≈ 15 % du build par an, lissé) | ≈ 1,3 × TJM |
 
 ### TCO 3 ans
 
-`TCO = 90,9 × TJM + 36 × coût mensuel`. **Conclusion : non concluable tant que le TJM et le budget ne sont pas fixés.** Les revenus attendus des partenaires (O-03) devront couvrir au minimum le coût mensuel.
+`TCO = 102,4 × TJM + 36 × coût mensuel`. **Conclusion : non concluable tant que le TJM et le budget ne sont pas fixés.** Les revenus attendus des partenaires (O-03) devront couvrir au minimum le coût mensuel.
 
 <!-- saut-de-page -->
 
@@ -332,6 +376,8 @@ Le budget est reporté à plus tard par l'équipe : les montants dépendent du T
 | R-08 | Refus de publication sur l'App Store ou Google Play | 2 | 3 | 6 | Modéré | Réduire | Signalement, blocage et modération livrés dès le MVP | Lancement en web responsive installable, le temps de corriger | Équipe de réalisation |
 | R-09 | Coût de la vérification d'identité trop élevé par voyageur | 3 | 2 | 6 | Modéré | Accepter | Négociation d'un tarif au volume | Vérification exigée seulement avant le premier paiement ou le premier rendez-vous | Équipe fondatrice |
 | R-10 | Prototype généré par agents IA non maintenable pour le MVP | 3 | 2 | 6 | Modéré | Accepter | Le prototype est déclaré jetable dès le départ | Réécriture du MVP à partir du CDC, en réutilisant les maquettes | Équipe de réalisation |
+| R-11 | Lancement retardé : 3 intégrations externes (paiement, identité, stores) sont sur le chemin critique | 3 | 3 | 9 | Élevé | Réduire | Intégrations démarrées en premier, engagement PERT à 84 % (20,1 j) inscrit au planning | Lancer d'abord en web responsive, applications mobiles ensuite | Équipe de réalisation |
+| R-12 | Modération débordée : le délai de traitement des signalements dépasse 24 h faute de disponibilité de l'équipe | 3 | 3 | 9 | Élevé | Réduire | Planning d'astreinte de modération établi avant le lancement | Suspension préventive d'un profil visé par 3 signalements distincts non traités | Équipe fondatrice |
 
 ## §14 · Validation
 
@@ -390,7 +436,10 @@ Relances prévues : « C'est-à-dire ? », « Par exemple ? », reformulation, p
 | §1 · §2 | Réalité du besoin et montant des frais partageables | À vérifier à l'entretien | Voyageurs solo (annexe A) | ⚠️ À COMPLÉTER |
 | §4 | Ville pilote | À compléter | Équipe | ⚠️ À COMPLÉTER |
 | §8 · §12 | Budget, TJM, coûts mensuels, TCO | À compléter | Équipe | ⚠️ À COMPLÉTER |
-| §9 | Prix des solutions Sharetribe et Bubble | À vérifier | Équipe | ⚠️ À COMPLÉTER |
+| §9 | Prix de Sharetribe et Bubble relevés le 29/10/2026, à confirmer sur les sites officiels (Bubble : sources tierces) | À vérifier | Équipe | Avant la revue |
+| §9 · §10 | Charges des EF-21 à EF-24 (8 j proposés) | À compléter | Équipe | ⚠️ À COMPLÉTER |
+| §5 · EF-22 | Délai de publication des avis si un membre ne note jamais | À compléter | Équipe | ⚠️ À COMPLÉTER |
+| §5 · EF-08 | Priorité du filtre « femmes uniquement » : Should, alors que la vision produit le veut visible dès le premier écran | À compléter | Équipe | ⚠️ À COMPLÉTER |
 | §11 | Dates du MVP et du lancement | À compléter | Équipe | ⚠️ À COMPLÉTER |
 | §13 · R-02 | Intérêt réel des partenaires | À vérifier à l'entretien | Auberges, prestataires d'activités | Avant le MVP |
 | §14 | Revue et décision | À compléter | Jury / équipe | ⚠️ À COMPLÉTER |
