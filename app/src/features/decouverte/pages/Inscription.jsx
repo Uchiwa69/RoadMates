@@ -2,7 +2,7 @@
 // validerInscription (inscription.js) reste la seule source de vérité : chaque étape n'affiche
 // que les erreurs de ses champs, une fois le champ quitté ou l'étape validée.
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, BadgeCheck, Eye, EyeOff, Lock, Mail, MessageCircleHeart, Sparkles } from 'lucide-react'
 import { useDb } from '../../../shared/db.js'
 import { paths } from '../../../shared/paths.js'
@@ -147,7 +147,9 @@ export default function Inscription() {
                 </div>
               </Field>
               {erreurs.email === 'Un compte existe déjà avec cette adresse.' && vus.email && (
-                <p className="inscription__note">Déjà inscrit ? Dans ce prototype, la connexion se fait par la pastille « Mode démo ».</p>
+                <p className="inscription__note">
+                  Déjà inscrit ? <Link to={`${paths.connexion}?email=${encodeURIComponent(form.email.trim())}`}>Se connecter</Link>
+                </p>
               )}
             </>
           )}
@@ -159,6 +161,7 @@ export default function Inscription() {
             </Button>
           </div>
         </form>
+        <p className="inscription__note">Déjà un compte ? <Link to={paths.connexion}>Se connecter</Link></p>
       </div>
     </section>
   )

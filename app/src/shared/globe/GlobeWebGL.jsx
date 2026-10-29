@@ -1,6 +1,6 @@
 // Globe 3D (react-globe.gl / three.js). Chargé en différé par Globe.jsx.
 // Sobriété : polygones 110m, aucune texture, pixel ratio ≤ 2, rendu en pause hors écran.
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
 import { PAYS_GEO, focusPays, vueInitiale } from './monde.js'
 import { echapperHtml } from '../texte.js'
@@ -10,7 +10,10 @@ export default function GlobeWebGL({
   largeur, hauteur, theme, mouvementReduit, pays, villeActive, points, arcs, villes, onPays, onVille, rotation = true,
   etiquettes: modeEtiquettes = 'actives',
 }) {
-  const globe = useRef(null)
+  // L'instance du globe est gardée dans un état : selon le navigateur, onGlobeReady arrive avant
+  // ou après l'attache de la ref, et les effets doivent se relancer quand les deux sont là.
+  const [g, setG] = useState(null)
+  const attacher = useCallback((instance) => { if (instance) setG(instance) }, [])
   const conteneur = useRef(null)
   const rappels = useRef({ onPays, onVille })
   const [pret, setPret] = useState(false)
@@ -27,10 +30,8 @@ export default function GlobeWebGL({
     rappels.current = { onPays, onVille }
   }, [onPays, onVille])
 
-  // onGlobeReady peut arriver avant que la ref soit attachée : on configure dans un effet.
   // Réglages qui n'existent pas en props : pixel ratio, contrôles, défilement tactile.
   useEffect(() => {
-    const g = globe.current
     if (!pret || !g) return
     g.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     const ctrl = g.controls()
@@ -39,29 +40,31 @@ export default function GlobeWebGL({
     ctrl.autoRotateSpeed = 0.45
     // Un glissement vertical fait défiler la page, un glissement horizontal tourne le globe.
     g.renderer().domElement.style.touchAction = 'pan-y'
-  }, [pret])
+  }, [pret, g])
 
   // La ref n'expose pas le matériau de la sphère : on le retrouve dans la scène
   // (seul maillage en MeshPhongMaterial), ce qui évite d'importer three directement.
+  // La couleur est aussi posée en émissif : sans cela, Firefox rend cette sphère presque noire
+  // (ombrage Phong), alors que Chrome et Safari l'affichent bien.
   useEffect(() => {
-    const g = globe.current
     if (!pret || !g) return
     g.scene().traverse((o) => {
-      if (o.isMesh && o.material?.isMeshPhongMaterial) o.material.color.set(c.sphere)
+      if (!o.isMesh || !o.material?.isMeshPhongMaterial) return
+      o.material.color.set(c.sphere)
+      o.material.emissive.set(c.sphere)
+      o.material.emissiveIntensity = 0.55
     })
-  }, [pret, c.sphere])
+  }, [pret, g, c.sphere])
 
   // Pays choisi : on arrête de tourner, on pivote et on zoome dessus.
   useEffect(() => {
-    const g = globe.current
     if (!pret || !g) return
     g.pointOfView(focus ? vuePays(focus, compact) : vueInitiale(compact), mouvementReduit ? 0 : 1500)
     g.controls().autoRotate = rotation && !focus && !mouvementReduit
-  }, [focus, pret, mouvementReduit, rotation, compact])
+  }, [focus, pret, g, mouvementReduit, rotation, compact])
 
   // Rendu en pause quand le globe est hors écran ou l'onglet masqué (RSE-05, RSE-06).
   useEffect(() => {
-    const g = globe.current
     if (!pret || !g) return
     let visible = true
     const maj = () => (visible && !document.hidden ? g.resumeAnimation() : g.pauseAnimation())
@@ -72,7 +75,7 @@ export default function GlobeWebGL({
       io.disconnect()
       document.removeEventListener('visibilitychange', maj)
     }
-  }, [pret])
+  }, [pret, g])
 
   const estChoisi = (d) => d.iso2 && d.iso2 === pays
   // Une fois zoomé, points et arcs s'affinent : leur taille est en degrés, pas en pixels.
@@ -81,7 +84,7 @@ export default function GlobeWebGL({
   return (
     <div ref={conteneur} className="globe__scene">
       <Globe
-        ref={globe}
+        ref={attacher}
         width={largeur}
         height={hauteur}
         backgroundColor="rgba(0,0,0,0)"

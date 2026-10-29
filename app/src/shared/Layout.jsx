@@ -1,13 +1,13 @@
 // En-tête, navigation (en haut sur ordinateur, onglets en bas sur mobile),
 // pastille de démo et transitions de page.
-import { Suspense, useEffect, useRef } from 'react'
+import { Component, Suspense, useEffect, useRef } from 'react'
 import { NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { LazyMotion, MotionConfig, m } from 'motion/react'
-import { Home, Inbox, Map, MessagesSquare, Moon, Sun, Users } from 'lucide-react'
+import { CloudOff, Home, Inbox, Map, MessagesSquare, Moon, RotateCcw, Sun, Users } from 'lucide-react'
 import { useDb } from './db.js'
 import { paths } from './paths.js'
 import { basculerTheme, useTheme } from './theme.js'
-import { ToastProvider } from './ui/index.js'
+import { Button, EmptyState, ToastProvider } from './ui/index.js'
 import Logo from './Logo.jsx'
 import DemoPanel from './DemoPanel.jsx'
 import './layout.css'
@@ -37,6 +37,27 @@ function ChargementPage() {
   )
 }
 
+// Une page chargée à la demande peut échouer (réseau coupé, ou fichier remplacé par un nouveau
+// déploiement pendant que l'onglet restait ouvert) : on le dit, sans faire tomber l'application.
+class ErreurPage extends Component {
+  state = { erreur: false }
+  static getDerivedStateFromError() {
+    return { erreur: true }
+  }
+  render() {
+    if (!this.state.erreur) return this.props.children
+    return (
+      <EmptyState
+        icon={CloudOff}
+        titre="La page n’a pas pu être chargée"
+        action={<Button icon={RotateCcw} onClick={() => window.location.reload()}>Recharger</Button>}
+      >
+        <p>Vérifiez votre connexion, puis rechargez la page.</p>
+      </EmptyState>
+    )
+  }
+}
+
 export default function Layout() {
   const theme = useTheme()
   const location = useLocation()
@@ -63,7 +84,9 @@ export default function Layout() {
         return
       }
       document.title = location.pathname === paths.accueil ? TITRE_SITE : `${h1.textContent.trim()} · RoadMates`
-      if (deplacerFocus) {
+      // Si l'utilisateur a déjà pris la main (il tape dans un champ), on ne lui vole pas le focus.
+      const dejaDansLaPage = main.current?.contains(document.activeElement) && document.activeElement !== main.current
+      if (deplacerFocus && !dejaDansLaPage) {
         if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1')
         h1.focus({ preventScroll: true })
       }
@@ -123,17 +146,19 @@ export default function Layout() {
           </header>
 
           <main id="contenu" ref={main} tabIndex={-1} className="main">
-            <Suspense fallback={<ChargementPage />}>
-              <m.div
-                key={location.pathname}
-                data-page={location.pathname}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 0.8, 0.36, 1] }}
-              >
-                {outlet}
-              </m.div>
-            </Suspense>
+            <ErreurPage key={location.pathname}>
+              <Suspense fallback={<ChargementPage />}>
+                <m.div
+                  key={location.pathname}
+                  data-page={location.pathname}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 0.8, 0.36, 1] }}
+                >
+                  {outlet}
+                </m.div>
+              </Suspense>
+            </ErreurPage>
           </main>
         </ToastProvider>
       </LazyMotion>

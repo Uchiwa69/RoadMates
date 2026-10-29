@@ -16,9 +16,15 @@ const CATEGORIES = [
 const ICONES = { voiture: <Car size={22} />, activité: <Ticket size={22} />, autre: <Receipt size={22} /> }
 
 // Micro-célébration discrète quand la dernière part est payée (chargée à la demande).
+// Purement décoratif : si le module ne se charge pas (réseau, navigation en cours), on l'ignore.
 async function celebrer(origine) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const { default: confetti } = await import('canvas-confetti')
+  let confetti
+  try {
+    ({ default: confetti } = await import('canvas-confetti'))
+  } catch {
+    return
+  }
   confetti({
     particleCount: 70, spread: 70, startVelocity: 32, ticks: 160, scalar: 0.9, disableForReducedMotion: true,
     origin: origine, colors: ['#FF6B5B', '#FF9F45', '#F2558C', '#FFD9C7'],

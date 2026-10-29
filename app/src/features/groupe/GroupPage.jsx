@@ -1,11 +1,11 @@
 // US-10 — la page d'un groupe : conversation en bulles et dépenses partagées.
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Lock, MapPin, MessagesSquare, SendHorizontal, Wallet } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Lock, LogOut, MapPin, MessagesSquare, SendHorizontal, Wallet } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { paths } from '../../shared/paths.js'
-import { Avatar, AvatarStack, Button, EmptyState } from '../../shared/ui/index.js'
+import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
 import Expenses from './Expenses.jsx'
 
@@ -57,7 +57,10 @@ function Conversation({ groupId, currentUser, users }) {
           messages.map((message, i) => {
             const author = users.find((user) => user.id === message.auteurId)
             const moi = message.auteurId === currentUser?.id
-            const suite = messages[i - 1]?.auteurId === message.auteurId
+            if (message.systeme) {
+              return <p key={message.id} className="conversation__systeme">{message.texte}</p>
+            }
+            const suite = !messages[i - 1]?.systeme && messages[i - 1]?.auteurId === message.auteurId
             return (
               <article key={message.id} className={`bulle${moi ? ' bulle--moi' : ''}${suite ? ' bulle--suite' : ''}`}>
                 {!moi && (suite ? <span className="bulle__place" aria-hidden="true" /> : <Avatar user={author} taille={32} />)}
@@ -104,6 +107,9 @@ export default function GroupPage() {
   const users = useDb((db) => db.users)
   const nbDepenses = useDb((db) => db.expenses.filter((e) => e.groupId === groupId).length)
   const isMember = group?.membres.includes(currentUser?.id) ?? false
+  const navigate = useNavigate()
+  const toast = useToast()
+  const [confirmerDepart, setConfirmerDepart] = useState(false)
 
   if (!group) {
     return <EmptyState icon={MessagesSquare} titre="Groupe introuvable" action={<Button to={paths.groupes}>Retour à mes groupes</Button>} />
@@ -117,6 +123,26 @@ export default function GroupPage() {
   }
 
   const membres = group.membres.map((id) => users.find((u) => u.id === id)).filter(Boolean)
+  // US-10.4 — quitter le groupe : les autres membres en sont informés dans la conversation.
+  // Les parts de dépenses déjà créées restent dues (les règles de partage ne changent pas).
+  function quitter() {
+    updateDb((db) => {
+      const g = db.groups.find((candidate) => candidate.id === groupId)
+      if (!g?.membres.includes(currentUser.id)) return
+      g.membres = g.membres.filter((id) => id !== currentUser.id)
+      db.messages.push({
+        id: newId('m'),
+        groupId,
+        auteurId: currentUser.id,
+        texte: `${currentUser.prenom} a quitté le groupe.`,
+        envoyeLe: new Date().toISOString(),
+        systeme: true,
+      })
+    })
+    toast(`Vous avez quitté « ${group.nom} ».`)
+    navigate(paths.groupes)
+  }
+
   const allerA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
@@ -133,6 +159,19 @@ export default function GroupPage() {
             <span className="sr-only">Membres ({membres.length}) : </span>
             {membres.map((m) => (m.id === currentUser?.id ? `${m.prenom} (vous)` : m.prenom)).join(', ')}
           </p>
+        </div>
+        <div className="groupe__quitter">
+          {confirmerDepart ? (
+            <div className="groupe__confirmer" role="alert">
+              <p>Quitter le groupe ? Les autres membres en seront informés.</p>
+              <div>
+                <Button variant="fantome" taille="petit" onClick={() => setConfirmerDepart(false)}>Annuler</Button>
+                <Button taille="petit" icon={LogOut} onClick={quitter}>Quitter</Button>
+              </div>
+            </div>
+          ) : (
+            <Button variant="fantome" taille="petit" icon={LogOut} onClick={() => setConfirmerDepart(true)}>Quitter le groupe</Button>
+          )}
         </div>
       </header>
 

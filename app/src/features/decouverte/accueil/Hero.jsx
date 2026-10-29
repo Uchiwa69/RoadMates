@@ -123,7 +123,11 @@ export default function Hero() {
           <Button to={paths.nouveauVoyage} taille="grand" iconEnd={ArrowRight}>Déclarer mon voyage</Button>
           <Button to={paths.compagnons} variant="secondaire" taille="grand">Voir mes compagnons</Button>
         </div>
-        <p className="hero__compte">Pas encore de compte ? <Link to={paths.inscription}>Créer un compte</Link></p>
+        <p className="hero__compte">
+          Pas encore de compte ? <Link to={paths.inscription}>Créer un compte</Link>
+          <span aria-hidden="true"> · </span>
+          <Link to={paths.connexion}>Se connecter</Link>
+        </p>
       </div>
 
       <div className="hero__globe">

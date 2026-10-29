@@ -253,3 +253,13 @@
   .depense__part { padding: var(--e-4); }
   .demande__actions .ui-btn { flex: 1; }
 }
+
+/* Quitter le groupe, messages système */
+.groupe__quitter { flex-basis: 100%; display: flex; justify-content: flex-end; }
+.groupe__confirmer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-3); padding: var(--e-2) var(--e-3); border-radius: var(--r-l); background: var(--surface); }
+.groupe__confirmer p { margin: 0; font-weight: 600; font-size: .9rem; }
+.groupe__confirmer div { display: flex; gap: var(--e-2); }
+.conversation__systeme {
+  align-self: center; margin: var(--e-3) 0 0; padding: 4px 12px; border-radius: var(--r-rond);
+  background: var(--fond-2); color: var(--texte-2); font-size: .8rem; font-weight: 600;
+}

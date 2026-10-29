@@ -109,7 +109,7 @@ export default function GroupsPage() {
                   )}
                   {dernier && (
                     <p className="groupe-carte__dernier">
-                      <strong>{auteur?.id === currentUser?.id ? 'Vous' : auteur?.prenom}</strong> : {dernier.texte}
+                      {dernier.systeme ? dernier.texte : <><strong>{auteur?.id === currentUser?.id ? 'Vous' : auteur?.prenom}</strong> : {dernier.texte}</>}
                     </p>
                   )}
                 </article>

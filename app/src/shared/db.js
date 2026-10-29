@@ -2,14 +2,15 @@
 // dans le prototype).
 //
 // Collections et propriétaire (seul le propriétaire écrit dedans) :
-//   users     A  { id, prenom, age, genre: 'F'|'H'|'autre', langues: string[], bio, verifie: bool }
+//   users     A  { id, prenom, email, age, genre: 'F'|'H'|'autre', langues: string[], bio, verifie: bool }
 //   trips     A  { id, userId, destination, etapes: [{ ville, pays, debut, fin }] }  dates 'AAAA-MM-JJ'
 //   requests  B  { id, fromId, toId, message, statut: 'en_attente'|'acceptee'|'refusee', creeLe }
 //   groups    B  { id, nom, destination, membres: userId[], creeLe }
-//   messages  B  { id, groupId, auteurId, texte, envoyeLe }
+//   messages  B  { id, groupId, auteurId, texte, envoyeLe, systeme?: bool }  (systeme : « X a quitté le groupe »)
 //   expenses  B  { id, groupId, createurId, libelle, categorie, montantCentimes, dateReservation,
 //                  parts: [{ userId, montantCentimes, payee: bool }], creeLe }
 //   session   —  { userId }  (voir session.js)
+//   version   —  version du jeu de démo (seed.js), pour compléter les anciennes données
 import { useSyncExternalStore } from 'react'
 import { seed } from './seed.js'
 
@@ -17,11 +18,33 @@ const KEY = 'roadmates-db-v1'
 const listeners = new Set()
 let cache = null
 
+// Un navigateur qui a déjà joué la démo garde ses données, mais reçoit ce que les nouvelles
+// versions du jeu de démo ont ajouté (voyageurs, voyages, champs). Rien n'est écrasé ni supprimé.
+function completerAvecSeed(db) {
+  if (db.version === seed.version) return db
+  for (const collection of ['users', 'trips', 'requests', 'groups', 'messages']) {
+    db[collection] ??= []
+    for (const element of seed[collection]) {
+      const existant = db[collection].find((x) => x.id === element.id)
+      if (!existant) db[collection].push(structuredClone(element))
+      else for (const [cle, valeur] of Object.entries(element)) if (!(cle in existant)) existant[cle] = structuredClone(valeur)
+    }
+  }
+  db.expenses ??= []
+  db.version = seed.version
+  try {
+    localStorage.setItem(KEY, JSON.stringify(db))
+  } catch {
+    // stockage indisponible : la démo continue en mémoire
+  }
+  return db
+}
+
 function load() {
   if (cache) return cache
   try {
     const raw = localStorage.getItem(KEY)
-    cache = raw ? JSON.parse(raw) : structuredClone(seed)
+    cache = raw ? completerAvecSeed(JSON.parse(raw)) : structuredClone(seed)
   } catch {
     cache = structuredClone(seed)
   }
