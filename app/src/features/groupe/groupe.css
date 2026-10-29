@@ -9,6 +9,7 @@
 .groupe-contacts input { accent-color: var(--c-primaire); }
 .groupe-membres { margin: 0; padding-left: 24px; }
 .groupe-messages { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; }
+.groupe-parts { margin: 8px 0 0; padding-left: 24px; }
 .groupe-aide { margin: 0; color: var(--c-texte-2); font-size: .9rem; }
 .profil-carte { display: grid; gap: 8px; }
 .profil-carte p { margin: 0; }

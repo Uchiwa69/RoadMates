@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { paths } from '../../shared/paths.js'
+import Expenses from './Expenses.jsx'
 
 function formatDate(value) {
   const date = new Date(value)
@@ -80,6 +81,7 @@ export default function GroupPage() {
         {error && <p className="erreur" role="alert">{error}</p>}
         <button className="btn" type="submit">Envoyer</button>
       </form>
+      <Expenses group={group} />
     </section>
   )
 }
