@@ -1,0 +1,94 @@
+/* Design tokens RoadMates — « coucher de soleil ».
+   Chaque couleur est déclarée en light-dark(clair, sombre) : le thème suit le système,
+   sauf si l'utilisateur a forcé data-theme="light" ou "dark" sur <html> (voir theme.js).
+   Ratios de contraste vérifiés (≥ 4,5:1 pour le texte, ≥ 3:1 pour les bords de champ). */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --fond: light-dark(#FFF8F3, #1E1236);
+  --fond-2: light-dark(#F3E9E1, #251843);
+  --surface: light-dark(#FFFFFF, #2B1D4A);
+  --surface-2: light-dark(#FBF3EE, #33245A);
+  --surface-verre: light-dark(rgb(255 248 243 / .78), rgb(30 18 54 / .74));
+
+  /* Texte */
+  --texte: light-dark(#2A2230, #FFF1E8);           /* 14,58 / 15,90 */
+  --texte-2: light-dark(#6A5A63, #C9B8D4);         /* 5,39 sur sable / 8,20 */
+
+  /* Bords */
+  --bord: light-dark(#ECE0D7, #3D2C63);            /* décoratif */
+  --bord-fort: light-dark(#9A8792, #8E7BA6);       /* champs : 3,36 / 4,02 */
+
+  /* Marque */
+  --corail: #FF6B5B;
+  --orange: #FF9F45;
+  --rose: #F2558C;
+  --violet: #6B3FD1;
+  --nuit: #1E1236;
+
+  --primaire: light-dark(#C2412F, #FF6B5B);        /* fond de bouton */
+  --sur-primaire: light-dark(#FFFFFF, #1E1236);    /* 5,13 / 6,28 */
+  --primaire-hover: light-dark(#A93526, #FF8F80);
+  --primaire-texte: light-dark(#B03A28, #FF8F80);  /* liens : 5,74 / 7,94 */
+  --primaire-doux: light-dark(#FFE9E3, #3E2350);
+
+  --accent: light-dark(#B8245F, #F2558C);
+  --sur-accent: light-dark(#FFFFFF, #1E1236);      /* 6,08 / 5,40 */
+  --accent-doux: light-dark(#FCE6EF, #43204F);
+  --accent-texte: light-dark(#A51F55, #FF8DB5);
+
+  --violet-texte: light-dark(#5B33B8, #B9A2FF);
+  --violet-doux: light-dark(#EEE8FC, #3A2A66);
+
+  /* États */
+  --succes: light-dark(#1A6E43, #6FD8A0);
+  --succes-doux: light-dark(#E3F4EA, #1F3B3A);
+  --alerte: light-dark(#8A4B00, #FFC46B);
+  --alerte-doux: light-dark(#FFF0D9, #3D2E2A);
+  --erreur: light-dark(#A11F15, #FF9A8F);
+  --erreur-doux: light-dark(#FDE8E6, #45202E);
+
+  --focus: light-dark(#C2412F, #FF8F80);
+
+  /* Ciel couchant — réservé au hero, au globe et aux moments forts */
+  --ciel-1: light-dark(#FFB36B, #FF8A4C);
+  --ciel-2: light-dark(#FF7A66, #E8456A);
+  --ciel-3: light-dark(#F2558C, #8E3CC0);
+  --ciel-4: light-dark(#7A4BDB, #2A1650);
+  --ciel: linear-gradient(160deg, var(--ciel-1) 0%, var(--ciel-2) 34%, var(--ciel-3) 66%, var(--ciel-4) 100%);
+  --soleil: linear-gradient(135deg, #FF9F45, #FF6B5B 50%, #F2558C);
+
+  /* Ombres chaudes, teintées de violet */
+  --ombre-teinte: light-dark(rgb(107 63 209 / .10), rgb(8 2 22 / .45));
+  --ombre-1: 0 1px 2px var(--ombre-teinte), 0 2px 8px var(--ombre-teinte);
+  --ombre-2: 0 2px 4px var(--ombre-teinte), 0 8px 24px var(--ombre-teinte);
+  --ombre-3: 0 4px 8px var(--ombre-teinte), 0 20px 48px var(--ombre-teinte);
+
+  /* Espacements — échelle de 4 px */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 20px;
+  --e-6: 24px; --e-8: 32px; --e-10: 40px; --e-12: 48px; --e-16: 64px;
+
+  /* Rayons */
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-xl: 24px; --r-rond: 999px;
+
+  /* Typographie */
+  --police-titre: 'Fraunces Variable', Georgia, serif;
+  --police-texte: 'Plus Jakarta Sans Variable', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* Animations */
+  --d-rapide: 150ms; --d-moyen: 250ms; --d-lent: 400ms;
+  --ease: cubic-bezier(.22, .8, .36, 1);
+
+  /* Gabarit */
+  --largeur: 1120px;
+  --haut-entete: 64px;
+  --haut-onglets: 64px;
+}
+
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-rapide: 0ms; --d-moyen: 0ms; --d-lent: 0ms; }
+}

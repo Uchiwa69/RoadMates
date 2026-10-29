@@ -4,13 +4,13 @@
 .groupe-formulaire { display: grid; gap: 10px; max-width: 560px; }
 .groupe-formulaire textarea { resize: vertical; }
 .groupe-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.groupe-contacts { display: grid; gap: 8px; border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.groupe-contacts { display: grid; gap: 8px; border: 1px solid var(--bord); border-radius: var(--r-l); }
 .groupe-contacts label { display: flex; align-items: center; gap: 8px; }
-.groupe-contacts input { accent-color: var(--c-primaire); }
+.groupe-contacts input { accent-color: var(--primaire-texte); }
 .groupe-membres { margin: 0; padding-left: 24px; }
 .groupe-messages { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; }
 .groupe-parts { margin: 8px 0; padding-left: 24px; }
-.groupe-statut-attente { display: inline-block; margin: 0; padding: 2px 8px; border-radius: 999px; background: #fff1d6; color: var(--c-alerte); }
-.groupe-aide { margin: 0; color: var(--c-texte-2); font-size: .9rem; }
+.groupe-statut-attente { display: inline-block; margin: 0; padding: 2px 8px; border-radius: 999px; background: var(--alerte-doux); color: var(--alerte); }
+.groupe-aide { margin: 0; color: var(--texte-2); font-size: .9rem; }
 .profil-carte { display: grid; gap: 8px; }
 .profil-carte p { margin: 0; }

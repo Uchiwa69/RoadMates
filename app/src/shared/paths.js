@@ -1,4 +1,4 @@
-// SOCLE PARTAGÉ — le contrat des URL entre les deux parties.
+// le contrat des URL entre les deux parties.
 // Partie A (découverte) et partie B (groupe) se lient uniquement par ces chemins.
 
 export const paths = {

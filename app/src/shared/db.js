@@ -1,5 +1,5 @@
-// SOCLE PARTAGÉ — base de données de démo dans le localStorage (pas de back-end
-// dans le prototype). Ne pas modifier sans prévenir l'autre binôme.
+// base de données de démo dans le localStorage (pas de back-end
+// dans le prototype).
 //
 // Collections et propriétaire (seul le propriétaire écrit dedans) :
 //   users     A  { id, prenom, age, genre: 'F'|'H'|'autre', langues: string[], bio, verifie: bool }

@@ -1,4 +1,4 @@
-// SOCLE PARTAGÉ — page provisoire, à remplacer par la vraie page de la story.
+// page provisoire, à remplacer par la vraie page de la story.
 export default function AFaire({ titre, stories }) {
   return (
     <section>

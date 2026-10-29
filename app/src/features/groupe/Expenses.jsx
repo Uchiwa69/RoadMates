@@ -4,7 +4,7 @@ import { useCurrentUser } from '../../shared/session.js'
 
 const devise = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
 
-export function formatEuros(centimes) {
+function formatEuros(centimes) {
   return devise.format((centimes || 0) / 100)
 }
 

@@ -1,4 +1,4 @@
-// SOCLE PARTAGÉ — utilisateur connecté (prototype : pas d'authentification réelle).
+// utilisateur connecté (prototype : pas d'authentification réelle).
 import { useDb, updateDb } from './db.js'
 
 export function useCurrentUser() {

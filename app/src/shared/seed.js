@@ -1,4 +1,4 @@
-// SOCLE PARTAGÉ — données de démo, reprises du parcours de Léa (vision produit §4.2).
+// données de démo, reprises du parcours de Léa (vision produit §4.2).
 // Elles permettent à chaque partie de travailler sans attendre l'autre.
 
 export const seed = {

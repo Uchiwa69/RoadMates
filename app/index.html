@@ -2,9 +2,19 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="RoadMates — trouvez des compagnons de route, rencontrez-les en confiance et partagez les frais du voyage." />
+    <meta name="theme-color" content="#FFF8F3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1E1236" media="(prefers-color-scheme: dark)" />
     <title>RoadMates</title>
+    <script>
+      // Applique le thème mémorisé avant le premier rendu (voir src/shared/theme.js).
+      try {
+        var t = localStorage.getItem('roadmates-theme')
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
