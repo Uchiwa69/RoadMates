@@ -4,6 +4,11 @@
 .groupe-formulaire { display: grid; gap: 10px; max-width: 560px; }
 .groupe-formulaire textarea { resize: vertical; }
 .groupe-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.groupe-contacts { display: grid; gap: 8px; border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.groupe-contacts label { display: flex; align-items: center; gap: 8px; }
+.groupe-contacts input { accent-color: var(--c-primaire); }
+.groupe-membres { margin: 0; padding-left: 24px; }
+.groupe-messages { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; }
 .groupe-aide { margin: 0; color: var(--c-texte-2); font-size: .9rem; }
 .profil-carte { display: grid; gap: 8px; }
 .profil-carte p { margin: 0; }

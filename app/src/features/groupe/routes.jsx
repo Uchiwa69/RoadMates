@@ -3,11 +3,13 @@ import AFaire from '../../shared/AFaire.jsx'
 import { paths } from '../../shared/paths.js'
 import ProfilePage from './ProfilePage.jsx'
 import RequestsPage from './RequestsPage.jsx'
+import GroupsPage from './GroupsPage.jsx'
+import GroupPage from './GroupPage.jsx'
 import './groupe.css'
 
 export const groupeRoutes = [
   { path: '/voyageurs/:userId', element: <ProfilePage /> },
   { path: paths.demandes, element: <RequestsPage /> },
-  { path: paths.groupes, element: <AFaire titre="Mes groupes" stories="US-10" /> },
-  { path: '/groupes/:groupId', element: <AFaire titre="Groupe" stories="US-09 (conversation), US-13, US-14" /> },
+  { path: paths.groupes, element: <GroupsPage /> },
+  { path: '/groupes/:groupId', element: <GroupPage /> },
 ]
