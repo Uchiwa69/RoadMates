@@ -6,6 +6,7 @@ export const paths = {
   accueil: '/',
   inscription: '/inscription',
   nouveauVoyage: '/voyages/nouveau',
+  nouveauVoyageVers: (ville) => `/voyages/nouveau?ville=${encodeURIComponent(ville)}`,
   mesVoyages: '/voyages',
   destination: (ville) => `/destination/${encodeURIComponent(ville)}`,
   compagnons: '/compagnons',

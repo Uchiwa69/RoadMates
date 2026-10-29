@@ -20,8 +20,6 @@
 .meta { color: var(--texte-2); font-size: .9rem; }
 .commun { font-weight: 600; color: var(--primaire-texte); }
 
-.accueil { display: grid; gap: 16px; max-width: 640px; padding: 24px 0; }
-.accueil h1 { font-size: 2rem; margin: 0; line-height: 1.2; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .filtres { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 12px 0; }

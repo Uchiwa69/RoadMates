@@ -1,18 +1,21 @@
 // US-02 + US-03 — déclarer un voyage et ses étapes.
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useCurrentUser } from '../../../shared/session.js'
 import { paths } from '../../../shared/paths.js'
 import { VILLES } from '../villes.js'
 import { validerVoyage, creerVoyage, MAX_ETAPES } from '../voyages.js'
 
-const etapeVide = () => ({ ville: '', debut: '', fin: '' })
+const etapeVide = (ville = '') => ({ ville, debut: '', fin: '' })
 
 export default function NouveauVoyage() {
   const user = useCurrentUser()
   const navigate = useNavigate()
-  const [destination, setDestination] = useState('')
-  const [etapes, setEtapes] = useState([etapeVide()])
+  // Arrivée depuis le globe de l'accueil : la ville est déjà choisie.
+  const [params] = useSearchParams()
+  const villeChoisie = params.get('ville') ?? ''
+  const [destination, setDestination] = useState(villeChoisie)
+  const [etapes, setEtapes] = useState([etapeVide(villeChoisie)])
   const [erreurs, setErreurs] = useState({})
 
   if (!user) return <p>Connectez-vous pour déclarer un voyage. <Link to={paths.inscription}>Créer un compte</Link></p>
