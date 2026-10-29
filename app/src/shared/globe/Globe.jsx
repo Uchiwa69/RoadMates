@@ -58,15 +58,20 @@ export default function GlobeTerre({ label, className = '', ...props }) {
   const tous = { ...props, ...taille, theme, mouvementReduit }
   const plat = <Suspense fallback={<Squelette />}><GlobePlat {...tous} /></Suspense>
 
+  // La scène est masquée aux technologies d'assistance (ses étiquettes doublent des listes
+  // accessibles de la page) ; une description textuelle la remplace.
   return (
-    <div ref={boite} className={['globe', className].filter(Boolean).join(' ')} role="img" aria-label={label}>
-      {!taille ? <Squelette /> : webgl ? (
-        <Garde repli={plat}>
-          <Suspense fallback={<Squelette />}>
-            <GlobeWebGL {...tous} />
-          </Suspense>
-        </Garde>
-      ) : plat}
+    <div ref={boite} className={['globe', className].filter(Boolean).join(' ')}>
+      {label && <p className="sr-only">{label}</p>}
+      <div className="globe__rendu" aria-hidden="true">
+        {!taille ? <Squelette /> : webgl ? (
+          <Garde repli={plat}>
+            <Suspense fallback={<Squelette />}>
+              <GlobeWebGL {...tous} />
+            </Suspense>
+          </Garde>
+        ) : plat}
+      </div>
     </div>
   )
 }

@@ -14,6 +14,19 @@ export default defineConfig({
     // en différé, seulement sur les pages qui affichent le globe : le seuil par défaut de 500 Ko
     // ne s'applique pas à lui. Tout autre chunk qui dépasserait 1 050 Ko déclencherait l'alerte.
     chunkSizeWarningLimit: 1050,
+    // Les pages sont chargées à la demande ; sans regroupement, chaque icône partagée et chaque
+    // petit module métier deviendrait un fichier de quelques centaines d'octets (une requête chacun).
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'icones', test: /[\\/]node_modules[\\/]lucide-react[\\/]/ },
+            { name: 'decouverte', test: /[\\/]src[\\/]features[\\/]decouverte[\\/][a-z]+\.js$/ },
+            { name: 'groupe', test: /[\\/]src[\\/]features[\\/]groupe[\\/](depenses|format)\.js$/ },
+          ],
+        },
+      },
+    },
   },
   resolve: {
     // Modules du globe jamais utilisés par RoadMates (voir src/shared/globe/bouchons.js).

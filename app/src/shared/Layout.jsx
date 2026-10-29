@@ -1,8 +1,8 @@
 // En-tête, navigation (en haut sur ordinateur, onglets en bas sur mobile),
 // pastille de démo et transitions de page.
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { NavLink, useLocation, useOutlet } from 'react-router-dom'
-import { LazyMotion, MotionConfig, domAnimation, m } from 'motion/react'
+import { LazyMotion, MotionConfig, m } from 'motion/react'
 import { Home, Inbox, Map, MessagesSquare, Moon, Sun, Users } from 'lucide-react'
 import { useDb } from './db.js'
 import { paths } from './paths.js'
@@ -20,6 +20,23 @@ const liens = [
   { to: paths.groupes, label: 'Groupes', icon: MessagesSquare },
 ]
 
+// Le moteur d'animation arrive après le premier affichage : la page n'attend pas ses ~20 Ko.
+const chargerAnimations = () => import('./animations.js').then((module) => module.default)
+
+const TITRE_SITE = 'RoadMates · Compagnons de route pour voyageurs solo'
+
+// Squelette affiché pendant le chargement d'une page.
+function ChargementPage() {
+  return (
+    <div className="chargement" role="status">
+      <span className="sr-only">Chargement de la page…</span>
+      <span className="chargement__ligne chargement__ligne--titre" aria-hidden="true" />
+      <span className="chargement__ligne" aria-hidden="true" />
+      <span className="chargement__bloc" aria-hidden="true" />
+    </div>
+  )
+}
+
 export default function Layout() {
   const theme = useTheme()
   const location = useLocation()
@@ -27,8 +44,32 @@ export default function Layout() {
   const main = useRef(null)
   const enAttente = useDb((db) => db.requests.filter((r) => r.toId === db.session.userId && r.statut === 'en_attente').length)
 
+  // À chaque changement de page : retour en haut, titre de l'onglet tiré du h1 de la page
+  // (RGAA 8.6), et focus sur ce h1 pour que les lecteurs d'écran annoncent la nouvelle page.
+  // Les pages sont chargées à la demande et l'ancienne reste affichée pendant le chargement :
+  // on cherche le h1 du conteneur marqué avec le nouveau chemin.
+  const premiereVisite = useRef(true)
   useEffect(() => {
     window.scrollTo(0, 0)
+    const deplacerFocus = !premiereVisite.current
+    premiereVisite.current = false
+    let essais = 0
+    let minuteur
+    const appliquer = () => {
+      const page = [...(main.current?.querySelectorAll('[data-page]') ?? [])].find((el) => el.dataset.page === location.pathname)
+      const h1 = page?.querySelector('h1')
+      if (!h1) {
+        if (essais++ < 40) minuteur = setTimeout(appliquer, 50)
+        return
+      }
+      document.title = location.pathname === paths.accueil ? TITRE_SITE : `${h1.textContent.trim()} · RoadMates`
+      if (deplacerFocus) {
+        if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1')
+        h1.focus({ preventScroll: true })
+      }
+    }
+    appliquer()
+    return () => clearTimeout(minuteur)
   }, [location.pathname])
 
   // HashRouter : un lien « #contenu » changerait de page, on déplace donc le focus à la main.
@@ -39,7 +80,7 @@ export default function Layout() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <LazyMotion features={domAnimation} strict>
+      <LazyMotion features={chargerAnimations} strict>
         <ToastProvider>
           <a href="#contenu" className="evitement" onClick={allerAuContenu}>Aller au contenu</a>
           <header className="entete">
@@ -82,14 +123,17 @@ export default function Layout() {
           </header>
 
           <main id="contenu" ref={main} tabIndex={-1} className="main">
-            <m.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 0.8, 0.36, 1] }}
-            >
-              {outlet}
-            </m.div>
+            <Suspense fallback={<ChargementPage />}>
+              <m.div
+                key={location.pathname}
+                data-page={location.pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 0.8, 0.36, 1] }}
+              >
+                {outlet}
+              </m.div>
+            </Suspense>
           </main>
         </ToastProvider>
       </LazyMotion>

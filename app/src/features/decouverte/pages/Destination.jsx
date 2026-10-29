@@ -60,6 +60,7 @@ export default function Destination() {
         </EmptyState>
       )}
 
+      <h2 className="sr-only">Voyageurs présents à {ville}</h2>
       <ul className="ui-grille">
         {dansLaVille.map((r, i) => (
           <VoyageurCarte key={r.user.id} rang={i} resultat={r} resume={`${r.jours} jour${r.jours > 1 ? 's' : ''} en commun à ${ville}`} />

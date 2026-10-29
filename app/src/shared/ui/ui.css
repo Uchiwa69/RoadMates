@@ -275,6 +275,7 @@
 .ui-retour {
   justify-self: start; display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px 6px 8px; margin-left: -8px; border-radius: var(--r-rond);
+  border: none; background: transparent; cursor: pointer; font: inherit;
   color: var(--texte-2); font-weight: 600; text-decoration: none;
 }
 .ui-retour:hover { background: var(--fond-2); color: var(--texte); }

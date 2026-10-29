@@ -152,3 +152,19 @@
 
   .main { padding: var(--e-6) var(--e-4) calc(var(--haut-onglets) + var(--e-10) + env(safe-area-inset-bottom)); }
 }
+
+/* ---------- Squelette de chargement d'une page ---------- */
+.chargement { display: grid; gap: var(--e-4); padding-top: var(--e-4); }
+.chargement__ligne, .chargement__bloc {
+  display: block; border-radius: var(--r-m);
+  background: linear-gradient(90deg, var(--fond-2) 0%, var(--surface-2) 50%, var(--fond-2) 100%);
+  background-size: 200% 100%; animation: chargement-reflet 1.2s linear infinite;
+}
+.chargement__ligne { height: 18px; width: min(420px, 80%); }
+.chargement__ligne--titre { height: 40px; width: min(320px, 70%); }
+.chargement__bloc { height: 280px; border-radius: var(--r-xl); }
+@keyframes chargement-reflet { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .chargement__ligne, .chargement__bloc { animation: none; } }
+
+/* Les titres reçoivent le focus au changement de page : pas d'anneau à la souris */
+main h1[tabindex='-1']:focus:not(:focus-visible) { outline: none; }
