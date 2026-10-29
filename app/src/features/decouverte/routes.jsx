@@ -3,6 +3,8 @@ import AFaire from '../../shared/AFaire.jsx'
 import { paths } from '../../shared/paths.js'
 import NouveauVoyage from './pages/NouveauVoyage.jsx'
 import MesVoyages from './pages/MesVoyages.jsx'
+import Compagnons from './pages/Compagnons.jsx'
+import Destination from './pages/Destination.jsx'
 import './decouverte.css'
 
 export const decouverteRoutes = [
@@ -10,6 +12,6 @@ export const decouverteRoutes = [
   { path: paths.inscription, element: <AFaire titre="Inscription" stories="US-01" /> },
   { path: paths.nouveauVoyage, element: <NouveauVoyage /> },
   { path: paths.mesVoyages, element: <MesVoyages /> },
-  { path: '/destination/:ville', element: <AFaire titre="Voyageurs dans la même ville" stories="US-04" /> },
-  { path: paths.compagnons, element: <AFaire titre="Itinéraires communs" stories="US-05" /> },
+  { path: '/destination/:ville', element: <Destination /> },
+  { path: paths.compagnons, element: <Compagnons /> },
 ]
