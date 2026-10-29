@@ -1,0 +1,24 @@
+/* Styles de la partie A — découverte. */
+.entete-page { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.entete-page h1, .entete-page h2 { margin: 0; }
+.liste { list-style: none; padding: 0; display: grid; gap: 12px; margin: 16px 0; }
+
+.form-voyage { display: grid; gap: 16px; max-width: 640px; }
+.champ { display: grid; gap: 4px; font-weight: 500; }
+.etapes { border: 1px solid var(--c-bord); border-radius: var(--rayon); padding: 12px; display: grid; gap: 12px; }
+.etape { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; align-items: end; }
+.etape-erreur { grid-column: 1 / -1; }
+@media (max-width: 560px) { .etape { grid-template-columns: 1fr 1fr; } .etape .champ:first-child { grid-column: 1 / -1; } }
+.etapes-liste { margin: 8px 0; padding-left: 20px; }
+
+.voyageur { display: grid; gap: 6px; }
+.voyageur-tete { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.voyageur-tete h3 { margin: 0; }
+.meta { color: var(--c-texte-2); font-size: .9rem; }
+.commun { font-weight: 600; color: var(--c-primaire); }
+
+.accueil { display: grid; gap: 16px; max-width: 640px; padding: 24px 0; }
+.accueil h1 { font-size: 2rem; margin: 0; line-height: 1.2; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.filtres { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 12px 0; }
