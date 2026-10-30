@@ -66,6 +66,7 @@
   font-size: calc(var(--taille) * .42); line-height: 1;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / .18);
 }
+.ui-avatar--photo { object-fit: cover; background: var(--fond-2); }
 .ui-avatar-stack { display: inline-flex; align-items: center; }
 .ui-avatar-stack .ui-avatar { box-shadow: 0 0 0 3px var(--surface); }
 .ui-avatar-stack .ui-avatar + .ui-avatar { margin-left: calc(var(--taille) * -.3); }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BadgeCheck, Camera, Check, Save } from 'lucide-react'
+import { BadgeCheck, Camera, Check, Save, Shield } from 'lucide-react'
 import { updateDb, useDb } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { Badge, Button, Card, EntetePage, Field, Input, Select, Textarea, useToast } from '../../shared/ui/index.js'
@@ -115,6 +115,7 @@ export default function EditionProfil() {
     <section className="profil-enrichi">
       <EntetePage surtitre="Votre espace" titre="Mon profil">
         <p>Présentez votre façon de voyager pour trouver des compagnons qui vous correspondent.</p>
+        <Button to={paths.confidentialite} variant="secondaire" icon={Shield}>Confidentialité</Button>
       </EntetePage>
 
       <div className="profil-enrichi__grille">

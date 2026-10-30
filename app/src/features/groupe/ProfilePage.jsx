@@ -211,7 +211,7 @@ export default function ProfilePage() {
                 <Badge ton="succes" icon={Check}>En contact</Badge>
                 {peutAjouterAmiRoute && <Button variant="secondaire" onClick={ajouterAmiRoute}>Ajouter à mes amis de route</Button>}
                 <p className="profil__aide">Vous pouvez l’ajouter à un groupe pour discuter et partager les frais.</p>
-                <Button to={paths.groupes} variant="secondaire">Voir mes groupes</Button>
+                <Button to={paths.messagesOnglet('groupes')} variant="secondaire">Voir mes groupes</Button>
               </>
             ) : outgoing ? (
               <>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
             ) : incoming ? (
               <>
                 <p className="profil__aide">Cette personne vous a écrit.</p>
-                <Button to={paths.demandes} icon={Inbox}>Voir la demande</Button>
+                <Button to={paths.messagesOnglet('demandes')} icon={Inbox}>Voir la demande</Button>
               </>
             ) : currentUser?.id === user.id ? (
               <p className="profil__aide">C’est votre profil.</p>

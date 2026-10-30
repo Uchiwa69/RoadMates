@@ -14,9 +14,11 @@ export const paths = {
 
   // Partie B — groupe
   profil: (userId) => `/voyageurs/${userId}`,
-  demandes: '/demandes',
-  groupes: '/groupes',
+  demandes: '/demandes',  // redirige vers messagesOnglet('demandes')
+  groupes: '/groupes',    // redirige vers messagesOnglet('groupes')
   groupe: (groupId) => `/groupes/${groupId}`,
+  messages: '/messages',
+  messagesOnglet: (onglet) => `/messages?onglet=${onglet}`,
 
   // Step-up — confidentialité (agent A) et profil enrichi (agent B)
   confidentialite: '/confidentialite',

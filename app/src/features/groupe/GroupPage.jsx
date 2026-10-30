@@ -161,11 +161,11 @@ export default function GroupPage() {
   const [confirmerDepart, setConfirmerDepart] = useState(false)
 
   if (!group) {
-    return <EmptyState icon={MessagesSquare} titre="Groupe introuvable" action={<Button to={paths.groupes}>Retour à mes groupes</Button>} />
+    return <EmptyState icon={MessagesSquare} titre="Groupe introuvable" action={<Button to={paths.messagesOnglet('groupes')}>Retour à mes groupes</Button>} />
   }
   if (!isMember) {
     return (
-      <EmptyState icon={Lock} titre="Accès refusé" action={<Button to={paths.groupes}>Retour à mes groupes</Button>}>
+      <EmptyState icon={Lock} titre="Accès refusé" action={<Button to={paths.messagesOnglet('groupes')}>Retour à mes groupes</Button>}>
         <p>Ce groupe ne fait pas partie de vos groupes.</p>
       </EmptyState>
     )
@@ -194,7 +194,7 @@ export default function GroupPage() {
         })
       })
       toast(`Vous avez quitté « ${group.nom} ».`)
-      navigate(paths.groupes)
+      navigate(paths.messagesOnglet('groupes'))
     } catch {
       toast('Le message de départ n’a pas pu être chiffré. Vous êtes toujours dans le groupe.')
     }
@@ -204,7 +204,7 @@ export default function GroupPage() {
 
   return (
     <section className="groupe">
-      <Link to={paths.groupes} className="ui-retour"><ArrowLeft size={18} aria-hidden="true" /> Mes groupes</Link>
+      <Link to={paths.messagesOnglet('groupes')} className="ui-retour"><ArrowLeft size={18} aria-hidden="true" /> Mes groupes</Link>
       <header className="groupe__tete">
         <div className="groupe__titres">
           <h1 className="groupe__nom">{group.nom}</h1>

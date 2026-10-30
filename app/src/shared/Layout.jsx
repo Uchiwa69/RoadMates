@@ -1,23 +1,34 @@
 // En-tête, navigation (en haut sur ordinateur, onglets en bas sur mobile),
 // pastille de démo et transitions de page.
 import { Component, Suspense, useEffect, useRef } from 'react'
-import { NavLink, useLocation, useOutlet } from 'react-router-dom'
+import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { LazyMotion, MotionConfig, m } from 'motion/react'
-import { CloudOff, Home, Inbox, Map, MessagesSquare, Moon, RotateCcw, Shield, Sun, Users } from 'lucide-react'
+import { CloudOff, Home, Map, MessagesSquare, Moon, RotateCcw, Sun, Users } from 'lucide-react'
 import { useDb } from './db.js'
 import { paths } from './paths.js'
+import { useCurrentUser } from './session.js'
 import { basculerTheme, useTheme } from './theme.js'
-import { Button, EmptyState, ToastProvider } from './ui/index.js'
+import { Avatar, Button, EmptyState, ToastProvider } from './ui/index.js'
 import Logo from './Logo.jsx'
 import DemoPanel from './DemoPanel.jsx'
 import './layout.css'
 
+// Un onglet reste actif sur ses sous-pages : Messages sur une conversation de groupe,
+// Profil sur Modifier, Confidentialité, etc. NavLink ne sait pas relier /groupes/:id à
+// /messages, d'où les préfixes déclarés ici.
+const sousChemin = (pathname, prefixe) => pathname === prefixe || pathname.startsWith(`${prefixe}/`)
 const liens = [
-  { to: paths.accueil, label: 'Accueil', icon: Home, end: true },
-  { to: paths.mesVoyages, label: 'Voyages', icon: Map },
-  { to: paths.compagnons, label: 'Compagnons', icon: Users },
-  { to: paths.demandes, label: 'Demandes', icon: Inbox, notif: true },
-  { to: paths.groupes, label: 'Groupes', icon: MessagesSquare },
+  { to: paths.accueil, label: 'Accueil', icon: Home, actif: (p) => p === paths.accueil },
+  { to: paths.mesVoyages, label: 'Voyages', icon: Map, actif: (p) => sousChemin(p, paths.mesVoyages) },
+  { to: paths.compagnons, label: 'Compagnons', icon: Users, actif: (p) => sousChemin(p, paths.compagnons) },
+  {
+    to: paths.messages, label: 'Messages', icon: MessagesSquare, notif: true,
+    actif: (p) => [paths.messages, paths.groupes, paths.demandes].some((prefixe) => sousChemin(p, prefixe)),
+  },
+  {
+    to: paths.monProfil, label: 'Profil', avatar: true,
+    actif: (p) => [paths.monProfil, paths.confidentialite, paths.avis].some((prefixe) => sousChemin(p, prefixe)),
+  },
 ]
 
 // Le moteur d'animation arrive après le premier affichage : la page n'attend pas ses ~20 Ko.
@@ -63,6 +74,7 @@ export default function Layout() {
   const location = useLocation()
   const outlet = useOutlet()
   const main = useRef(null)
+  const moi = useCurrentUser()
   const enAttente = useDb((db) => db.requests.filter((r) => r.toId === db.session.userId && r.statut === 'en_attente').length)
 
   // À chaque changement de page : retour en haut, titre de l'onglet tiré du h1 de la page
@@ -114,27 +126,27 @@ export default function Layout() {
 
               <nav className="nav" aria-label="Navigation principale">
                 <ul>
-                  {liens.map(({ to, label, icon: Icon, end, notif }) => (
-                    <li key={to}>
-                      <NavLink to={to} end={end} className="nav__lien">
-                        <span className="nav__icone">
-                          <Icon size={22} aria-hidden="true" />
-                          {notif && enAttente > 0 && <span className="nav__notif" aria-hidden="true">{enAttente}</span>}
-                        </span>
-                        <span className="nav__label">{label}</span>
-                        {notif && enAttente > 0 && (
-                          <span className="sr-only">, {enAttente} demande{enAttente > 1 ? 's' : ''} en attente</span>
-                        )}
-                      </NavLink>
-                    </li>
-                  ))}
+                  {liens.map(({ to, label, icon: Icon, notif, avatar, actif }) => {
+                    const courant = actif(location.pathname)
+                    return (
+                      <li key={to}>
+                        <Link to={to} className={`nav__lien${courant ? ' active' : ''}`} aria-current={courant ? 'page' : undefined}>
+                          <span className="nav__icone">
+                            {avatar ? <Avatar user={moi} taille={24} photo className="nav__avatar" /> : <Icon size={22} aria-hidden="true" />}
+                            {notif && enAttente > 0 && <span className="nav__notif" aria-hidden="true">{enAttente}</span>}
+                          </span>
+                          <span className="nav__label">{label}</span>
+                          {notif && enAttente > 0 && (
+                            <span className="sr-only">, {enAttente} demande{enAttente > 1 ? 's' : ''} en attente</span>
+                          )}
+                        </Link>
+                      </li>
+                    )
+                  })}
                 </ul>
               </nav>
 
               <div className="entete__outils">
-                <NavLink to={paths.confidentialite} className="theme-btn" aria-label="Confidentialité" title="Confidentialité">
-                  <Shield size={20} aria-hidden="true" />
-                </NavLink>
                 <button
                   type="button"
                   className="theme-btn"
