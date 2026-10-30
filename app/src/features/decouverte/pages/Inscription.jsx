@@ -57,8 +57,9 @@ export default function Inscription() {
 
   const confirmer = () => {
     const user = creerCompte(form)
-    toast(`Bienvenue ${user.prenom} ! Déclarez votre premier voyage.`)
-    navigate(paths.nouveauVoyage)
+    // Retour à l'accueil, connecté : le globe et la recherche « Où · Quand » sont le meilleur point de départ.
+    toast(`Bienvenue ${user.prenom} ! Où partez-vous ?`)
+    navigate(paths.accueil)
   }
 
   if (envoye) {
