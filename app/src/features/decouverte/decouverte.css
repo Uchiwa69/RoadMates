@@ -52,6 +52,20 @@
 }
 .filtres__reset:hover:not(:disabled) { background: var(--primaire-doux); }
 .filtres__reset:disabled { color: var(--texte-2); cursor: default; opacity: .7; }
+.filtres__plus {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 16px;
+  border-radius: var(--r-rond); border: 1.5px solid var(--bord-fort); background: var(--surface);
+  color: var(--texte); font-weight: 600; cursor: pointer;
+}
+.filtres__plus:hover { border-color: var(--texte-2); }
+.filtres__plus--actif { border-color: var(--primaire-texte); background: var(--primaire-doux); color: var(--primaire-texte); }
+.filtres__chevron { transition: transform var(--d-moyen) var(--ease); }
+.filtres__plus[aria-expanded='true'] .filtres__chevron { transform: rotate(180deg); }
+.filtres__panneau { padding-top: var(--e-3); border-top: 1px dashed var(--bord); animation: filtres-ouverture var(--d-moyen) var(--ease); }
+@keyframes filtres-ouverture { from { opacity: 0; transform: translateY(-4px); } }
+.ui-feuille .filtres__champs--avances { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ui-feuille .filtres__champs--avances .filtres__preference { grid-column: 1 / -1; }
+.ui-feuille .filtres__champs--avances > * { width: auto; min-width: 0; }
 
 /* ---------- Compagnons ---------- */
 .compagnons__voyage { display: grid; gap: var(--e-4); margin-bottom: var(--e-10); }
