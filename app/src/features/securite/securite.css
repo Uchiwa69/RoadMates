@@ -1,0 +1,9 @@
+.securite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.securite-actions__etat { margin: 0; color: var(--texte-2); font-size: .85rem; }
+.securite-actions__confirmation { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.securite-actions__form { flex-basis: 100%; display: grid; gap: var(--e-3); padding: var(--e-3); border: 1px solid var(--bord); border-radius: var(--r-l); background: var(--surface-2); }
+.securite-actions__form label { display: grid; gap: 6px; font-weight: 600; }
+.securite-actions__form select,
+.securite-actions__form textarea { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--bord-fort); border-radius: var(--r-m); background: var(--surface); color: var(--texte); font: inherit; }
+.securite-actions__form textarea { resize: vertical; }
+.securite-actions__form p { margin: 0; color: var(--texte-2); font-size: .85rem; }

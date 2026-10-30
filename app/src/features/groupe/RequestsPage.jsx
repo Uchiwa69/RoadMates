@@ -8,6 +8,7 @@ import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, Badge, Button, EmptyState, EntetePage, Tabs, TabPanel, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
+import ActionsSecurite, { estBloque } from '../securite/ActionsSecurite.jsx'
 
 function Statut({ statut, recue }) {
   if (statut === 'en_attente') return <Badge ton="alerte" icon={Clock}>{recue ? 'À traiter' : 'En attente de réponse'}</Badge>
@@ -20,6 +21,7 @@ export default function RequestsPage() {
   const requests = useDb((db) => db.requests)
   const users = useDb((db) => db.users)
   const toast = useToast()
+  const blocages = useDb((db) => db.blocages ?? [])
   const received = requests.filter((request) => request.toId === currentUser?.id)
   const sent = requests.filter((request) => request.fromId === currentUser?.id)
   const aTraiter = received.filter((r) => r.statut === 'en_attente').length
@@ -30,9 +32,15 @@ export default function RequestsPage() {
   }
 
   function updateStatus(requestId, status) {
+    const requestCourante = requests.find((request) => request.id === requestId)
+    const cible = person(requestCourante?.fromId)
+    if (cible && estBloque({ blocages }, currentUser?.id, cible.id)) {
+      toast('Cette interaction est désactivée car un blocage est actif.')
+      return
+    }
     updateDb((db) => {
       const request = db.requests.find((candidate) => candidate.id === requestId)
-      if (request?.toId === currentUser?.id && request.statut === 'en_attente') {
+      if (request?.toId === currentUser?.id && request.statut === 'en_attente' && !estBloque(db, currentUser.id, request.fromId)) {
         request.statut = status
       }
     })
@@ -58,7 +66,11 @@ export default function RequestsPage() {
             <Statut statut={request.statut} recue={recue} />
           </div>
           {request.message && <p className="demande__message">{request.message}</p>}
-          {recue && request.statut === 'en_attente' && (
+          {autre && <ActionsSecurite cible={autre} />}
+          {autre && estBloque({ blocages }, currentUser?.id, autre.id) && (
+            <p className="groupe-aide">Cette interaction est désactivée à cause d’un blocage.</p>
+          )}
+          {recue && request.statut === 'en_attente' && !estBloque({ blocages }, currentUser?.id, autre?.id) && (
             <div className="demande__actions">
               <Button icon={Check} onClick={() => updateStatus(request.id, 'acceptee')}>Accepter</Button>
               <Button variant="secondaire" icon={X} onClick={() => updateStatus(request.id, 'refusee')}>Refuser</Button>

@@ -162,6 +162,9 @@
 .conversation__envoyer:active { transform: scale(.94); }
 .conversation__erreur { grid-column: 1 / -1; }
 
+.securite-membres { display: grid; gap: var(--e-2); padding: var(--e-3); border: 1px solid var(--bord); border-radius: var(--r-l); background: var(--surface-2); }
+.securite-membres__ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2); }
+
 /* Dépenses */
 .depenses { display: grid; gap: var(--e-4); min-width: 0; }
 .depenses__titre { display: flex; align-items: center; gap: var(--e-2); margin: 0; font-size: 1.3rem; }

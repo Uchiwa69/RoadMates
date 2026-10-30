@@ -10,6 +10,7 @@ import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
 import Expenses from './Expenses.jsx'
+import ActionsSecurite from '../securite/ActionsSecurite.jsx'
 
 function Conversation({ groupId, currentUser, users }) {
   const allMessages = useDb((db) => db.messages)
@@ -216,6 +217,17 @@ export default function GroupPage() {
           )}
         </div>
       </header>
+
+      {membres.some((member) => member.id !== currentUser?.id) && (
+        <section className="securite-membres" aria-label="Actions de sécurité des membres">
+          {membres.filter((member) => member.id !== currentUser?.id).map((member) => (
+            <div className="securite-membres__ligne" key={member.id}>
+              <span>{profilMasque(member) ? 'Voyageur anonyme' : member.prenom}</span>
+              <ActionsSecurite cible={member} groupId={groupId} />
+            </div>
+          ))}
+        </section>
+      )}
 
       <nav className="groupe__raccourcis" aria-label="Sections du groupe">
         <button type="button" onClick={() => allerA('conversation-titre')}><MessagesSquare size={16} aria-hidden="true" /> Discussion</button>
