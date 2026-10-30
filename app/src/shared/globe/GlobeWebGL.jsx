@@ -8,7 +8,7 @@ import { COULEURS_GLOBE, SELECTION, creerEtiquetteVille, etiquettesVisibles, vue
 import CommandesZoom from './CommandesZoom.jsx'
 
 // Bornes du zoom, en altitude de caméra (rayon du globe = 1). globe.gl place le globe à 100 unités.
-// ALT_MIN reste au-dessus de l'atmosphère (0,22) : vue de l'intérieur, Firefox la rend noire.
+// ALT_MIN reste au-dessus de l'atmosphère (0,14).
 const ALT_MIN = 0.26
 const ALT_MAX = 3.8
 const RAYON = 100
@@ -187,13 +187,13 @@ export default function GlobeWebGL({
         onGlobeReady={() => setPret(true)}
         showAtmosphere
         atmosphereColor={c.atmosphere}
-        atmosphereAltitude={0.22}
+        atmosphereAltitude={0.14}
         polygonsData={PAYS_GEO}
         polygonGeoJsonGeometry="geometry"
         polygonCapColor={(d) => (estChoisi(d) ? SELECTION : d === survol ? c.terreSurvol : c.terre)}
         polygonSideColor={(d) => (estChoisi(d) ? 'rgba(194, 65, 47, 0.9)' : c.flanc)}
         polygonStrokeColor={() => c.cote}
-        polygonAltitude={(d) => (estChoisi(d) ? 0.03 : 0.006)}
+        polygonAltitude={(d) => (estChoisi(d) ? 0.03 : 0.004)}
         polygonLabel={(d) => `<div class="globe-bulle">${echapperHtml(d.nom)}</div>`}
         polygonsTransitionDuration={mouvementReduit ? 0 : 600}
         onPolygonHover={setSurvol}

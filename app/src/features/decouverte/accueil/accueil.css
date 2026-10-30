@@ -6,7 +6,7 @@
   --hero-4: light-dark(#FF9E8A, #4A2440);
   --hero-5: light-dark(#F27FA0, #A8443F);
   --etoile: light-dark(transparent, rgb(255 255 255 / .75));
-  --soleil-halo: light-dark(rgb(255 179 107 / .75), rgb(255 122 92 / .35));
+  --soleil-halo: light-dark(rgb(255 179 107 / .4), rgb(255 122 92 / .3));
   display: grid; gap: var(--e-16);
 }
 
@@ -89,8 +89,8 @@
 .hero__globe > .globe {
   position: absolute; z-index: 1; inset: calc(var(--e-12) * -1) calc(var(--e-12) * -1) calc(var(--e-10) * -1) -40px;
   width: auto; height: auto;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 70px);
-  mask-image: linear-gradient(to right, transparent 0, #000 70px);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px);
+  mask-image: linear-gradient(to right, transparent 0, #000 32px);
   clip-path: inset(0 0 0 0 round 0);
   transition: clip-path var(--d-lent) var(--ease);
 }

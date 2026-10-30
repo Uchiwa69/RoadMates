@@ -3,16 +3,18 @@ import { echapperHtml } from '../texte.js'
 
 export const SELECTION = '#FF6B5B'
 
-// Clair : un globe de crépuscule (océan encre, terres pêche) sur le ciel couchant.
+// Clair : un globe de crépuscule (océan encre, terres crème) sur le ciel couchant.
+// Les flancs des pays ont la couleur des terres : semi-transparents, ils dessinaient une ombre
+// grise décalée le long des côtes qui donnait un aspect flou.
 // Sombre : un globe de nuit, terres bleu ardoise, halo corail.
 export const COULEURS_GLOBE = {
   light: {
-    sphere: '#1B2444', terre: '#FFD9C7', terreSurvol: '#FFBFA6', cote: 'rgba(27, 36, 68, 0.35)',
-    flanc: 'rgba(255, 217, 199, 0.4)', atmosphere: '#FF8A6B', point: '#FFF8F3',
+    sphere: '#1B2444', terre: '#FFE6DA', terreSurvol: '#FFC7AE', cote: 'rgba(27, 36, 68, 0.5)',
+    flanc: '#FFE6DA', atmosphere: '#FF7A5C', point: '#FFFFFF',
   },
   dark: {
     sphere: '#0F1630', terre: '#2B3A66', terreSurvol: '#3B4E86', cote: 'rgba(169, 184, 255, 0.28)',
-    flanc: 'rgba(43, 58, 102, 0.6)', atmosphere: '#FF7A5C', point: '#FFE3D3',
+    flanc: '#2B3A66', atmosphere: '#FF7A5C', point: '#FFE3D3',
   },
 }
 

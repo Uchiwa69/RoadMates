@@ -7,11 +7,12 @@ import { alpha2DepuisNumerique, nomPays } from './pays.js'
 
 export const VUE_INITIALE = { lat: 36, lng: 6, altitude: 3.4 }
 
-// Vue de départ adaptée au cadre : le globe entier occupe 90 % de la largeur du canevas
+// Vue de départ adaptée au cadre : le globe entier occupe 84 % de la largeur du canevas
+// (son atmosphère tient ainsi dans le cadre, sans être coupée ni estompée sur les bords)
 // (72 % de sa hauteur au plus). La caméra de globe.gl a un champ vertical de 50° et le globe
 // un rayon de 1 en unités d'altitude : on en déduit la distance qui donne ce diamètre.
 export function vueInitiale(largeur, hauteur) {
-  const diametre = Math.min(largeur * 0.9, hauteur * 0.72)
+  const diametre = Math.min(largeur * 0.84, hauteur * 0.72)
   const demiAngle = (diametre / hauteur) * 25 * (Math.PI / 180)
   return { ...VUE_INITIALE, altitude: Math.min(4, Math.max(1.6, 1 / Math.sin(demiAngle) - 1)) }
 }
