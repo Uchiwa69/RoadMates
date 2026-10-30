@@ -10,6 +10,7 @@
 }
 .voyageur__carte:hover { transform: translateY(-3px); box-shadow: var(--ombre-2); }
 .voyageur__tete { display: flex; align-items: center; gap: var(--e-3); }
+.voyageur__photo { width: 56px; height: 56px; flex: none; border-radius: 50%; object-fit: cover; }
 .voyageur__identite { flex: 1; min-width: 0; display: grid; gap: 4px; justify-items: start; }
 .voyageur__nom { margin: 0; font-size: 1.2rem; }
 .voyageur__commun { margin: 0; font-weight: 700; color: var(--primaire-texte); }
@@ -40,7 +41,9 @@
 .filtres__total { margin: 0; color: var(--texte-2); }
 .filtres__total strong { display: inline-block; min-width: 1ch; color: var(--texte); font-size: 1.1rem; }
 .filtres__champs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--e-3); }
-.filtres__langue { min-width: 160px; }
+.filtres__langue { min-width: 150px; }
+.filtres__preference { min-width: 170px; }
+.filtres__budget { width: 150px; }
 .filtres__age { width: 104px; }
 .filtres__reset {
   display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 12px;
@@ -184,8 +187,8 @@
 }
 @media (max-width: 767px) {
   .filtres { padding: var(--e-4); }
-  .filtres__langue { flex: 1 1 100%; }
-  .filtres__age { flex: 1 1 0; width: auto; }
+  .filtres__langue, .filtres__preference { flex: 1 1 100%; }
+  .filtres__budget, .filtres__age { flex: 1 1 0; width: auto; }
   .inscription__carte { padding: var(--e-5); }
   .inscription__promesse ul { display: none; }
   .inscription__actions { flex-direction: column-reverse; align-items: stretch; }

@@ -17,7 +17,8 @@ export default function Compagnons() {
   const db = useDb((d) => d)
   const [filtres, setFiltres] = useState(FILTRES_VIDES)
   const mesVoyages = db.trips.filter((t) => t.userId === user?.id)
-  const langues = [...new Set(db.users.flatMap((u) => u.langues))].sort()
+  const langues = [...new Set(db.users.flatMap((u) => u.langues ?? []))].sort()
+  const centresInteret = [...new Set(db.users.flatMap((u) => u.centresInteret ?? []))].sort()
 
   if (mesVoyages.length === 0) {
     return (
@@ -43,8 +44,9 @@ export default function Compagnons() {
       <EntetePage surtitre="Compagnons de route" titre="Itinéraires communs">
         <p>Les voyageurs qui partagent au moins une étape avec vous, le même jour au même endroit.</p>
       </EntetePage>
+      <Button to={paths.monProfil} variant="secondaire">Compléter mon profil</Button>
 
-      <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} total={total} />
+      <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} centresInteret={centresInteret} total={total} />
 
       {parVoyage.map(({ voyage, tous, visibles }) => (
         <section key={voyage.id} className="compagnons__voyage" aria-labelledby={`voyage-${voyage.id}`}>
@@ -85,8 +87,8 @@ export default function Compagnons() {
                 key={r.user.id}
                 rang={i}
                 resultat={r}
-                score={{ valeur: r.nbEtapes, total: voyage.etapes.length }}
-                resume={`${r.nbEtapes} étape${r.nbEtapes > 1 ? 's' : ''} sur ${voyage.etapes.length} en commun`}
+                score={{ valeur: r.compatibilite, total: 100 }}
+                resume={`${r.nbEtapes} étape${r.nbEtapes > 1 ? 's' : ''} sur ${voyage.etapes.length} en commun · ${r.compatibilite}% de compatibilité`}
               />
             ))}
           </ul>

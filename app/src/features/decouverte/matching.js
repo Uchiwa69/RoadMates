@@ -1,12 +1,17 @@
 // Calcul des compagnons possibles (US-04, US-05). Lecture seule.
+import { profilMasque, itineraireMasque } from '../../shared/confidentialite.js'
 import { joursCommuns, periodeCommune } from './dates.js'
+import { scoreCompatibilite } from './filtres.js'
 
 // US-05 — pour un de mes voyages, les voyageurs qui ont au moins une étape commune
 // (même ville et au moins 1 jour qui coïncide), triés par étapes puis jours communs.
 export function itinerairesCommuns(db, monVoyage) {
   const resultats = []
+  const moi = db.users.find((user) => user.id === monVoyage.userId)
   for (const autre of db.trips) {
     if (autre.userId === monVoyage.userId) continue
+    const user = db.users.find((u) => u.id === autre.userId)
+    if (!user || profilMasque(user) || itineraireMasque(user)) continue
     const communes = []
     for (const mienne of monVoyage.etapes) {
       for (const sienne of autre.etapes) {
@@ -16,16 +21,15 @@ export function itinerairesCommuns(db, monVoyage) {
       }
     }
     if (communes.length === 0) continue
-    const user = db.users.find((u) => u.id === autre.userId)
-    if (!user) continue
     resultats.push({
       user,
       communes,
       nbEtapes: new Set(communes.map((c) => c.ville)).size,
       jours: communes.reduce((s, c) => s + c.jours, 0),
+      compatibilite: scoreCompatibilite(user, moi),
     })
   }
-  return fusionnerParUser(resultats).sort((a, b) => b.nbEtapes - a.nbEtapes || b.jours - a.jours)
+  return fusionnerParUser(resultats).sort((a, b) => b.compatibilite - a.compatibilite || b.nbEtapes - a.nbEtapes || b.jours - a.jours)
 }
 
 // US-04 — les voyageurs présents dans une ville pendant mes dates dans cette ville.
@@ -50,8 +54,11 @@ export function presentsDansLePays(db, userId, ville) {
 
 function presentsPendant(db, userId, mesEtapes, filtre) {
   const resultats = []
+  const moi = db.users.find((user) => user.id === userId)
   for (const autre of db.trips) {
     if (autre.userId === userId) continue
+    const user = db.users.find((candidat) => candidat.id === autre.userId)
+    if (!user || profilMasque(user) || itineraireMasque(user)) continue
     const communes = []
     for (const sienne of autre.etapes.filter(filtre)) {
       for (const mienne of mesEtapes) {
@@ -59,12 +66,11 @@ function presentsPendant(db, userId, mesEtapes, filtre) {
         if (jours > 0) communes.push({ ville: sienne.ville, jours, periode: periodeCommune(mienne, sienne) })
       }
     }
-    const user = db.users.find((u) => u.id === autre.userId)
-    if (communes.length && user) {
-      resultats.push({ user, communes, nbEtapes: communes.length, jours: communes.reduce((s, c) => s + c.jours, 0) })
+    if (communes.length) {
+      resultats.push({ user, communes, nbEtapes: communes.length, jours: communes.reduce((s, c) => s + c.jours, 0), compatibilite: scoreCompatibilite(user, moi) })
     }
   }
-  return fusionnerParUser(resultats).sort((a, b) => b.jours - a.jours)
+  return fusionnerParUser(resultats).sort((a, b) => b.compatibilite - a.compatibilite || b.jours - a.jours)
 }
 
 // Un voyageur peut avoir plusieurs voyages : on n'affiche qu'une carte par personne.
@@ -79,5 +85,5 @@ function fusionnerParUser(resultats) {
       deja.jours += r.jours
     }
   }
-  return [...parUser.values()]
+  return [...parUser.values()].sort((a, b) => b.compatibilite - a.compatibilite || b.jours - a.jours)
 }

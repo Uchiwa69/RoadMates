@@ -9,6 +9,7 @@ import { formatPeriode } from './dates.js'
 // score : { valeur, total } pour l'anneau « 2 étapes sur 2 » ; resume : la phrase qui l'accompagne.
 export default function VoyageurCarte({ resultat, resume, score, rang = 0 }) {
   const { user, communes } = resultat
+  const compatibilite = score ?? (resultat.compatibilite == null ? null : { valeur: resultat.compatibilite, total: 100 })
   return (
     <m.li
       className="voyageur"
@@ -18,17 +19,19 @@ export default function VoyageurCarte({ resultat, resume, score, rang = 0 }) {
     >
       <article className="voyageur__carte">
         <div className="voyageur__tete">
-          <Avatar user={user} taille={56} />
+          {user.photoUrl
+            ? <img className="voyageur__photo" src={user.photoUrl} alt={`Photo de ${user.prenom}`} referrerPolicy="no-referrer" />
+            : <Avatar user={user} taille={56} />}
           <div className="voyageur__identite">
             <h3 className="voyageur__nom">{user.prenom}, {user.age} ans</h3>
             {user.verifie
               ? <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>
               : <Badge ton="neutre">Identité non vérifiée</Badge>}
           </div>
-          {score && <MatchRing valeur={score.valeur} total={score.total} />}
+          {compatibilite && <MatchRing valeur={compatibilite.valeur} total={compatibilite.total} />}
         </div>
 
-        {resume && <p className="voyageur__commun">{resume}</p>}
+        {resume && <p className="voyageur__commun">{resume}{compatibilite && !score ? ` · ${compatibilite.valeur}% de compatibilité` : ''}</p>}
 
         <ul className="voyageur__communes" aria-label="Dates en commun">
           {communes.map((c) => (
