@@ -7,8 +7,11 @@ npm install
 npm run dev
 ```
 
-Organisation du code et répartition du travail : voir [PLAN-PROTOTYPE.md](../PLAN-PROTOTYPE.md).
+Vue d'ensemble, commandes et personnages de démo : voir le [README à la racine](../README.md).
+Organisation du code et répartition du travail : voir [PLAN-PROTOTYPE.md](../docs/prototype/PLAN-PROTOTYPE.md).
 
-- `src/shared/` — socle commun figé (routes, données de démo, session, styles)
-- `src/features/decouverte/` — partie A : inscription, voyages, compagnons
-- `src/features/groupe/` — partie B : contacts, groupes, dépenses partagées
+- `src/shared/` — socle commun (base locale, jeu de démo, URL, session, design system, globe)
+- `src/features/decouverte/` — partie A : accueil, inscription, voyages, compagnons, page ville
+- `src/features/groupe/` — partie B : messages, demandes, groupes, dépenses partagées
+- `src/features/profil/`, `confidentialite/`, `avis/`, `securite/` — espace « Mon profil »
+- `src/features/partenaires/` — activités, bons plans et espace partenaire

@@ -1,0 +1,8 @@
+# Fins de ligne normalisées en LF dans le dépôt, quel que soit le système (Windows, macOS, Linux).
+* text=auto
+
+# Fichiers binaires : jamais modifiés par Git.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.woff2 binary
