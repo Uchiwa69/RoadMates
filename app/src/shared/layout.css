@@ -92,11 +92,13 @@
 .demo__pastille:hover { border-color: var(--violet-texte); }
 .demo__pastille svg { color: var(--violet-texte); }
 .demo__sep { color: var(--texte-2); }
-.demo__qui { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.demo__qui { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 767px) { .demo__qui { max-width: 14ch; } }
 .demo__panneau {
   position: absolute; z-index: 50; right: 0; top: calc(100% + 8px);
   width: min(300px, calc(100vw - 32px));
-  display: grid; gap: var(--e-3);
+  /* minmax(0, 1fr) : un nom long dans « Je suis » ne doit pas élargir le panneau au-delà de 300 px */
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-3);
   padding: var(--e-4); border-radius: var(--r-l);
   background: var(--surface); border: 1px solid var(--bord); box-shadow: var(--ombre-3);
   animation: demo-entree var(--d-moyen) var(--ease);
@@ -112,7 +114,7 @@
 .demo__aide { margin: 0; font-size: .85rem; color: var(--texte-2); }
 .demo__label { font-size: .85rem; font-weight: 650; margin-bottom: calc(var(--e-2) * -1); }
 .demo__choix { display: flex; align-items: center; gap: var(--e-3); }
-.demo__choix select { flex: 1; min-width: 0; }
+.demo__choix select { flex: 1; min-width: 0; width: 100%; text-overflow: ellipsis; }
 .demo__reset {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 40px; border-radius: var(--r-rond);

@@ -172,8 +172,8 @@ export default function Hero() {
                       <span className="hero__ville-nb">{v.nb ? pluriel(v.nb, 'voyageur') : 'Personne encore'}{nbActivites > 0 && ` · ${pluriel(nbActivites, 'activité')}`}</span>
                     </>
                   )
-                  // Pas encore de voyage dans une ville qui a un guide : deux choix, créer le voyage d'abord.
-                  if (!mesVilles.has(v.ville) && nbActivites > 0) {
+                  // Pas encore de voyage dans la ville : « Créer un voyage », plus « Découvrir » s'il existe un guide.
+                  if (!mesVilles.has(v.ville)) {
                     return (
                       <li key={v.ville}>
                         <div className={`${classes} hero__ville--choix`}>
@@ -182,9 +182,11 @@ export default function Hero() {
                             <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
                               Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
                             </Link>
-                            <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
-                              Découvrir<span className="sr-only"> {v.ville}</span>
-                            </Link>
+                            {nbActivites > 0 && (
+                              <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
+                                Découvrir<span className="sr-only"> {v.ville}</span>
+                              </Link>
+                            )}
                           </span>
                         </div>
                       </li>
@@ -192,10 +194,10 @@ export default function Hero() {
                   }
                   return (
                     <li key={v.ville}>
-                      <Link to={cible(v.ville)} className={classes}>
+                      <Link to={paths.destination(v.ville)} className={classes}>
                         {infos}
                         <span className="hero__ville-action">
-                          {mesVilles.has(v.ville) ? 'Voir qui est là' : 'Déclarer un voyage'}
+                          Voir qui est là
                           <ArrowRight size={16} aria-hidden="true" />
                         </span>
                       </Link>
