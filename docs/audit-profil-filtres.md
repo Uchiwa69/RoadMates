@@ -1,0 +1,10 @@
+# Audit — profil enrichi, filtres et investissement
+
+1. **Aucun écran d’édition de profil** : `/profil` n’est pas déclaré et la page actuelle est un profil public avec demande de contact. Ajouter un écran personnel contrôlé par `useCurrentUser` et persister avec `updateDb`.
+2. **Schéma utilisateur trop mince** : `seed.js` ne contient pas la photo, les intérêts, le style, le budget journalier, le rythme ou l’investissement souhaité. Ajouter des valeurs de démonstration cohérentes aux voyageurs et incrémenter la version du seed.
+3. **Découverte filtrée de façon limitée** : `filtres.js` et `Filtres.jsx` ne gèrent que l’âge, la langue et le genre. Ajouter intérêts, style, budget, investissement et vérification, en conservant les filtres cumulables et la réinitialisation.
+4. **Compatibilité réduite aux dates** : `matching.js` classe selon les étapes et jours communs; il n’intègre pas les préférences des voyageurs. Calculer une compatibilité à partir des critères de profil et garder la correspondance d’itinéraire comme contexte.
+5. **Plusieurs surfaces de découverte** : les compagnons sont filtrés dans `Compagnons.jsx`, tandis que la page Destination passe directement par `matching.js`. Centraliser le respect des profils/itinéraires masqués dans les fonctions de matching.
+6. **Contrat d’anonymat existant mais non consommé** : `confidentialite.js` fournit `profilMasque` et `itineraireMasque`; les cartes et `ProfilePage.jsx` ne les consultent pas. Exclure les profils anonymisés en découverte, puis masquer profil et itinéraire sur la page publique selon leurs échéances.
+7. **Page de profil public non éditable** : enrichir `ProfilePage.jsx` pour présenter les champs ajoutés et appliquer les règles d’anonymat, sans modifier le CSS commun possédé par l’autre agent.
+8. **Branchement de route sans changement d’App** : `App.jsx` agrège les routes de découverte et de groupe. Ajouter un `routes.jsx` au nouveau dossier profil et l’agréger depuis les routes de découverte, seule surface de raccordement autorisée.
