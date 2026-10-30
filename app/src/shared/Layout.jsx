@@ -11,6 +11,7 @@ import { basculerTheme, useTheme } from './theme.js'
 import { Avatar, Button, EmptyState, ToastProvider } from './ui/index.js'
 import Logo from './Logo.jsx'
 import DemoPanel from './DemoPanel.jsx'
+import { profilAAction } from '../features/profil/completude.js'
 import './layout.css'
 
 // Un onglet reste actif sur ses sous-pages : Messages sur une conversation de groupe,
@@ -75,6 +76,7 @@ export default function Layout() {
   const outlet = useOutlet()
   const main = useRef(null)
   const moi = useCurrentUser()
+  const aFaireProfil = useDb((db) => profilAAction(db, moi))
   const enAttente = useDb((db) => db.requests.filter((r) => r.toId === db.session.userId && r.statut === 'en_attente').length)
 
   // À chaque changement de page : retour en haut, titre de l'onglet tiré du h1 de la page
@@ -134,11 +136,13 @@ export default function Layout() {
                           <span className="nav__icone">
                             {avatar ? <Avatar user={moi} taille={24} photo className="nav__avatar" /> : <Icon size={22} aria-hidden="true" />}
                             {notif && enAttente > 0 && <span className="nav__notif" aria-hidden="true">{enAttente}</span>}
+                            {avatar && aFaireProfil && <span className="nav__point" aria-hidden="true" />}
                           </span>
                           <span className="nav__label">{label}</span>
                           {notif && enAttente > 0 && (
                             <span className="sr-only">, {enAttente} demande{enAttente > 1 ? 's' : ''} en attente</span>
                           )}
+                          {avatar && aFaireProfil && <span className="sr-only">, action suggérée</span>}
                         </Link>
                       </li>
                     )

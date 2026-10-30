@@ -3,7 +3,6 @@
 import { lazy } from 'react'
 import { Navigate } from 'react-router-dom'
 import { paths } from '../../shared/paths.js'
-import { confidentialiteRoutes } from '../confidentialite/routes.jsx'
 import './groupe.css'
 
 const pages = {
@@ -19,5 +18,4 @@ export const groupeRoutes = [
   { path: paths.demandes, element: <Navigate to={paths.messagesOnglet('demandes')} replace /> },
   { path: paths.groupes, element: <Navigate to={paths.messagesOnglet('groupes')} replace /> },
   { path: '/groupes/:groupId', element: <pages.GroupPage /> },
-  ...confidentialiteRoutes,
 ]

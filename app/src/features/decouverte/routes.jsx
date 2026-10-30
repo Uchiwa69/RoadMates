@@ -3,7 +3,6 @@
 import { lazy } from 'react'
 import { paths } from '../../shared/paths.js'
 import { profilRoutes } from '../profil/routes.jsx'
-import { avisRoutes } from '../avis/routes.jsx'
 import './decouverte.css'
 
 const pages = {
@@ -25,5 +24,4 @@ export const decouverteRoutes = [
   { path: '/destination/:ville', element: <pages.Destination /> },
   { path: paths.compagnons, element: <pages.Compagnons /> },
   ...profilRoutes,
-  ...avisRoutes,
 ]

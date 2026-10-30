@@ -3,8 +3,9 @@
 import { useId } from 'react'
 import { FieldContext } from './fieldContext.js'
 
-export default function Field({ label, aide, error, requis = false, className = '', children }) {
-  const id = useId()
+export default function Field({ id: idFixe, label, aide, error, requis = false, className = '', children }) {
+  const auto = useId()
+  const id = idFixe ?? auto
   const aideId = aide ? `${id}-aide` : undefined
   const errId = error ? `${id}-err` : undefined
   const describedBy = [aideId, errId].filter(Boolean).join(' ') || undefined

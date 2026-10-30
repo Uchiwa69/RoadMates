@@ -1,25 +1,47 @@
-.confidentialite { display: grid; gap: var(--e-5); }
-.confidentialite__carte { display: grid; gap: var(--e-5); max-width: 820px; padding: var(--e-6); }
-.confidentialite__intro { display: flex; align-items: flex-start; gap: var(--e-3); padding: var(--e-4); border-radius: var(--r-l); background: var(--primaire-doux); color: var(--primaire-texte); }
-.confidentialite__intro svg { flex: none; }
-.confidentialite__intro p { margin: 0; }
-.confidentialite__regle { display: grid; gap: var(--e-3); padding-bottom: var(--e-5); border-bottom: 1px solid var(--bord); }
-.confidentialite__regle-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--e-3); }
-.confidentialite__regle-tete h2 { margin: 0; font-size: 1.1rem; }
-.confidentialite__regle-tete p { margin: 4px 0 0; color: var(--texte-2); font-size: .9rem; }
-.confidentialite__etat { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; color: var(--texte-2); font-size: .85rem; font-weight: 650; }
-.confidentialite__etat--actif { color: var(--primaire-texte); }
-.confidentialite__durees { display: flex; flex-wrap: wrap; gap: var(--e-2); }
-.confidentialite__durees button { min-height: 40px; padding: 7px 13px; border: 1px solid var(--bord-fort); border-radius: var(--r-rond); color: var(--texte); background: var(--surface); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
-.confidentialite__durees button:hover { background: var(--fond-2); border-color: var(--primaire-texte); }
-.confidentialite__actions { display: flex; flex-wrap: wrap; gap: var(--e-3); }
-.confidentialite__suppression { display: grid; gap: var(--e-3); max-width: 820px; padding: var(--e-6); border-color: color-mix(in srgb, var(--erreur) 35%, var(--bord)); }
-.confidentialite__suppression h2 { margin: 0; font-size: 1.15rem; }
-.confidentialite__suppression > p { margin: 0; color: var(--texte-2); }
-.confidentialite__confirmation { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
-.confidentialite__confirmation p { flex-basis: 100%; margin: 0; font-weight: 650; }
-@media (max-width: 600px) {
-  .confidentialite__carte, .confidentialite__suppression { padding: var(--e-4); }
-  .confidentialite__regle-tete { flex-direction: column; }
-  .confidentialite__actions .ui-btn, .confidentialite__confirmation .ui-btn { flex: 1; }
+/* Confidentialité : deux réglages d'anonymat à interrupteur, aperçu de ce que voient les autres. */
+.confidentialite__grille { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr); gap: var(--e-5); align-items: start; }
+.confidentialite__regles, .confidentialite__cote { display: grid; gap: var(--e-4); }
+
+.anonymat { display: grid; gap: var(--e-4); transition: border-color var(--d-moyen), box-shadow var(--d-moyen); }
+.anonymat--actif { border-color: color-mix(in srgb, var(--primaire-texte) 45%, var(--bord)); }
+.anonymat__tete { display: flex; align-items: flex-start; gap: var(--e-3); }
+.anonymat__icone {
+  display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: var(--r-m);
+  background: var(--violet-doux); color: var(--violet-texte);
+}
+.anonymat--actif .anonymat__icone { background: var(--primaire-doux); color: var(--primaire-texte); }
+.anonymat__texte { flex: 1; min-width: 0; }
+.anonymat__texte h2 { margin: 0; font-size: 1.1rem; }
+.anonymat__texte p { margin: 4px 0 0; color: var(--texte-2); font-size: .9rem; }
+.anonymat__duree { display: grid; gap: var(--e-3); padding-top: var(--e-4); border-top: 1px solid var(--bord); }
+.anonymat__jusqua { margin: 0; color: var(--alerte); font-weight: 600; }
+.anonymat__jusqua svg { display: inline-block; vertical-align: -3px; margin-right: 6px; }
+.anonymat__puces { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+
+.apercu-anonymat { display: grid; gap: var(--e-3); }
+.apercu-anonymat h2 { margin: 0; font-size: 1.05rem; }
+.apercu-anonymat__carte {
+  display: grid; gap: var(--e-3); padding: var(--e-4); border-radius: var(--r-l);
+  background: var(--surface-2); border: 1px dashed var(--bord-fort);
+}
+.apercu-anonymat__qui { display: flex; align-items: center; gap: var(--e-3); }
+.apercu-anonymat__anonyme {
+  display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--fond-2); color: var(--texte-2);
+}
+.apercu-anonymat__nom { margin: 0; font-weight: 700; }
+.apercu-anonymat__detail { margin: 2px 0 0; color: var(--texte-2); font-size: .875rem; }
+.apercu-anonymat__etapes { display: flex; align-items: center; gap: 6px; margin: 0; font-size: .875rem; color: var(--texte-2); }
+
+.confidentialite__chiffrement {
+  display: flex; align-items: flex-start; gap: var(--e-2); margin: 0; padding: var(--e-4);
+  border-radius: var(--r-l); background: var(--succes-doux); color: var(--succes); font-size: .9rem;
+}
+.confidentialite__chiffrement svg { flex: none; margin-top: 2px; }
+
+@media (max-width: 860px) {
+  .confidentialite__grille { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .anonymat__icone { display: none; }
 }

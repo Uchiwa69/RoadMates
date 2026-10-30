@@ -13,3 +13,11 @@ export function profilMasque(user, maintenant) {
 export function itineraireMasque(user, maintenant) {
   return actif(user?.anonymat?.itineraireJusqua, maintenant)
 }
+
+const jourLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
+const jourCourt = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+
+// '2027-07-17' → « jeudi 17 juillet » (ou « 17 juil. » en version courte).
+export function formatJusqua(jusqua, court = false) {
+  return jusqua ? (court ? jourCourt : jourLong).format(new Date(`${jusqua}T00:00:00Z`)) : ''
+}

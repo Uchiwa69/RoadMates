@@ -1,8 +1,9 @@
+// Avis mutuels (US-21) : contenu de la page « Avis et amis de route » de l'espace profil.
 import { useState } from 'react'
 import { MessageSquareText, Star } from 'lucide-react'
 import { newId, updateDb, useDb } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
-import { Button, Card, EmptyState, EntetePage, Field, Select, Textarea, useToast } from '../../shared/ui/index.js'
+import { Button, Card, EmptyState, Field, Select, Textarea, useToast } from '../../shared/ui/index.js'
 import { avisPublics, moyenneAvis, pairesAvisEligibles } from './avis.js'
 
 export default function AvisPage() {
@@ -41,10 +42,6 @@ export default function AvisPage() {
 
   return (
     <section className="avis-page">
-      <EntetePage surtitre="Après le voyage" titre="Avis des voyageurs">
-        <p>Les avis restent privés jusqu’à ce que les deux voyageurs se soient évalués.</p>
-      </EntetePage>
-
       <section aria-labelledby="avis-a-faire">
         <h2 id="avis-a-faire">Avis à laisser</h2>
         {eligibles.filter((pair) => !dejaNotes.has(`${pair.groupId}:${pair.cibleId}`)).length === 0

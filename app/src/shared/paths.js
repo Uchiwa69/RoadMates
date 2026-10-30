@@ -21,7 +21,14 @@ export const paths = {
   messagesOnglet: (onglet) => `/messages?onglet=${onglet}`,
 
   // Step-up — confidentialité (agent A) et profil enrichi (agent B)
-  confidentialite: '/confidentialite',
+  confidentialite: '/confidentialite',  // redirige vers profilConfidentialite
   monProfil: '/profil',
-  avis: '/avis',
+  avis: '/avis',                        // redirige vers profilAvis
+
+  // Espace « Mon profil » : accueil et sous-pages
+  profilModifier: '/profil/modifier',
+  profilModifierChamp: (champ) => `/profil/modifier?champ=${champ}`,
+  profilConfidentialite: '/profil/confidentialite',
+  profilAvis: '/profil/avis',
+  profilCompte: '/profil/compte',
 }

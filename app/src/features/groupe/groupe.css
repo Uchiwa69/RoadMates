@@ -275,3 +275,8 @@
   align-self: center; margin: var(--e-3) 0 0; padding: 4px 12px; border-radius: var(--r-rond);
   background: var(--fond-2); color: var(--texte-2); font-size: .8rem; font-weight: 600;
 }
+
+/* Messages : le second niveau d'onglets (Reçues / Envoyées) est plus discret que le premier. */
+.messages .ui-tabpanel .ui-tabs { background: transparent; padding: 0; gap: var(--e-2); }
+.messages .ui-tabpanel .ui-tabs__tab { min-height: 44px; padding: 6px 14px; border: 1.5px solid var(--bord); font-size: .9rem; }
+.messages .ui-tabpanel .ui-tabs__tab[aria-selected='true'] { border-color: var(--primaire-texte); background: var(--primaire-doux); color: var(--primaire-texte); box-shadow: none; }
