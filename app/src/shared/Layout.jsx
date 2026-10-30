@@ -3,7 +3,7 @@
 import { Component, Suspense, useEffect, useRef } from 'react'
 import { NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { LazyMotion, MotionConfig, m } from 'motion/react'
-import { CloudOff, Home, Inbox, Map, MessagesSquare, Moon, RotateCcw, Sun, Users } from 'lucide-react'
+import { CloudOff, Home, Inbox, Map, MessagesSquare, Moon, RotateCcw, Shield, Sun, Users } from 'lucide-react'
 import { useDb } from './db.js'
 import { paths } from './paths.js'
 import { basculerTheme, useTheme } from './theme.js'
@@ -132,6 +132,9 @@ export default function Layout() {
               </nav>
 
               <div className="entete__outils">
+                <NavLink to={paths.confidentialite} className="theme-btn" aria-label="Confidentialité" title="Confidentialité">
+                  <Shield size={20} aria-hidden="true" />
+                </NavLink>
                 <button
                   type="button"
                   className="theme-btn"

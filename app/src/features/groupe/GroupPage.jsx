@@ -1,44 +1,70 @@
 // US-10 — la page d'un groupe : conversation en bulles et dépenses partagées.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Lock, LogOut, MapPin, MessagesSquare, SendHorizontal, Wallet } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
+import { chiffrerMessage, dechiffrerMessage } from '../../shared/chiffrement.js'
+import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
 import Expenses from './Expenses.jsx'
 
 function Conversation({ groupId, currentUser, users }) {
-  const messages = useDb((db) => db.messages.filter((message) => message.groupId === groupId))
+  const allMessages = useDb((db) => db.messages)
+  const messages = useMemo(() => allMessages.filter((message) => message.groupId === groupId), [allMessages, groupId])
+  const [textesDechiffres, setTextesDechiffres] = useState({})
   const [texte, setTexte] = useState('')
   const [error, setError] = useState('')
   const fil = useRef(null)
+
+  // Les anciens messages et les messages système restent en clair ; seuls les nouveaux
+  // messages utilisateur portent les champs chiffre et iv.
+  useEffect(() => {
+    let actif = true
+    Promise.all(messages.map(async (message) => {
+      if (!message.chiffre || !message.iv) return [message.id, message.texte ?? '']
+      try {
+        return [message.id, await dechiffrerMessage(groupId, message)]
+      } catch {
+        return [message.id, 'Impossible de déchiffrer ce message.']
+      }
+    })).then((entries) => {
+      if (actif) setTextesDechiffres(Object.fromEntries(entries))
+    })
+    return () => { actif = false }
+  }, [groupId, messages])
 
   // Le fil défile jusqu'au dernier message à chaque nouveau message.
   useEffect(() => {
     if (fil.current) fil.current.scrollTop = fil.current.scrollHeight
   }, [messages.length])
 
-  function sendMessage(event) {
+  async function sendMessage(event) {
     event?.preventDefault()
     const cleanText = texte.trim()
     if (!cleanText) {
       setError('Le message ne peut pas être vide.')
       return
     }
-    updateDb((db) => {
-      if (!db.groups.some((candidate) => candidate.id === groupId && candidate.membres.includes(currentUser?.id))) return
-      db.messages.push({
-        id: newId('m'),
-        groupId,
-        auteurId: currentUser.id,
-        texte: cleanText,
-        envoyeLe: new Date().toISOString(),
+    try {
+      const chiffre = await chiffrerMessage(groupId, cleanText)
+      updateDb((db) => {
+        if (!db.groups.some((candidate) => candidate.id === groupId && candidate.membres.includes(currentUser?.id))) return
+        db.messages.push({
+          id: newId('m'),
+          groupId,
+          auteurId: currentUser.id,
+          ...chiffre,
+          envoyeLe: new Date().toISOString(),
+        })
       })
-    })
-    setTexte('')
-    setError('')
+      setTexte('')
+      setError('')
+    } catch {
+      setError('Le message n’a pas pu être chiffré. Vérifiez que le stockage local est disponible, puis réessayez.')
+    }
   }
 
   // Entrée envoie, Maj + Entrée passe à la ligne.
@@ -52,26 +78,34 @@ function Conversation({ groupId, currentUser, users }) {
   return (
     <section className="conversation" aria-labelledby="conversation-titre">
       <h2 id="conversation-titre" className="conversation__titre"><MessagesSquare size={20} aria-hidden="true" /> Conversation</h2>
+      <p className="conversation__chiffrement"><Lock size={15} aria-hidden="true" /> Conversation chiffrée de bout en bout</p>
       <div ref={fil} className="conversation__fil" role="log" aria-live="polite" aria-label="Messages du groupe" tabIndex={0}>
         {messages.length === 0 ? <p className="conversation__vide">Aucun message pour le moment. Lancez la discussion !</p> : (
           messages.map((message, i) => {
             const author = users.find((user) => user.id === message.auteurId)
+            const auteurMasque = profilMasque(author)
+            const auteurAffiche = auteurMasque ? { ...author, prenom: 'Voyageur anonyme' } : author
             const moi = message.auteurId === currentUser?.id
             if (message.systeme) {
-              return <p key={message.id} className="conversation__systeme">{message.texte}</p>
+              const auteurSysteme = users.find((user) => user.id === message.auteurId)
+              const texteSysteme = textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)
+              const texteAffiche = profilMasque(auteurSysteme) && texteSysteme?.includes('a quitté le groupe')
+                ? 'Un voyageur anonyme a quitté le groupe.'
+                : texteSysteme
+              return <p key={message.id} className="conversation__systeme">{texteAffiche}</p>
             }
             const suite = !messages[i - 1]?.systeme && messages[i - 1]?.auteurId === message.auteurId
             return (
               <article key={message.id} className={`bulle${moi ? ' bulle--moi' : ''}${suite ? ' bulle--suite' : ''}`}>
-                {!moi && (suite ? <span className="bulle__place" aria-hidden="true" /> : <Avatar user={author} taille={32} />)}
+                {!moi && (suite ? <span className="bulle__place" aria-hidden="true" /> : <Avatar user={auteurAffiche} taille={32} />)}
                 <div className="bulle__corps">
                   {!suite && (
                     <p className="bulle__auteur">
-                      {moi ? 'Vous' : author?.prenom ?? 'Voyageur inconnu'}
+                      {moi ? 'Vous' : auteurAffiche?.prenom ?? 'Voyageur inconnu'}
                       {message.envoyeLe && <span className="bulle__heure"> · {formatMoment(message.envoyeLe)}</span>}
                     </p>
                   )}
-                  <p className="bulle__texte">{message.texte}</p>
+                  <p className="bulle__texte">{textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)}</p>
                 </div>
               </article>
             )
@@ -122,25 +156,33 @@ export default function GroupPage() {
     )
   }
 
-  const membres = group.membres.map((id) => users.find((u) => u.id === id)).filter(Boolean)
+  const membres = group.membres.map((id) => {
+    const membre = users.find((user) => user.id === id)
+    return membre && profilMasque(membre) ? { ...membre, prenom: 'Voyageur anonyme' } : membre
+  }).filter(Boolean)
   // US-10.4 — quitter le groupe : les autres membres en sont informés dans la conversation.
   // Les parts de dépenses déjà créées restent dues (les règles de partage ne changent pas).
-  function quitter() {
-    updateDb((db) => {
-      const g = db.groups.find((candidate) => candidate.id === groupId)
-      if (!g?.membres.includes(currentUser.id)) return
-      g.membres = g.membres.filter((id) => id !== currentUser.id)
-      db.messages.push({
-        id: newId('m'),
-        groupId,
-        auteurId: currentUser.id,
-        texte: `${currentUser.prenom} a quitté le groupe.`,
-        envoyeLe: new Date().toISOString(),
-        systeme: true,
+  async function quitter() {
+    try {
+      const chiffre = await chiffrerMessage(groupId, `${currentUser.prenom} a quitté le groupe.`)
+      updateDb((db) => {
+        const g = db.groups.find((candidate) => candidate.id === groupId)
+        if (!g?.membres.includes(currentUser.id)) return
+        g.membres = g.membres.filter((id) => id !== currentUser.id)
+        db.messages.push({
+          id: newId('m'),
+          groupId,
+          auteurId: currentUser.id,
+          ...chiffre,
+          envoyeLe: new Date().toISOString(),
+          systeme: true,
+        })
       })
-    })
-    toast(`Vous avez quitté « ${group.nom} ».`)
-    navigate(paths.groupes)
+      toast(`Vous avez quitté « ${group.nom} ».`)
+      navigate(paths.groupes)
+    } catch {
+      toast('Le message de départ n’a pas pu être chiffré. Vous êtes toujours dans le groupe.')
+    }
   }
 
   const allerA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })

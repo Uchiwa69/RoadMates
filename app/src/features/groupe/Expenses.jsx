@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { BadgeCheck, CalendarClock, Car, Check, Clock, PartyPopper, Plus, Receipt, Ticket, Wallet } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
+import { profilMasque } from '../../shared/confidentialite.js'
 import { Avatar, Badge, Button, Card, Field, Input, ProgressBar, useToast } from '../../shared/ui/index.js'
 import { estComplete, formatEuros, nbPayees, repartir } from './depenses.js'
 import { formatJourLong } from './format.js'
@@ -72,10 +73,12 @@ function Depense({ expense, users, currentUser, onPayer, paiement }) {
       <ul className="depense__parts groupe-parts" aria-label="Parts des membres">
         {expense.parts.map((part) => {
           const member = users.find((user) => user.id === part.userId)
+          const memberMasked = profilMasque(member)
+          const displayedMember = memberMasked ? { ...member, prenom: 'Voyageur anonyme' } : member
           return (
             <li key={part.userId} className="depense__ligne">
-              <Avatar user={member} taille={28} />
-              <span className="depense__qui">{member?.prenom ?? 'Membre'}{part.userId === currentUser?.id ? ' (vous)' : ''}</span>
+              <Avatar user={displayedMember} taille={28} />
+              <span className="depense__qui">{displayedMember?.prenom ?? 'Membre'}{part.userId === currentUser?.id ? ' (vous)' : ''}</span>
               <span className="depense__montant">{formatEuros(part.montantCentimes)}</span>
               {part.payee ? <Badge ton="succes">Payée</Badge> : <Badge ton="neutre">À payer</Badge>}
             </li>

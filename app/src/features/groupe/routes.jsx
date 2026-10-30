@@ -2,6 +2,7 @@
 // Chaque page est chargée à la demande : la première visite ne télécharge que la page affichée.
 import { lazy } from 'react'
 import { paths } from '../../shared/paths.js'
+import { confidentialiteRoutes } from '../confidentialite/routes.jsx'
 import './groupe.css'
 
 const pages = {
@@ -16,4 +17,5 @@ export const groupeRoutes = [
   { path: paths.demandes, element: <pages.RequestsPage /> },
   { path: paths.groupes, element: <pages.GroupsPage /> },
   { path: '/groupes/:groupId', element: <pages.GroupPage /> },
+  ...confidentialiteRoutes,
 ]
