@@ -331,3 +331,11 @@
 .hero__ville-choix .hero__ville-action:hover { background: color-mix(in srgb, var(--primaire-doux) 70%, var(--primaire-texte) 12%); }
 .hero__ville-choix .hero__ville-action--second { background: transparent; border: 1.5px solid var(--bord-fort); color: var(--texte); }
 .hero__ville-choix .hero__ville-action--second:hover { background: var(--fond-2); }
+/* « Quand ? » + « Rechercher » sous le champ « Où partez-vous ? » */
+.hero__quand { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-3); }
+.hero__quand .champ-quand { flex: 1 1 220px; width: auto; min-height: 52px; border-radius: var(--r-rond); padding-inline: 18px; }
+.hero__quand .ui-btn { flex: 0 0 auto; min-height: 52px; }
+.hero__erreur { margin: var(--e-2) 0 0; padding-left: var(--e-5); color: var(--erreur); font-weight: 600; font-size: .9rem; }
+@media (max-width: 480px) {
+  .hero__quand .ui-btn { flex: 1 1 100%; }
+}

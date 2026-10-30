@@ -10,7 +10,9 @@ import { filtrerEtClasser, normaliser } from '../../../shared/texte.js'
 import { PAYS, nomPays } from '../../../shared/globe/pays.js'
 import GlobeTerre from '../../../shared/globe/Globe.jsx'
 import { Button, Combobox, Field } from '../../../shared/ui/index.js'
-import { VILLES } from '../villes.js'
+import { VILLES, trouverVille } from '../villes.js'
+import { aujourdhui } from '../dates.js'
+import ChampQuand from '../recherche/ChampQuand.jsx'
 import { arcsVoyages, pointsVoyageurs, villesDuPays } from '../globe.js'
 import { suggestionsContenus } from '../../partenaires/recherche.js'
 import { activitesDe } from '../../partenaires/activites.js'
@@ -25,6 +27,8 @@ export default function Hero() {
   const [saisie, setSaisie] = useState('')
   const [pays, setPays] = useState(null)
   const [villeActive, setVilleActive] = useState(null)
+  const [dates, setDates] = useState({ debut: '', fin: '' })
+  const [erreurRecherche, setErreurRecherche] = useState('')
 
   const points = useMemo(() => pointsVoyageurs(db), [db])
   const arcs = useMemo(() => arcsVoyages(db), [db])
@@ -82,6 +86,19 @@ export default function Hero() {
 
   const nbDansPays = pays ? voyageursParPays.get(pays)?.size ?? 0 : 0
 
+  // « Rechercher » : la page de résultats de la ville, aux dates choisies (sans rien enregistrer).
+  const rechercher = (e) => {
+    e.preventDefault()
+    const ville = trouverVille(saisie)
+    if (!ville) {
+      setErreurRecherche(pays ? 'Choisissez une ville de ce pays pour lancer la recherche.' : 'Choisissez une ville (ex. Lisbonne) pour lancer la recherche.')
+      return
+    }
+    navigate(paths.destinationRecherche(ville.ville, dates.debut, dates.fin))
+  }
+  // Le calendrier s'ouvre sur le premier mois où des voyageurs sont annoncés.
+  const moisSuggere = db.trips.flatMap((t) => t.etapes).map((e) => e.debut).filter((d) => d >= aujourdhui()).sort()[0]?.slice(0, 7)
+
   return (
     <section className={`hero${pays ? ' hero--zoome' : ''}`} aria-labelledby="hero-titre">
       <div className="hero__texte">
@@ -94,18 +111,23 @@ export default function Hero() {
           et partagez la voiture : chacun paie sa part dans l'application.
         </p>
 
-        <form className="hero__recherche" role="search" onSubmit={(e) => e.preventDefault()}>
+        <form className="hero__recherche" role="search" onSubmit={rechercher}>
           <Field label="Où partez-vous ?" aide="Un pays, une ville, une activité : le globe vous y emmène.">
             <Combobox
               valeur={saisie}
-              onValeur={(v) => { setSaisie(v); if (!v) toutVoir() }}
+              onValeur={(v) => { setSaisie(v); setErreurRecherche(''); if (!v) toutVoir() }}
               suggestions={suggestions}
-              onChoix={(s) => (s.onglet ? navigate(paths.destinationOnglet(s.ville, s.onglet, s.carte)) : s.iso2 ? choisirPays(s.iso2) : choisirVille(s.ville))}
+              onChoix={(s) => { setErreurRecherche(''); if (s.onglet) navigate(paths.destinationOnglet(s.ville, s.onglet, s.carte)); else if (s.iso2) choisirPays(s.iso2); else choisirVille(s.ville) }}
               placeholder="Portugal, Lisbonne, Croatie…"
               vide="Aucun pays ni aucune ville trouvés."
               icon={Search}
             />
           </Field>
+          <div className="hero__quand">
+            <ChampQuand debut={dates.debut} fin={dates.fin} moisInitial={moisSuggere} onChange={setDates} />
+            <Button type="submit" icon={Search}>Rechercher</Button>
+          </div>
+          {erreurRecherche && <p className="hero__erreur" role="alert">{erreurRecherche}</p>}
         </form>
 
         {!pays && (
@@ -124,8 +146,9 @@ export default function Hero() {
         )}
 
         <div className="hero__actions">
-          <Button to={paths.nouveauVoyage} taille="grand" iconEnd={ArrowRight}>Déclarer mon voyage</Button>
-          <Button to={paths.compagnons} variant="secondaire" taille="grand">Voir mes compagnons</Button>
+          {/* « Rechercher » est l'action principale ; on peut aussi déclarer d'emblée un voyage à plusieurs étapes. */}
+          <Button to={paths.nouveauVoyage} variant="secondaire" iconEnd={ArrowRight}>Déclarer un voyage à plusieurs étapes</Button>
+          <Button to={paths.compagnons} variant="fantome">Voir mes compagnons</Button>
         </div>
         <p className="hero__compte">
           Pas encore de compte ? <Link to={paths.inscription}>Créer un compte</Link>

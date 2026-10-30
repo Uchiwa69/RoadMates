@@ -1,19 +1,23 @@
-// Guide de ville : voyageurs présents pendant mes dates (US-04), choses à faire, et bons plans des
-// partenaires (US-18). L'onglet est dans l'URL (?onglet=voyageurs|a-faire|bons-plans&carte=…).
-// « À faire » et « Bons plans » restent consultables sans voyage déclaré.
+// Page d'une ville = page de résultats de la recherche « Où · Quand », tout au même endroit :
+// voyageurs présents (US-04), choses à faire et bons plans des partenaires (US-18).
+// - Avec ?du=…&au=… : recherche libre, sans voyage déclaré ; « Enregistrer ce voyage » le crée en un clic.
+// - Sans dates : les dates de mon voyage dans cette ville, s'il existe.
+// L'onglet est dans l'URL (?onglet=voyageurs|a-faire|bons-plans&carte=…).
 import { useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Globe2, MapPin, Search, Users } from 'lucide-react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { CalendarDays, Check, Globe2, MapPin, Search, Users } from 'lucide-react'
 import { updateDb, useDb } from '../../../shared/db.js'
 import { useCurrentUser } from '../../../shared/session.js'
 import { paths } from '../../../shared/paths.js'
 import { filtrerEtClasser } from '../../../shared/texte.js'
-import { Button, Combobox, EmptyState, EntetePage, Field, TabPanel, Tabs } from '../../../shared/ui/index.js'
-import { presentsDansLaVille, presentsDansLePays } from '../matching.js'
-import { formatPeriode } from '../dates.js'
+import { Button, Combobox, EmptyState, EntetePage, Field, TabPanel, Tabs, useToast } from '../../../shared/ui/index.js'
+import { presentsDansLaVille, presentsDansLePays, presentsSurPeriode } from '../matching.js'
+import { aujourdhui, formatPeriode, joursCommuns } from '../dates.js'
 import { VILLES, trouverVille } from '../villes.js'
+import { creerVoyage, validerVoyage } from '../voyages.js'
 import VoyageurCarte from '../VoyageurCarte.jsx'
 import Filtres from '../Filtres.jsx'
+import ChampQuand from '../recherche/ChampQuand.jsx'
 import { appliquerFiltres, FILTRES_VIDES, normaliserFiltres } from '../filtres.js'
 import { RESUMES, activitesDe } from '../../partenaires/activites.js'
 import { offresDeLaVille } from '../../partenaires/partenaires.js'
@@ -23,9 +27,10 @@ import OngletBonsPlans from '../../partenaires/OngletBonsPlans.jsx'
 import '../../partenaires/partenaires.css'
 
 const ONGLETS = ['voyageurs', 'a-faire', 'bons-plans']
+const ISO = /^\d{4}-\d{2}-\d{2}$/
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`
 
-function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
+function OngletVoyageurs({ ville, pays, etapes, recherche, trouver, voirActivites, dates }) {
   const user = useCurrentUser()
   const db = useDb((d) => d)
   const [elargi, setElargi] = useState(false)
@@ -39,37 +44,41 @@ function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
     })
   }
 
-  if (mesEtapes.length === 0) {
+  // Ni voyage ni dates : on demande les dates sur place, ou on crée le voyage.
+  if (etapes.length === 0) {
     return (
       <EmptyState
-        icon={MapPin}
-        titre={`Vous n'avez pas de voyage déclaré à ${ville}.`}
+        icon={CalendarDays}
+        titre={`Quand serez-vous à ${ville} ?`}
         action={(
           <div className="destination__choix">
-            <Button to={paths.nouveauVoyageVers(ville)}>Créer un voyage à {ville}</Button>
-            {voirActivites && <Button variant="secondaire" onClick={voirActivites}>Voir ce qu’on peut y faire</Button>}
+            {dates}
+            <Button to={paths.nouveauVoyageVers(ville)} variant="secondaire">Créer un voyage à {ville}</Button>
+            {voirActivites && <Button variant="fantome" onClick={voirActivites}>Voir ce qu’on peut y faire</Button>}
           </div>
         )}
       >
-        <p>Déclarez vos dates pour voir qui sera là en même temps que vous.</p>
+        <p>Choisissez vos dates pour voir qui sera là en même temps que vous. Rien n’est enregistré tant que vous ne le décidez pas.</p>
       </EmptyState>
     )
   }
 
   const langues = [...new Set(db.users.flatMap((u) => u.langues ?? []))].sort()
   const centresInteret = [...new Set(db.users.flatMap((u) => u.centresInteret ?? []))].sort()
-  const dansLaVille = appliquerFiltres(presentsDansLaVille(db, user.id, ville), filtres, user)
-  const tousDansLaVille = presentsDansLaVille(db, user.id, ville)
-  const dansLePays = elargi ? appliquerFiltres(presentsDansLePays(db, user.id, ville), filtres, user) : []
-  const tousDansLePays = elargi ? presentsDansLePays(db, user.id, ville) : []
-  const pays = db.trips.flatMap((t) => t.etapes).find((e) => e.ville === ville)?.pays
+  const tousDansLaVille = trouver()
+  const dansLaVille = appliquerFiltres(tousDansLaVille, filtres, user)
+  const tousDansLePays = elargi && pays ? trouver(pays) : []
+  const dansLePays = appliquerFiltres(tousDansLePays.filter((r) => !tousDansLaVille.some((x) => x.user.id === r.user.id)), filtres, user)
   const n = dansLaVille.length
 
   return (
     <>
       <div className="destination__resume">
-        <p><CalendarDays size={18} aria-hidden="true" /> Vous y êtes : <strong>{mesEtapes.map(formatPeriode).join(', ')}</strong></p>
-        <p aria-live="polite"><Users size={18} aria-hidden="true" /> <strong>{n}</strong> voyageur{n > 1 ? 's' : ''} en même temps que vous</p>
+        <p>
+          <CalendarDays size={18} aria-hidden="true" /> {recherche ? 'Votre recherche' : 'Vous y êtes'} :{' '}
+          <strong>{etapes.map(formatPeriode).join(', ')}</strong>
+        </p>
+        <p aria-live="polite"><Users size={18} aria-hidden="true" /> <strong>{n}</strong> voyageur{n > 1 ? 's' : ''} {recherche ? 'sur ces dates' : 'en même temps que vous'}</p>
       </div>
 
       <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} centresInteret={centresInteret} total={n} preferenceGenre={user?.preferenceGenre} />
@@ -79,7 +88,7 @@ function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
           icon={Users}
           titre={tousDansLaVille.length === 0 ? `Personne pour l'instant à ${ville} sur ces dates.` : 'Aucun voyageur ne correspond à ces filtres.'}
           action={tousDansLaVille.length > 0
-            ? <Button variant="secondaire" onClick={() => setFiltres({ ...FILTRES_VIDES, genre: user.preferenceGenre ?? 'tous' })}>Réinitialiser les filtres</Button>
+            ? <Button variant="secondaire" onClick={() => setFiltres({ ...FILTRES_VIDES, genre: user?.preferenceGenre ?? 'tous' })}>Réinitialiser les filtres</Button>
             : !elargi && pays && <Button variant="secondaire" icon={Globe2} onClick={() => setElargi(true)}>Élargir à tout le pays ({pays})</Button>}
         >
           <p>{tousDansLaVille.length === 0 ? 'De nouveaux voyageurs déclarent leurs dates chaque jour.' : 'Modifiez ou réinitialisez vos critères de recherche.'}</p>
@@ -95,7 +104,7 @@ function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
 
       {elargi && (
         <section className="destination__pays" aria-labelledby="ailleurs">
-          <h2 id="ailleurs">Ailleurs dans le pays ({pays}) pendant vos dates</h2>
+          <h2 id="ailleurs">Ailleurs dans le pays ({pays}) {recherche ? 'sur ces dates' : 'pendant vos dates'}</h2>
           {dansLePays.length === 0
             ? <EmptyState icon={Globe2} titre={tousDansLePays.length === 0 ? 'Personne non plus dans le reste du pays.' : 'Aucun voyageur ne correspond à ces filtres.'} />
             : (
@@ -109,8 +118,8 @@ function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
   )
 }
 
-// Recherche groupée : une autre ville, une activité ou un bon plan.
-function RechercheGuide() {
+// « Où ? » : une autre ville (les dates sont gardées), une activité ou un bon plan.
+function ChampOu({ ville, du, au }) {
   const db = useDb((d) => d)
   const navigate = useNavigate()
   const [saisie, setSaisie] = useState('')
@@ -120,22 +129,20 @@ function RechercheGuide() {
     ...suggestionsContenus(db, saisie),
   ]
   return (
-    <form className="destination__recherche" role="search" onSubmit={(e) => e.preventDefault()}>
-      <Field label="Chercher une ville, une activité, un bon plan">
-        <Combobox
-          valeur={saisie}
-          onValeur={setSaisie}
-          suggestions={suggestions}
-          onChoix={(s) => {
-            setSaisie('')
-            navigate(s.onglet ? paths.destinationOnglet(s.ville, s.onglet, s.carte) : paths.destination(s.ville))
-          }}
-          placeholder="Lyon, musée, vélo…"
-          vide="Aucun résultat."
-          icon={Search}
-        />
-      </Field>
-    </form>
+    <Field label="Où ?" className="barre-recherche__ou">
+      <Combobox
+        valeur={saisie}
+        onValeur={setSaisie}
+        suggestions={suggestions}
+        onChoix={(s) => {
+          setSaisie('')
+          navigate(s.onglet ? paths.destinationOnglet(s.ville, s.onglet, s.carte) : paths.destinationRecherche(s.ville, du, au))
+        }}
+        placeholder={`${ville} · autre ville, activité…`}
+        vide="Aucun résultat."
+        icon={Search}
+      />
+    </Field>
   )
 }
 
@@ -144,20 +151,64 @@ export default function Destination() {
   const [params, setParams] = useSearchParams()
   const user = useCurrentUser()
   const db = useDb((d) => d)
+  const toast = useToast()
   const onglet = ONGLETS.includes(params.get('onglet')) ? params.get('onglet') : 'voyageurs'
   const carte = params.get('carte')
 
+  // Modifie quelques paramètres de l'URL en gardant les autres (dates, onglet).
+  const majParams = (changements) => setParams((actuels) => {
+    const suivants = new URLSearchParams(actuels)
+    for (const [cle, valeur] of Object.entries(changements)) {
+      if (valeur) suivants.set(cle, valeur)
+      else suivants.delete(cle)
+    }
+    return suivants
+  }, { replace: true })
+
+  const du = params.get('du')
+  const au = params.get('au')
+  const periode = du && au && ISO.test(du) && ISO.test(au) && du <= au ? { debut: du, fin: au } : null
+  const infos = trouverVille(ville)
+  const pays = infos?.pays ?? db.trips.flatMap((t) => t.etapes).find((e) => e.ville === ville)?.pays
   const mesEtapes = db.trips.filter((t) => t.userId === user?.id).flatMap((t) => t.etapes).filter((e) => e.ville === ville)
-  const pays = trouverVille(ville)?.pays ?? db.trips.flatMap((t) => t.etapes).find((e) => e.ville === ville)?.pays
-  const nbVoyageurs = mesEtapes.length ? presentsDansLaVille(db, user.id, ville).length : null
+  const etapes = periode ? [{ ville, pays, ...periode }] : mesEtapes
+  const trouver = (dansLePays) => (periode
+    ? presentsSurPeriode(db, user?.id, ville, periode.debut, periode.fin, dansLePays)
+    : dansLePays ? presentsDansLePays(db, user?.id, ville) : presentsDansLaVille(db, user?.id, ville))
+  const dejaEnregistre = periode && mesEtapes.some((e) => joursCommuns(e, periode) > 0)
+
+  const nbVoyageurs = etapes.length ? trouver().length : null
   const nbActivites = activitesDe(ville).length
   const nbOffres = offresDeLaVille(db, ville).length
-
   const compteurs = [
-    nbVoyageurs != null && pluriel(nbVoyageurs, 'voyageur') + ' pendant vos dates',
+    nbVoyageurs != null && `${pluriel(nbVoyageurs, 'voyageur')} ${periode ? 'sur ces dates' : 'pendant vos dates'}`,
     nbActivites > 0 && pluriel(nbActivites, 'activité'),
     nbOffres > 0 && (nbOffres > 1 ? `${nbOffres} bons plans` : '1 bon plan'),
   ].filter(Boolean)
+
+  // Le calendrier s'ouvre sur le mois où des voyageurs sont déjà annoncés dans cette ville.
+  const today = aujourdhui()
+  const moisSuggere = db.trips.flatMap((t) => t.etapes).filter((e) => e.ville === ville && e.fin >= today)
+    .map((e) => e.debut).sort()[0]?.slice(0, 7)
+  const champQuand = (
+    <ChampQuand
+      debut={periode?.debut}
+      fin={periode?.fin}
+      moisInitial={moisSuggere}
+      onChange={({ debut, fin }) => majParams({ du: debut, au: fin, carte: null })}
+    />
+  )
+
+  function enregistrer() {
+    const { erreurs, etapes: propres } = validerVoyage({ destination: ville, etapes: [{ ville, ...periode }] })
+    const erreur = Object.values(erreurs)[0]
+    if (erreur) {
+      toast(`Impossible d’enregistrer ce voyage : ${erreur.charAt(0).toLowerCase()}${erreur.slice(1)}`)
+      return
+    }
+    creerVoyage(user.id, ville, propres)
+    toast(`Voyage enregistré : les voyageurs de ${ville} peuvent maintenant vous trouver.`)
+  }
 
   return (
     <section className="destination">
@@ -166,13 +217,16 @@ export default function Destination() {
         {compteurs.length > 0 && <p className="destination__compteurs">{compteurs.join(' · ')}</p>}
       </EntetePage>
 
-      <RechercheGuide />
+      <form className="barre-recherche" role="search" aria-label="Modifier la recherche" onSubmit={(e) => e.preventDefault()}>
+        <ChampOu ville={ville} du={periode?.debut} au={periode?.fin} />
+        <div className="barre-recherche__quand">{champQuand}</div>
+      </form>
 
       <Tabs
         id="destination"
         label={`Guide de ${ville}`}
         valeur={onglet}
-        onChange={(id) => setParams({ onglet: id }, { replace: true })}
+        onChange={(id) => majParams({ onglet: id, carte: null })}
         onglets={[
           { id: 'voyageurs', label: 'Voyageurs' },
           { id: 'a-faire', label: 'À faire' },
@@ -182,14 +236,38 @@ export default function Destination() {
       <TabPanel id="destination" onglet={onglet}>
         {onglet === 'voyageurs' && (
           <OngletVoyageurs
+            key={periode ? `${periode.debut}-${periode.fin}` : 'voyage'}
             ville={ville}
-            mesEtapes={mesEtapes}
-            voirActivites={nbActivites > 0 ? () => setParams({ onglet: 'a-faire' }, { replace: true }) : null}
+            pays={pays}
+            etapes={etapes}
+            recherche={Boolean(periode)}
+            trouver={trouver}
+            dates={champQuand}
+            voirActivites={nbActivites > 0 ? () => majParams({ onglet: 'a-faire' }) : null}
           />
         )}
         {onglet === 'a-faire' && <OngletAFaire ville={ville} carte={carte} voyageurs={nbVoyageurs} />}
         {onglet === 'bons-plans' && <OngletBonsPlans ville={ville} pays={pays} carte={carte} />}
       </TabPanel>
+
+      {periode && user && (
+        <div className="enregistrer-voyage" role="region" aria-label="Enregistrer ce voyage">
+          {dejaEnregistre ? (
+            <p className="enregistrer-voyage__fait">
+              <Check size={18} aria-hidden="true" /> Voyage enregistré à {ville}.{' '}
+              <Link to={paths.mesVoyages}>Voir mes voyages</Link>
+            </p>
+          ) : (
+            <>
+              <p className="enregistrer-voyage__texte">
+                <strong>{ville} · {formatPeriode(periode)}</strong>
+                <span>Enregistrez ce voyage pour que les autres voyageurs vous trouvent aussi.</span>
+              </p>
+              <Button onClick={enregistrer}>Enregistrer ce voyage</Button>
+            </>
+          )}
+        </div>
+      )}
     </section>
   )
 }
