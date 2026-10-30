@@ -1,0 +1,18 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T10:30:00Z" },
+  "lists": "css",
+  "title": "Pitch RoadMates",
+  "cover": "cover",
+  "order": ["cover", "vision", "discovery", "stories", "storymap", "priorisation", "contraintes", "technique", "lea", "karim", "monique", "fin"],
+  "sections": {
+    "s1": { "description": "Personne 1 : vision, Discovery, user stories et personas.", "start": "cover" },
+    "s2": { "description": "Personne 2 : story map, priorisation, contraintes et technique.", "start": "storymap" },
+    "s3": { "description": "La démo, persona par persona.", "start": "lea" }
+  },
+  "faces": {
+    "fraunces": { "family": "Fraunces", "href": "https://fonts.googleapis.com/css2?family=Fraunces:wght@400..700&family=Plus+Jakarta+Sans:wght@400..700&display=swap" },
+    "plus-jakarta-sans": { "family": "Plus Jakarta Sans", "href": "https://fonts.googleapis.com/css2?family=Fraunces:wght@400..700&family=Plus+Jakarta+Sans:wght@400..700&display=swap" }
+  },
+  "designSystems": []
+}
