@@ -13,8 +13,13 @@
 .confidentialite__durees button { min-height: 40px; padding: 7px 13px; border: 1px solid var(--bord-fort); border-radius: var(--r-rond); color: var(--texte); background: var(--surface); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
 .confidentialite__durees button:hover { background: var(--fond-2); border-color: var(--primaire-texte); }
 .confidentialite__actions { display: flex; flex-wrap: wrap; gap: var(--e-3); }
+.confidentialite__suppression { display: grid; gap: var(--e-3); max-width: 820px; padding: var(--e-6); border-color: color-mix(in srgb, var(--erreur) 35%, var(--bord)); }
+.confidentialite__suppression h2 { margin: 0; font-size: 1.15rem; }
+.confidentialite__suppression > p { margin: 0; color: var(--texte-2); }
+.confidentialite__confirmation { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.confidentialite__confirmation p { flex-basis: 100%; margin: 0; font-weight: 650; }
 @media (max-width: 600px) {
-  .confidentialite__carte { padding: var(--e-4); }
+  .confidentialite__carte, .confidentialite__suppression { padding: var(--e-4); }
   .confidentialite__regle-tete { flex-direction: column; }
-  .confidentialite__actions .ui-btn { flex: 1; }
+  .confidentialite__actions .ui-btn, .confidentialite__confirmation .ui-btn { flex: 1; }
 }

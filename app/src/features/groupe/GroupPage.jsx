@@ -10,9 +10,13 @@ import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
 import Expenses from './Expenses.jsx'
+import ActionsSecurite from '../securite/ActionsSecurite.jsx'
+import { estBloque } from '../securite/securite.js'
 
-function Conversation({ groupId, currentUser, users }) {
+function Conversation({ groupId, groupMembers, currentUser, users }) {
   const allMessages = useDb((db) => db.messages)
+  const signalements = useDb((db) => db.signalements ?? [])
+  const blocages = useDb((db) => db.blocages ?? [])
   const messages = useMemo(() => allMessages.filter((message) => message.groupId === groupId), [allMessages, groupId])
   const [textesDechiffres, setTextesDechiffres] = useState({})
   const [texte, setTexte] = useState('')
@@ -48,6 +52,10 @@ function Conversation({ groupId, currentUser, users }) {
       setError('Le message ne peut pas être vide.')
       return
     }
+    if (users.some((other) => other.id !== currentUser?.id && estBloque({ blocages }, currentUser?.id, other.id) && groupMembers.includes(other.id))) {
+      setError('L’envoi de messages est désactivé car un blocage est actif dans ce groupe.')
+      return
+    }
     try {
       const chiffre = await chiffrerMessage(groupId, cleanText)
       updateDb((db) => {
@@ -78,7 +86,7 @@ function Conversation({ groupId, currentUser, users }) {
   return (
     <section className="conversation" aria-labelledby="conversation-titre">
       <h2 id="conversation-titre" className="conversation__titre"><MessagesSquare size={20} aria-hidden="true" /> Conversation</h2>
-      <p className="conversation__chiffrement"><Lock size={15} aria-hidden="true" /> Conversation chiffrée de bout en bout</p>
+      <p className="conversation__chiffrement"><Lock size={15} aria-hidden="true" /> Messages chiffrés localement pour cette démonstration</p>
       <div ref={fil} className="conversation__fil" role="log" aria-live="polite" aria-label="Messages du groupe" tabIndex={0}>
         {messages.length === 0 ? <p className="conversation__vide">Aucun message pour le moment. Lancez la discussion !</p> : (
           messages.map((message, i) => {
@@ -86,6 +94,12 @@ function Conversation({ groupId, currentUser, users }) {
             const auteurMasque = profilMasque(author)
             const auteurAffiche = auteurMasque ? { ...author, prenom: 'Voyageur anonyme' } : author
             const moi = message.auteurId === currentUser?.id
+            const masqueApresSignalement = !moi && signalements.some((signalement) =>
+              signalement.auteurId === currentUser?.id && signalement.cibleId === message.auteurId && (!signalement.groupId || signalement.groupId === groupId),
+            )
+            if (masqueApresSignalement) {
+              return <p key={message.id} className="conversation__systeme">Message masqué après votre signalement.</p>
+            }
             if (message.systeme) {
               const auteurSysteme = users.find((user) => user.id === message.auteurId)
               const texteSysteme = textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)
@@ -116,6 +130,7 @@ function Conversation({ groupId, currentUser, users }) {
         <label htmlFor="message-groupe" className="sr-only">Votre message</label>
         <textarea
           id="message-groupe"
+          disabled={users.some((other) => other.id !== currentUser?.id && estBloque({ blocages }, currentUser?.id, other.id) && groupMembers.includes(other.id))}
           className="ui-input conversation__champ"
           value={texte}
           rows={1}
@@ -125,7 +140,7 @@ function Conversation({ groupId, currentUser, users }) {
           onKeyDown={onKeyDown}
           onChange={(event) => { setTexte(event.target.value); setError('') }}
         />
-        <button className="conversation__envoyer" type="submit" aria-label="Envoyer">
+        <button className="conversation__envoyer" type="submit" aria-label="Envoyer" disabled={users.some((other) => other.id !== currentUser?.id && estBloque({ blocages }, currentUser?.id, other.id) && groupMembers.includes(other.id))}>
           <SendHorizontal size={20} aria-hidden="true" />
         </button>
         {error && <p id="message-erreur" className="ui-field__erreur conversation__erreur" role="alert">{error}</p>}
@@ -217,13 +232,34 @@ export default function GroupPage() {
         </div>
       </header>
 
+      {membres.some((member) => member.id !== currentUser?.id) && (
+        <section className="securite-membres" aria-label="Actions de sécurité des membres">
+          {membres.filter((member) => member.id !== currentUser?.id).map((member) => (
+            <div className="securite-membres__ligne" key={member.id}>
+              <span>{profilMasque(member) ? 'Voyageur anonyme' : member.prenom}</span>
+              <ActionsSecurite cible={member} groupId={groupId} />
+            </div>
+          ))}
+        </section>
+      )}
+
+      <section className="lieux-publics" aria-labelledby="lieux-publics-titre">
+        <h2 id="lieux-publics-titre"><MapPin size={18} aria-hidden="true" /> Idées de premier rendez-vous</h2>
+        <p>Pour une première rencontre, choisissez librement un lieu public fréquenté. Ces exemples ne sont ni vérifiés ni géolocalisés.</p>
+        <ul>
+          <li>Café ou salon de thé en centre-ville</li>
+          <li>Hall d’un musée ou d’un lieu culturel ouvert au public</li>
+          <li>Auberge partenaire ou espace commun d’un hébergement</li>
+        </ul>
+      </section>
+
       <nav className="groupe__raccourcis" aria-label="Sections du groupe">
         <button type="button" onClick={() => allerA('conversation-titre')}><MessagesSquare size={16} aria-hidden="true" /> Discussion</button>
         <button type="button" onClick={() => allerA('depenses-titre')}><Wallet size={16} aria-hidden="true" /> Dépenses ({nbDepenses})</button>
       </nav>
 
       <div className="groupe__grille">
-        <Conversation groupId={groupId} currentUser={currentUser} users={users} />
+        <Conversation groupId={groupId} groupMembers={group.membres} currentUser={currentUser} users={users} />
         <Expenses group={group} />
       </div>
     </section>
