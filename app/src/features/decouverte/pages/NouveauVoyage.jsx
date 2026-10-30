@@ -39,9 +39,15 @@ export default function NouveauVoyage() {
   const [params] = useSearchParams()
   const villeDemandee = params.get('ville') ?? ''
   const villeConnue = trouverVille(villeDemandee)
+  // Arrivée depuis une recherche « Où · Quand » : les dates sont déjà choisies aussi.
+  const du = params.get('du') ?? ''
+  const au = params.get('au') ?? ''
+  const datesConnues = /^\d{4}-\d{2}-\d{2}$/.test(du) && /^\d{4}-\d{2}-\d{2}$/.test(au) && du <= au
 
   const [pas, setPas] = useState(0)
-  const [etapes, setEtapes] = useState(() => (villeConnue ? [etapeVide(villeConnue.ville)] : []))
+  const [etapes, setEtapes] = useState(() => (villeConnue
+    ? [{ ...etapeVide(villeConnue.ville), ...(datesConnues ? { debut: du, fin: au } : {}) }]
+    : []))
   const [nomSaisi, setNomSaisi] = useState(null)
   const [erreurs, setErreurs] = useState({})
   const [recap, setRecap] = useState([])

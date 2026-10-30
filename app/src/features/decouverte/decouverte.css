@@ -260,3 +260,10 @@
   .enregistrer-voyage .ui-btn { flex: 1 1 100%; }
   .enregistrer-voyage__texte span { display: none; }
 }
+
+.enregistrer-voyage__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-4); }
+.enregistrer-voyage__etapes { display: inline-flex; align-items: center; min-height: 44px; color: var(--primaire-texte); font-weight: 650; }
+@media (max-width: 767px) {
+  .enregistrer-voyage__actions { flex: 1 1 100%; flex-direction: row-reverse; justify-content: space-between; }
+  .enregistrer-voyage__actions .ui-btn { flex: 1 1 auto; }
+}

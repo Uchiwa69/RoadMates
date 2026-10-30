@@ -196,15 +196,23 @@ export default function Hero() {
                     </>
                   )
                   // Pas encore de voyage dans la ville : « Créer un voyage », plus « Découvrir » s'il existe un guide.
+                  // Dates déjà choisies : « Voir qui sera là » ouvre les résultats, où le voyage s'enregistre en un clic.
+                  const avecDates = Boolean(dates.debut && dates.fin)
                   if (!mesVilles.has(v.ville)) {
                     return (
                       <li key={v.ville}>
                         <div className={`${classes} hero__ville--choix`}>
                           {infos}
                           <span className="hero__ville-choix">
-                            <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
-                              Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
-                            </Link>
+                            {avecDates ? (
+                              <Link to={paths.destinationRecherche(v.ville, dates.debut, dates.fin)} className="hero__ville-action">
+                                Voir qui sera là<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                              </Link>
+                            ) : (
+                              <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
+                                Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                              </Link>
+                            )}
                             {nbActivites > 0 && (
                               <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
                                 Découvrir<span className="sr-only"> {v.ville}</span>

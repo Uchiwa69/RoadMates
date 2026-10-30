@@ -263,7 +263,10 @@ export default function Destination() {
                 <strong>{ville} · {formatPeriode(periode)}</strong>
                 <span>Enregistrez ce voyage pour que les autres voyageurs vous trouvent aussi.</span>
               </p>
-              <Button onClick={enregistrer}>Enregistrer ce voyage</Button>
+              <span className="enregistrer-voyage__actions">
+                <Link to={paths.nouveauVoyageVers(ville, periode.debut, periode.fin)} className="enregistrer-voyage__etapes">Plusieurs étapes ?</Link>
+                <Button onClick={enregistrer}>Enregistrer ce voyage</Button>
+              </span>
             </>
           )}
         </div>

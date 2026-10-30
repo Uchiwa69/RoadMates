@@ -7,7 +7,8 @@ export const paths = {
   inscription: '/inscription',
   connexion: '/connexion',
   nouveauVoyage: '/voyages/nouveau',
-  nouveauVoyageVers: (ville) => `/voyages/nouveau?ville=${encodeURIComponent(ville)}`,
+  nouveauVoyageVers: (ville, du, au) =>
+    `/voyages/nouveau?ville=${encodeURIComponent(ville)}${du && au ? `&du=${du}&au=${au}` : ''}`,
   mesVoyages: '/voyages',
   destination: (ville) => `/destination/${encodeURIComponent(ville)}`,
   // Résultats de recherche « Où · Quand » (sans voyage déclaré) : la ville et la période.
