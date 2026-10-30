@@ -1,5 +1,6 @@
 // Données du globe : où sont les voyageurs, et les trajets entre leurs étapes. Lecture seule.
 import { VILLES } from './villes.js'
+import { aujourdhui } from './dates.js'
 
 const PAR_NOM = new Map(VILLES.map((v) => [v.ville, v]))
 
@@ -20,7 +21,8 @@ export function pointsVoyageurs(db) {
   for (const t of db.trips) {
     for (const e of t.etapes) {
       const v = PAR_NOM.get(e.ville)
-      if (!v) continue
+      // Seules les étapes à venir ou en cours : un voyage terminé n'est plus « en route ».
+      if (!v || e.fin < aujourdhui()) continue
       const p = parVille.get(e.ville) ?? { ...v, voyageurs: new Set(), debut: e.debut, fin: e.fin }
       p.voyageurs.add(t.userId)
       if (e.debut < p.debut) p.debut = e.debut
@@ -41,7 +43,7 @@ export function arcsVoyages(db) {
     return etapes.slice(1).flatMap((e, i) => {
       const de = PAR_NOM.get(etapes[i].ville)
       const a = PAR_NOM.get(e.ville)
-      if (!de || !a || de === a) return []
+      if (!de || !a || de === a || e.fin < aujourdhui()) return []
       return [{ startLat: de.lat, startLng: de.lng, endLat: a.lat, endLng: a.lng }]
     })
   })

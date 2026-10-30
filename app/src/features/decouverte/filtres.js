@@ -72,17 +72,22 @@ export function nombreFiltresActifs(filtres) {
   return Object.keys(FILTRES_VIDES).filter((cle) => filtres[cle] !== FILTRES_VIDES[cle]).length
 }
 
+// Part du critère « centres d'intérêt » selon le nombre d'intérêts partagés.
+export function valeurInterets(partages) {
+  return partages <= 0 ? 0 : Math.min(1, 0.6 + 0.2 * (partages - 1))
+}
+
 export function scoreCompatibilite(voyageur, moi) {
   if (!voyageur || !moi || !preferencesGenresCompatibles(voyageur, moi)) return 0
   const comparaisons = []
   const ajouter = (poids, valeur) => comparaisons.push({ poids, valeur: Math.max(0, Math.min(1, valeur)) })
 
+  // Centres d'intérêt : le critère le plus lourd. Un seul intérêt en commun compte déjà beaucoup
+  // (60 % du critère), deux 80 %, trois ou plus 100 % ; aucun en commun : 0.
   if (moi.centresInteret?.length && voyageur.centresInteret?.length) {
-    const interetsMoi = new Set(moi.centresInteret)
     const interetsVoyageur = new Set(voyageur.centresInteret)
-    const partages = [...interetsMoi].filter((interet) => interetsVoyageur.has(interet)).length
-    const totalInterets = new Set([...interetsMoi, ...interetsVoyageur]).size
-    ajouter(30, totalInterets ? partages / totalInterets : 0)
+    const partages = new Set(moi.centresInteret.filter((interet) => interetsVoyageur.has(interet))).size
+    ajouter(45, valeurInterets(partages))
   }
   if (moi.styleVoyage && voyageur.styleVoyage) ajouter(20, moi.styleVoyage === voyageur.styleVoyage ? 1 : 0)
   if (Number.isFinite(moi.budgetJournalierCentimes) && Number.isFinite(voyageur.budgetJournalierCentimes)) {

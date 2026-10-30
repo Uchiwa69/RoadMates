@@ -9,7 +9,8 @@ import { setCurrentPartenaire, setCurrentUser, usePartenaire } from './session.j
 import { Avatar, useToast } from './ui/index.js'
 
 // Les personnages du parcours de démo (PLAN-PROTOTYPE.md §6), affichés en premier.
-const PERSONNAGES = ['u-lea', 'u-ines', 'u-karim', 'u-sofia', 'u-tom', 'u-maya']
+// Full : profil complet qui montre toutes les fonctionnalités (avis, groupes, dépenses, amis de route).
+const PERSONNAGES = ['u-lea', 'u-full', 'u-ines', 'u-karim', 'u-sofia', 'u-tom', 'u-maya']
 
 export default function DemoPanel() {
   const users = useDb((db) => db.users)

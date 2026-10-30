@@ -13,10 +13,15 @@ const profil = (centresInteret, styleVoyage, budgetJournalierCentimes, rythme, i
   amisRoute: [],
 })
 
+// Photo de démonstration générée en SVG (aucune image distante, aucun visage réel).
+const photoDemo = (lettre, c1, c2) => `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="96" height="96" fill="url(#g)"/><circle cx="48" cy="38" r="17" fill="#fff" fill-opacity=".9"/><path d="M16 92c4-20 18-30 32-30s28 10 32 30z" fill="#fff" fill-opacity=".9"/><text x="48" y="45" font-family="Georgia,serif" font-size="20" font-weight="700" text-anchor="middle" fill="${c2}">${lettre}</text></svg>`,
+)}`
+
 export const seed = {
   // À incrémenter quand on ajoute des données : les navigateurs qui ont déjà joué la démo
   // les reçoivent sans perdre les leurs (voir completerAvecSeed dans db.js).
-  version: 5,
+  version: 6,
   session: { userId: 'u-lea', partenaireId: null },
 
   users: [
@@ -40,7 +45,32 @@ export const seed = {
     // Vitrine des destinations partenaires (Paris, Kosovo), version 5. Toujours hors Portugal.
     { id: 'u-camille', ...profil(['musées', 'photographie', 'gastronomie'], 'culture', 6500, 'modéré', 'activites'), prenom: 'Camille', email: 'camille@roadmates.demo', age: 25, genre: 'F', langues: ['français', 'anglais', 'espagnol'], bio: 'Une semaine à Paris : expos, marchés et soirées au bord du canal.', verifie: true },
     { id: 'u-arben', ...profil(['randonnée', 'histoire', 'rencontres'], 'aventure', 3500, 'actif', 'tout'), prenom: 'Arben', email: 'arben@roadmates.demo', age: 27, genre: 'H', langues: ['albanais', 'anglais', 'allemand'], bio: 'Je fais découvrir le Kosovo à qui veut : Pristina, Prizren et les monts Sharr.', verifie: true },
-    { id: 'u-lina', ...profil(['street art', 'randonnée', 'culture'], 'routard', 4000, 'modéré', 'trajet'), prenom: 'Lina', email: 'lina@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais'], bio: 'Paris puis les Balkans en bus, je cherche des compagnons pour les trajets.', verifie: true },  ],
+    { id: 'u-lina', ...profil(['street art', 'randonnée', 'culture'], 'routard', 4000, 'modéré', 'trajet'), prenom: 'Lina', email: 'lina@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais'], bio: 'Paris puis les Balkans en bus, je cherche des compagnons pour les trajets.', verifie: true },
+
+    // Version 6 : plus de profils variés pour la vitrine (toujours hors Portugal).
+    { id: 'u-hugo', ...profil(['gastronomie', 'plage', 'vélo'], 'confort', 7000, 'tranquille', 'activites'), prenom: 'Hugo', email: 'hugo@roadmates.demo', age: 29, genre: 'H', langues: ['français', 'espagnol', 'anglais'], bio: 'Tapas, vélo le long de la mer et longues soirées : Barcelone puis Valence.', verifie: true },
+    { id: 'u-sara', ...profil(['musées', 'histoire', 'gastronomie'], 'culture', 6000, 'modéré', 'tout'), prenom: 'Sara', email: 'sara@roadmates.demo', age: 24, genre: 'F', langues: ['italien', 'anglais', 'français'], bio: 'Rome et Florence pour mon mémoire en histoire de l’art, et beaucoup de glaces.', verifie: true },
+    { id: 'u-malik', ...profil(['randonnée', 'photographie', 'culture'], 'aventure', 4500, 'actif', 'activites'), prenom: 'Malik', email: 'malik@roadmates.demo', age: 27, genre: 'H', langues: ['français', 'arabe', 'anglais'], bio: 'Photographe amateur, je pars vers l’Atlas au lever du jour.', verifie: true },
+    { id: 'u-clara', ...profil(['street art', 'musées', 'rencontres'], 'routard', 3500, 'actif', 'trajet'), prenom: 'Clara', email: 'clara@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante en design : fresques à Lyon, puis Paris en covoiturage.', verifie: false },
+    { id: 'u-dren', ...profil(['randonnée', 'histoire', 'rencontres'], 'routard', 3000, 'actif', 'tout'), prenom: 'Dren', email: 'dren@roadmates.demo', age: 25, genre: 'H', langues: ['albanais', 'anglais', 'italien'], bio: 'Né à Prizren, je guide volontiers vers les monts Sharr.', verifie: true },
+    { id: 'u-julie', ...profil(['musées', 'train', 'photographie'], 'culture', 5500, 'tranquille', 'trajet'), prenom: 'Julie', email: 'julie@roadmates.demo', age: 30, genre: 'F', langues: ['français', 'allemand', 'anglais'], bio: 'Prague et Vienne en train de nuit, appareil photo argentique en bandoulière.', verifie: true },
+
+    // « Full » : le personnage qui peut tout montrer (profil complet, voyages passés et à venir,
+    // contacts, groupes, dépenses, avis, amis de route). Aucune interaction avec le parcours de Léa.
+    {
+      id: 'u-full',
+      ...profil(['randonnée', 'gastronomie', 'culture', 'photographie', 'musées', 'street art', 'plage', 'rencontres'], 'aventure', 6000, 'modéré', 'tout'),
+      photoUrl: photoDemo('F', '#FF9F45', '#7A4BDB'),
+      amisRoute: ['u-camille', 'u-arben'],
+      prenom: 'Full',
+      email: 'full@roadmates.demo',
+      age: 26,
+      genre: 'autre',
+      langues: ['français', 'anglais', 'espagnol', 'italien', 'albanais', 'arabe'],
+      bio: 'Profil de démonstration complet : je voyage partout, je parle six langues et j’ai déjà partagé un bateau à Split. Cet été : Lyon, Paris puis les Balkans.',
+      verifie: true,
+    },
+  ],
 
   trips: [
     { id: 't-lea', userId: 'u-lea', destination: 'Algarve', etapes: [
@@ -113,24 +143,91 @@ export const seed = {
       { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-18', fin: '2027-07-20' },
       { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-21', fin: '2027-07-23' },
     ] },
+    // Version 6
+    { id: 't-hugo', userId: 'u-hugo', destination: 'Côte espagnole', etapes: [
+      { ville: 'Barcelone', pays: 'Espagne', debut: '2027-07-05', fin: '2027-07-09' },
+      { ville: 'Valence', pays: 'Espagne', debut: '2027-07-10', fin: '2027-07-12' },
+    ] },
+    { id: 't-sara', userId: 'u-sara', destination: 'Italie', etapes: [
+      { ville: 'Rome', pays: 'Italie', debut: '2027-07-10', fin: '2027-07-14' },
+      { ville: 'Florence', pays: 'Italie', debut: '2027-07-15', fin: '2027-07-18' },
+    ] },
+    { id: 't-malik', userId: 'u-malik', destination: 'Marrakech et l’Atlas', etapes: [
+      { ville: 'Marrakech', pays: 'Maroc', debut: '2027-07-07', fin: '2027-07-12' },
+    ] },
+    { id: 't-clara', userId: 'u-clara', destination: 'Lyon – Paris', etapes: [
+      { ville: 'Lyon', pays: 'France', debut: '2027-07-02', fin: '2027-07-05' },
+      { ville: 'Paris', pays: 'France', debut: '2027-07-15', fin: '2027-07-18' },
+    ] },
+    { id: 't-dren', userId: 'u-dren', destination: 'Prizren', etapes: [
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-20', fin: '2027-07-24' },
+    ] },
+    { id: 't-julie', userId: 'u-julie', destination: 'Europe centrale en train', etapes: [
+      { ville: 'Prague', pays: 'Tchéquie', debut: '2027-07-08', fin: '2027-07-11' },
+      { ville: 'Vienne', pays: 'Autriche', debut: '2027-07-12', fin: '2027-07-15' },
+    ] },
+    // Full : un voyage terminé (Split, été 2026, partagé avec Camille et Arben) et un voyage à venir.
+    { id: 't-full-ete', userId: 'u-full', destination: 'Croatie (été 2026)', etapes: [
+      { ville: 'Split', pays: 'Croatie', debut: '2026-08-10', fin: '2026-08-14' },
+    ] },
+    { id: 't-camille-ete', userId: 'u-camille', destination: 'Croatie (été 2026)', etapes: [
+      { ville: 'Split', pays: 'Croatie', debut: '2026-08-10', fin: '2026-08-13' },
+    ] },
+    { id: 't-arben-ete', userId: 'u-arben', destination: 'Croatie (été 2026)', etapes: [
+      { ville: 'Split', pays: 'Croatie', debut: '2026-08-11', fin: '2026-08-14' },
+    ] },
+    { id: 't-full', userId: 'u-full', destination: 'Lyon → Balkans', etapes: [
+      { ville: 'Lyon', pays: 'France', debut: '2027-07-02', fin: '2027-07-04' },
+      { ville: 'Paris', pays: 'France', debut: '2027-07-14', fin: '2027-07-17' },
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-18', fin: '2027-07-20' },
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-21', fin: '2027-07-23' },
+    ] },
   ],
 
-  requests: [    { id: 'r-tom-lea', fromId: 'u-tom', toId: 'u-lea', message: 'Salut ! Je suis à Lagos le 10, partante pour un resto ?', statut: 'en_attente', creeLe: '2026-10-29T10:00:00Z' },
+  requests: [
+    { id: 'r-tom-lea', fromId: 'u-tom', toId: 'u-lea', message: 'Salut ! Je suis à Lagos le 10, partante pour un resto ?', statut: 'en_attente', creeLe: '2026-10-29T10:00:00Z' },
     { id: 'r-lea-ines', fromId: 'u-lea', toId: 'u-ines', message: 'On a 2 étapes en commun, ça te dit de louer une voiture à plusieurs ?', statut: 'acceptee', creeLe: '2026-10-29T09:00:00Z' },
     { id: 'r-lea-sofia', fromId: 'u-lea', toId: 'u-sofia', message: 'On est à Lagos en même temps, road trip ensemble ?', statut: 'acceptee', creeLe: '2026-10-29T09:05:00Z' },
+    // Full : contacts acceptés, une demande reçue à traiter, une demande envoyée en attente.
+    { id: 'r-full-camille', fromId: 'u-full', toId: 'u-camille', message: 'On est à Split en même temps, on partage un bateau pour les îles ?', statut: 'acceptee', creeLe: '2026-07-20T18:00:00Z' },
+    { id: 'r-arben-full', fromId: 'u-arben', toId: 'u-full', message: 'Je serai aussi à Split, et je te montre le Kosovo l’été prochain !', statut: 'acceptee', creeLe: '2026-07-22T09:00:00Z' },
+    { id: 'r-lina-full', fromId: 'u-lina', toId: 'u-full', message: 'On a Pristina et Prizren en commun, le bus ensemble ?', statut: 'acceptee', creeLe: '2026-10-20T11:00:00Z' },
+    { id: 'r-anouk-full', fromId: 'u-anouk', toId: 'u-full', message: 'Salut ! On est à Lyon les mêmes jours, une balade sur les quais ?', statut: 'en_attente', creeLe: '2026-10-29T16:00:00Z' },
+    { id: 'r-full-malik', fromId: 'u-full', toId: 'u-malik', message: 'Je prépare un passage à Marrakech, partant pour l’Atlas ?', statut: 'en_attente', creeLe: '2026-10-28T10:00:00Z' },
   ],
 
   groups: [
     { id: 'g-algarve', nom: 'Road trip Algarve', destination: 'Algarve', membres: ['u-lea', 'u-ines', 'u-sofia'], creeLe: '2026-10-29T09:30:00Z' },
+    { id: 'g-full-split', nom: 'Split entre amis', destination: 'Split', membres: ['u-full', 'u-camille', 'u-arben'], creeLe: '2026-07-25T10:00:00Z' },
+    { id: 'g-full-balkans', nom: 'Balkans en bus', destination: 'Kosovo', membres: ['u-full', 'u-arben', 'u-lina'], creeLe: '2026-10-21T08:00:00Z' },
   ],
 
   messages: [
     { id: 'm-1', groupId: 'g-algarve', auteurId: 'u-lea', texte: 'Hello ! On loue une voiture à Lagos le 12 ?', envoyeLe: '2026-10-29T09:31:00Z' },
     { id: 'm-2', groupId: 'g-algarve', auteurId: 'u-ines', texte: 'Carrément, je regarde les prix.', envoyeLe: '2026-10-29T09:33:00Z' },
+    { id: 'm-full-1', groupId: 'g-full-split', auteurId: 'u-full', texte: 'Le bateau pour Hvar est réservé, 50 € chacun !', envoyeLe: '2026-08-09T19:00:00Z' },
+    { id: 'm-full-2', groupId: 'g-full-split', auteurId: 'u-camille', texte: 'Parfait, j’ai payé ma part.', envoyeLe: '2026-08-09T19:12:00Z' },
+    { id: 'm-full-3', groupId: 'g-full-split', auteurId: 'u-arben', texte: 'Merci pour ce voyage, à l’été prochain au Kosovo !', envoyeLe: '2026-08-15T08:30:00Z' },
+    { id: 'm-full-4', groupId: 'g-full-balkans', auteurId: 'u-arben', texte: 'J’ai trouvé une voiture à Pristina pour aller à Prizren le 21.', envoyeLe: '2026-10-22T10:00:00Z' },
+    { id: 'm-full-5', groupId: 'g-full-balkans', auteurId: 'u-full', texte: 'Top, je paie ma part tout de suite.', envoyeLe: '2026-10-22T10:05:00Z' },
+    { id: 'm-full-6', groupId: 'g-full-balkans', auteurId: 'u-lina', texte: 'Je règle la mienne ce week-end !', envoyeLe: '2026-10-22T10:20:00Z' },
   ],
 
-  expenses: [],
-  avis: [],
+  expenses: [
+    // Split (terminé) : réglée par tous, réservation lancée → Full peut noter ses compagnons.
+    { id: 'e-full-bateau', statut: 'reservee', groupId: 'g-full-split', createurId: 'u-full', libelle: 'Bateau pour Hvar', categorie: 'activité', montantCentimes: 15000, dateReservation: '2026-08-12',
+      parts: [{ userId: 'u-full', montantCentimes: 5000, payee: true }, { userId: 'u-camille', montantCentimes: 5000, payee: true }, { userId: 'u-arben', montantCentimes: 5000, payee: true }], creeLe: '2026-08-09T18:55:00Z' },
+    // Balkans (à venir) : une part reste à payer.
+    { id: 'e-full-voiture', statut: 'ouverte', groupId: 'g-full-balkans', createurId: 'u-arben', libelle: 'Location voiture Pristina → Prizren', categorie: 'voiture', montantCentimes: 18000, dateReservation: '2027-07-21',
+      parts: [{ userId: 'u-full', montantCentimes: 6000, payee: true }, { userId: 'u-arben', montantCentimes: 6000, payee: true }, { userId: 'u-lina', montantCentimes: 6000, payee: false }], creeLe: '2026-10-22T09:58:00Z' },
+  ],
+  // Avis du voyage à Split : Full et Arben se sont notés (avis publiés) ; Camille a noté Full,
+  // et Full a encore à la noter (« 1 avis à laisser »).
+  avis: [
+    { id: 'a-arben-full', groupId: 'g-full-split', auteurId: 'u-arben', cibleId: 'u-full', note: 5, commentaire: 'Organisation au top, et toujours partant pour une baignade.', creeLe: '2026-08-16T10:00:00Z' },
+    { id: 'a-full-arben', groupId: 'g-full-split', auteurId: 'u-full', cibleId: 'u-arben', note: 5, commentaire: 'Guide génial, il connaît chaque crique.', creeLe: '2026-08-16T12:00:00Z' },
+    { id: 'a-camille-full', groupId: 'g-full-split', auteurId: 'u-camille', cibleId: 'u-full', note: 4, commentaire: 'Super compagnon de route, un peu trop matinal !', creeLe: '2026-08-17T09:00:00Z' },
+  ],
   blocages: [],
 
   // Partie « partenaires » (US-18, US-20). Établissements FICTIFS, données de démonstration :
@@ -168,4 +265,5 @@ export const seed = {
     { id: 'o-dartajine', partenaireId: 'p-dartajine', titre: 'Cours de tajine et dîner', description: 'Marché, cours et repas sur la terrasse.', reductionPct: 10, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
     { id: 'o-bulevardi', partenaireId: 'p-bulevardi', titre: 'Dortoir de groupe à Pristina', description: 'Lits côte à côte et casiers, à deux pas du boulevard.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
     { id: 'o-sharrtrek', partenaireId: 'p-sharrtrek', titre: 'Journée dans les monts Sharr', description: 'Randonnée guidée et pique-nique, transport depuis Prizren.', reductionPct: 20, minVoyageurs: 4, debut: '2027-05-01', fin: '2027-10-15', active: true, creeLe: '2026-10-01T08:00:00Z' },
-  ],}
+  ],
+}

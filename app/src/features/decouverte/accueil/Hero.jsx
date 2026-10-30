@@ -35,7 +35,7 @@ export default function Hero() {
   const voyageursParPays = useMemo(() => {
     const m = new Map()
     for (const t of db.trips) {
-      for (const e of t.etapes) {
+      for (const e of t.etapes.filter((x) => x.fin >= aujourdhui())) {
         const iso = ISO_DE_VILLE.get(e.ville)
         if (iso) m.set(iso, (m.get(iso) ?? new Set()).add(t.userId))
       }

@@ -20,7 +20,8 @@ export default function AvisPage() {
     if (!user || user.id === pair.cibleId || !eligibles.some((candidat) => candidat.groupId === pair.groupId && candidat.cibleId === pair.cibleId)) return
     const form = formulaires[pair.cibleId] ?? { note: '', commentaire: '' }
     const note = Number(form.note)
-    const commentaire = form.commentaire.trim()
+    // Le commentaire est facultatif : il peut ne jamais avoir été saisi.
+    const commentaire = (form.commentaire ?? '').trim()
     if (!Number.isInteger(note) || note < 1 || note > 5) {
       setErreurs((actuelles) => ({ ...actuelles, [pair.cibleId]: 'Choisissez une note de 1 à 5.' }))
       return

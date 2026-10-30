@@ -29,7 +29,7 @@ let cache = null
 // versions du jeu de démo ont ajouté (voyageurs, voyages, champs). Rien n'est écrasé ni supprimé.
 function completerAvecSeed(db) {
   if (db.version === seed.version) return db
-  for (const collection of ['users', 'trips', 'requests', 'groups', 'messages', 'partenaires', 'offres']) {
+  for (const collection of ['users', 'trips', 'requests', 'groups', 'messages', 'expenses', 'avis', 'partenaires', 'offres']) {
     db[collection] ??= []
     for (const element of seed[collection]) {
       const existant = db[collection].find((x) => x.id === element.id)
@@ -59,8 +59,8 @@ function load() {
       cache.blocages ??= []
     } else {
       cache = structuredClone(seed)
-      cache.avis = []
-      cache.blocages = []
+      cache.avis ??= []
+      cache.blocages ??= []
     }
   } catch {
     cache = structuredClone(seed)
