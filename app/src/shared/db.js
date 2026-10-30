@@ -1,7 +1,8 @@
 // base de données de démo dans le localStorage (pas de back-end
 // dans le prototype).
 //
-// Collections et propriétaire (seul le propriétaire écrit dedans) :
+// Collections et propriétaire (seul le propriétaire écrit dedans) — A découverte, B groupe,
+// P partenaires :
 //   users     A  { id, prenom, email, age, genre: 'F'|'H'|'autre', langues: string[], bio, verifie: bool }
 //   trips     A  { id, userId, destination, etapes: [{ ville, pays, debut, fin }] }  dates 'AAAA-MM-JJ'
 //   requests  B  { id, fromId, toId, message, statut: 'en_attente'|'acceptee'|'refusee', creeLe }
@@ -11,7 +12,10 @@
 //   blocages  A { id, bloqueurId, bloqueId, creeLe }
 //   expenses  B { id, groupId, createurId, libelle, categorie, montantCentimes, dateReservation,
 //                  parts: [{ userId, montantCentimes, payee: bool }], creeLe }
-//   session   —  { userId }  (voir session.js)
+//   partenaires P { id, nom, ville, categorie: 'hebergement'|'restaurant'|'musee'|'activite'|'location', description, valide: bool }
+//   offres      P { id, partenaireId, titre, description, reductionPct: int, minVoyageurs: int,
+//                   debut, fin ('AAAA-MM-JJ'), active: bool, creeLe }  (voir features/partenaires)
+//   session   —  { userId, partenaireId }  (voir session.js ; partenaireId : partenaire incarné en démo)
 //   version   —  version du jeu de démo (seed.js), pour compléter les anciennes données
 import { useSyncExternalStore } from 'react'
 import { seed } from './seed.js'
@@ -24,7 +28,7 @@ let cache = null
 // versions du jeu de démo ont ajouté (voyageurs, voyages, champs). Rien n'est écrasé ni supprimé.
 function completerAvecSeed(db) {
   if (db.version === seed.version) return db
-  for (const collection of ['users', 'trips', 'requests', 'groups', 'messages']) {
+  for (const collection of ['users', 'trips', 'requests', 'groups', 'messages', 'partenaires', 'offres']) {
     db[collection] ??= []
     for (const element of seed[collection]) {
       const existant = db[collection].find((x) => x.id === element.id)

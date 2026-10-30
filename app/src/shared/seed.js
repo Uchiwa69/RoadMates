@@ -16,8 +16,8 @@ const profil = (centresInteret, styleVoyage, budgetJournalierCentimes, rythme, i
 export const seed = {
   // À incrémenter quand on ajoute des données : les navigateurs qui ont déjà joué la démo
   // les reçoivent sans perdre les leurs (voir completerAvecSeed dans db.js).
-  version: 4,
-  session: { userId: 'u-lea' },
+  version: 5,
+  session: { userId: 'u-lea', partenaireId: null },
 
   users: [
     { id: 'u-lea', ...profil(['surf', 'randonnée', 'gastronomie'], 'aventure', 5500, 'modéré', 'activites'), prenom: 'Léa', email: 'lea@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais', 'portugais'], bio: 'Erasmus à Lisbonne, road trip dans l’Algarve cet été.', verifie: true },
@@ -37,7 +37,10 @@ export const seed = {
     { id: 'u-zoe', ...profil(['plage', 'ferry', 'nature'], 'routard', 4000, 'tranquille', 'trajet'), prenom: 'Zoé', email: 'zoe@roadmates.demo', age: 27, genre: 'F', langues: ['français', 'italien'], bio: 'Les îles grecques, sac à dos et ferry.', verifie: true },
     { id: 'u-yasmine', ...profil(['culture', 'randonnée', 'gastronomie'], 'aventure', 5000, 'modéré', 'tout'), prenom: 'Yasmine', email: 'yasmine@roadmates.demo', age: 26, genre: 'F', langues: ['français', 'arabe'], bio: 'Marrakech puis le désert, à plusieurs c’est mieux.', verifie: true },
     { id: 'u-anouk', ...profil(['plage', 'randonnée', 'rencontres'], 'routard', 3500, 'actif', 'activites'), prenom: 'Anouk', email: 'anouk@roadmates.demo', age: 21, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante à Lyon, cap sur la Méditerranée.', verifie: true },
-  ],
+    // Vitrine des destinations partenaires (Paris, Kosovo), version 5. Toujours hors Portugal.
+    { id: 'u-camille', ...profil(['musées', 'photographie', 'gastronomie'], 'culture', 6500, 'modéré', 'activites'), prenom: 'Camille', email: 'camille@roadmates.demo', age: 25, genre: 'F', langues: ['français', 'anglais', 'espagnol'], bio: 'Une semaine à Paris : expos, marchés et soirées au bord du canal.', verifie: true },
+    { id: 'u-arben', ...profil(['randonnée', 'histoire', 'rencontres'], 'aventure', 3500, 'actif', 'tout'), prenom: 'Arben', email: 'arben@roadmates.demo', age: 27, genre: 'H', langues: ['albanais', 'anglais', 'allemand'], bio: 'Je fais découvrir le Kosovo à qui veut : Pristina, Prizren et les monts Sharr.', verifie: true },
+    { id: 'u-lina', ...profil(['street art', 'randonnée', 'culture'], 'routard', 4000, 'modéré', 'trajet'), prenom: 'Lina', email: 'lina@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais'], bio: 'Paris puis les Balkans en bus, je cherche des compagnons pour les trajets.', verifie: true },  ],
 
   trips: [
     { id: 't-lea', userId: 'u-lea', destination: 'Algarve', etapes: [
@@ -98,10 +101,21 @@ export const seed = {
       { ville: 'Marseille', pays: 'France', debut: '2027-07-05', fin: '2027-07-07' },
       { ville: 'Nice', pays: 'France', debut: '2027-07-08', fin: '2027-07-10' },
     ] },
+    { id: 't-camille', userId: 'u-camille', destination: 'Paris', etapes: [
+      { ville: 'Paris', pays: 'France', debut: '2027-07-14', fin: '2027-07-20' },
+    ] },
+    { id: 't-arben', userId: 'u-arben', destination: 'Kosovo', etapes: [
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-16', fin: '2027-07-19' },
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-20', fin: '2027-07-24' },
+    ] },
+    { id: 't-lina', userId: 'u-lina', destination: 'Paris – Balkans', etapes: [
+      { ville: 'Paris', pays: 'France', debut: '2027-07-12', fin: '2027-07-15' },
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-18', fin: '2027-07-20' },
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-21', fin: '2027-07-23' },
+    ] },
   ],
 
-  requests: [
-    { id: 'r-tom-lea', fromId: 'u-tom', toId: 'u-lea', message: 'Salut ! Je suis à Lagos le 10, partante pour un resto ?', statut: 'en_attente', creeLe: '2026-10-29T10:00:00Z' },
+  requests: [    { id: 'r-tom-lea', fromId: 'u-tom', toId: 'u-lea', message: 'Salut ! Je suis à Lagos le 10, partante pour un resto ?', statut: 'en_attente', creeLe: '2026-10-29T10:00:00Z' },
     { id: 'r-lea-ines', fromId: 'u-lea', toId: 'u-ines', message: 'On a 2 étapes en commun, ça te dit de louer une voiture à plusieurs ?', statut: 'acceptee', creeLe: '2026-10-29T09:00:00Z' },
     { id: 'r-lea-sofia', fromId: 'u-lea', toId: 'u-sofia', message: 'On est à Lagos en même temps, road trip ensemble ?', statut: 'acceptee', creeLe: '2026-10-29T09:05:00Z' },
   ],
@@ -118,4 +132,40 @@ export const seed = {
   expenses: [],
   avis: [],
   blocages: [],
-}
+
+  // Partie « partenaires » (US-18, US-20). Établissements FICTIFS, données de démonstration :
+  // aucune vraie entreprise n'est présentée comme partenaire. Aucun partenaire au Portugal
+  // (Faro montre l'état vide « Pas encore d'offre partenaire »).
+  partenaires: [
+    { id: 'p-traboules', nom: 'Auberge des Traboules', ville: 'Lyon', categorie: 'hebergement', description: 'Auberge de jeunesse dans une maison du Vieux Lyon, dortoirs et chambres partagées.', valide: true },
+    { id: 'p-velorhone', nom: 'Vélo’Rhône', ville: 'Lyon', categorie: 'location', description: 'Location de vélos et de vélos électriques le long des quais.', valide: true },
+    { id: 'p-pentes', nom: 'Le Bouchon des Pentes', ville: 'Lyon', categorie: 'restaurant', description: 'Cuisine lyonnaise de tradition, grandes tablées.', valide: true },
+    { id: 'p-saone', nom: 'Saône Canoë Club', ville: 'Lyon', categorie: 'activite', description: 'Balades encadrées en canoë sur la Saône.', valide: true },
+    { id: 'p-gones', nom: 'Les Gones Voyageurs', ville: 'Lyon', categorie: 'hebergement', description: 'Nouvelle auberge à la Croix-Rousse.', valide: false },
+    { id: 'p-canal', nom: 'Auberge du Canal', ville: 'Paris', categorie: 'hebergement', description: 'Auberge au bord du canal Saint-Martin.', valide: true },
+    { id: 'p-cycloseine', nom: 'Cyclo Seine', ville: 'Paris', categorie: 'location', description: 'Location de vélos pour les berges de Seine.', valide: true },
+    { id: 'p-croissant', nom: 'Atelier Croissant', ville: 'Paris', categorie: 'activite', description: 'Cours de viennoiserie en petit groupe.', valide: true },
+    { id: 'p-zellige', nom: 'Riad Zellige', ville: 'Marrakech', categorie: 'hebergement', description: 'Riad de six chambres au cœur de la médina.', valide: true },
+    { id: 'p-atlasroute', nom: 'Atlas Route', ville: 'Marrakech', categorie: 'location', description: 'Location de voitures avec ou sans chauffeur pour l’Atlas.', valide: true },
+    { id: 'p-dartajine', nom: 'Dar Tajine', ville: 'Marrakech', categorie: 'restaurant', description: 'Cours de cuisine marocaine suivis du repas.', valide: true },
+    { id: 'p-bulevardi', nom: 'Hostel Bulevardi', ville: 'Pristina', categorie: 'hebergement', description: 'Auberge près du boulevard Mère-Teresa.', valide: true },
+    { id: 'p-sharrtrek', nom: 'Sharr Trek', ville: 'Prizren', categorie: 'activite', description: 'Randonnées guidées dans les monts Sharr.', valide: true },
+  ],
+
+  // reductionPct : pourcentage entier ; minVoyageurs : taille minimale du groupe ; debut/fin : validité.
+  offres: [
+    { id: 'o-traboules', partenaireId: 'p-traboules', titre: 'Dortoir privatisé pour votre groupe', description: 'Un dortoir rien que pour vous dès 3 voyageurs, petit-déjeuner compris.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-09-30', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-velorhone', partenaireId: 'p-velorhone', titre: 'Vélos pour la journée', description: 'Vélos et cadenas pour toute la journée, carte des quais offerte.', reductionPct: 20, minVoyageurs: 2, debut: '2026-09-01', fin: '2027-10-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-velorhone-ete', partenaireId: 'p-velorhone', titre: 'Spécial été 2026', description: 'Offre terminée : elle ne doit plus apparaître.', reductionPct: 30, minVoyageurs: 2, debut: '2026-06-01', fin: '2026-08-31', active: true, creeLe: '2026-06-01T08:00:00Z' },
+    { id: 'o-pentes', partenaireId: 'p-pentes', titre: 'Menu bouchon pour les tablées', description: 'Menu complet entrée, plat, dessert pour les groupes RoadMates.', reductionPct: 10, minVoyageurs: 4, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-saone', partenaireId: 'p-saone', titre: 'Balade en canoë au coucher du soleil', description: 'Deux heures sur la Saône avec un moniteur.', reductionPct: 15, minVoyageurs: 3, debut: '2027-04-01', fin: '2027-09-30', active: true, creeLe: '2026-10-01T08:00:00Z' },
+    { id: 'o-gones', partenaireId: 'p-gones', titre: 'Ouverture : nuit offerte', description: 'Brouillon d’un partenaire pas encore validé.', reductionPct: 25, minVoyageurs: 3, debut: '2026-10-01', fin: '2027-06-30', active: true, creeLe: '2026-10-15T08:00:00Z' },
+    { id: 'o-canal', partenaireId: 'p-canal', titre: 'Chambre de 4 au bord du canal', description: 'Chambre privative pour 4, draps fournis.', reductionPct: 12, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-09-30', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-cycloseine', partenaireId: 'p-cycloseine', titre: 'Vélos pour les berges', description: 'Location à la demi-journée ou à la journée.', reductionPct: 20, minVoyageurs: 2, debut: '2026-09-01', fin: '2027-10-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-croissant', partenaireId: 'p-croissant', titre: 'Cours de croissants entre voyageurs', description: 'Deux heures de cours, vous repartez avec votre fournée.', reductionPct: 15, minVoyageurs: 4, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-zellige', partenaireId: 'p-zellige', titre: 'Le riad pour votre groupe', description: 'Trois chambres et la terrasse, thé d’accueil offert.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-atlasroute', partenaireId: 'p-atlasroute', titre: '4×4 pour l’Atlas', description: 'Véhicule 7 places, à partager entre compagnons.', reductionPct: 20, minVoyageurs: 4, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-dartajine', partenaireId: 'p-dartajine', titre: 'Cours de tajine et dîner', description: 'Marché, cours et repas sur la terrasse.', reductionPct: 10, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-bulevardi', partenaireId: 'p-bulevardi', titre: 'Dortoir de groupe à Pristina', description: 'Lits côte à côte et casiers, à deux pas du boulevard.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
+    { id: 'o-sharrtrek', partenaireId: 'p-sharrtrek', titre: 'Journée dans les monts Sharr', description: 'Randonnée guidée et pique-nique, transport depuis Prizren.', reductionPct: 20, minVoyageurs: 4, debut: '2027-05-01', fin: '2027-10-15', active: true, creeLe: '2026-10-01T08:00:00Z' },
+  ],}

@@ -31,8 +31,12 @@ function focusDe(geometrie) {
   return { lat, lng, altitude: Math.min(2.2, Math.max(0.32, 0.18 + Math.sqrt(aire) * 3.2)) }
 }
 
+// Polygones sans code numérique ISO 3166 dans world-atlas : reliés par leur nom.
+// Le Kosovo n'a pas de code numérique officiel ; XK est le code utilisé par l'UE et i18n-iso-countries.
+const SANS_CODE = { Kosovo: 'XK' }
+
 export const PAYS_GEO = feature(world, world.objects.countries).features.map((f) => {
-  const iso2 = f.id ? alpha2DepuisNumerique(f.id) : null
+  const iso2 = f.id ? alpha2DepuisNumerique(f.id) : SANS_CODE[f.properties.name] ?? null
   return { iso2, nom: iso2 ? nomPays(iso2) : f.properties.name, geometry: f.geometry, focus: focusDe(f.geometry) }
 })
 
