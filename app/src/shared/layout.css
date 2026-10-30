@@ -92,6 +92,7 @@
 .demo__pastille:hover { border-color: var(--violet-texte); }
 .demo__pastille svg { color: var(--violet-texte); }
 .demo__sep { color: var(--texte-2); }
+.demo__qui { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .demo__panneau {
   position: absolute; z-index: 50; right: 0; top: calc(100% + 8px);
   width: min(300px, calc(100vw - 32px));

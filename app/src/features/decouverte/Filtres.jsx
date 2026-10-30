@@ -1,7 +1,7 @@
 // Barre de critères cumulables de découverte.
 // Toujours visibles : genre, profils vérifiés, langue. Les autres critères sont dans « Plus de filtres » :
 // un panneau dépliant sur ordinateur, une feuille modale sur mobile.
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { AnimatePresence, m } from 'motion/react'
 import { BadgeCheck, ChevronDown, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { Button, Chip, Feuille, Field, Input, Select } from '../../shared/ui/index.js'
@@ -56,6 +56,7 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
   const mobile = useMediaQuery('(max-width: 767px)')
   const [ouvert, setOuvert] = useState(false)
   const panneauId = useId()
+  const boutonPlus = useRef(null)
   const libellePlus = `Plus de filtres${avancesActifs ? ` (${avancesActifs})` : ''}`
   const voyageurs = `${total} voyageur${total > 1 ? 's' : ''}`
 
@@ -96,6 +97,7 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
           Profils vérifiés
         </Chip>
         <button
+          ref={boutonPlus}
           type="button"
           className={`filtres__plus${avancesActifs ? ' filtres__plus--actif' : ''}`}
           aria-expanded={ouvert}
@@ -121,6 +123,7 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
           ouvert={ouvert}
           onFermer={() => setOuvert(false)}
           titre="Plus de filtres"
+          declencheur={boutonPlus}
           pied={<Button onClick={() => setOuvert(false)}>Afficher {voyageurs}</Button>}
         >
           <ChampsAvances filtres={filtres} maj={maj} centresInteret={centresInteret} />

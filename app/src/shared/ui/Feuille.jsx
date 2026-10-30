@@ -1,9 +1,10 @@
 // Feuille modale (bas de l'écran sur mobile, fenêtre centrée sur ordinateur), sur <dialog> natif :
 // showModal() rend le reste de la page inerte (focus piégé), Échap ferme, le focus revient au déclencheur.
+// Safari ne donne pas le focus à un bouton cliqué : passer declencheur (ref du bouton qui ouvre).
 import { useEffect, useId, useRef } from 'react'
 import { X } from 'lucide-react'
 
-export default function Feuille({ ouvert, onFermer, titre, children, pied }) {
+export default function Feuille({ ouvert, onFermer, titre, children, pied, declencheur: refDeclencheur }) {
   const dialog = useRef(null)
   const declencheur = useRef(null)
   const fermer = useRef(onFermer)
@@ -15,16 +16,17 @@ export default function Feuille({ ouvert, onFermer, titre, children, pied }) {
     const d = dialog.current
     if (!d) return
     if (ouvert && !d.open) {
-      declencheur.current = document.activeElement
+      declencheur.current = refDeclencheur?.current ?? document.activeElement
       d.showModal()
     } else if (!ouvert && d.open) d.close()
-  }, [ouvert])
+  }, [ouvert, refDeclencheur])
 
   useEffect(() => {
     const d = dialog.current
     const onClose = () => {
       fermer.current?.()
-      declencheur.current?.focus?.()
+      // Après la restauration propre au navigateur (Safari remet le focus sur l'élément d'avant).
+      requestAnimationFrame(() => declencheur.current?.focus?.())
     }
     d.addEventListener('close', onClose)
     return () => d.removeEventListener('close', onClose)

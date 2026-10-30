@@ -33,6 +33,8 @@ export default defineConfig({
             { name: 'icones', test: /[\\/]node_modules[\\/]lucide-react[\\/]/ },
             { name: 'decouverte', test: /[\\/]src[\\/]features[\\/]decouverte[\\/][a-z]+\.js$/ },
             { name: 'groupe', test: /[\\/]src[\\/]features[\\/]groupe[\\/](depenses|format)\.js$/ },
+            { name: 'partenaires', test: /[\\/]src[\\/]features[\\/]partenaires[\\/][a-z]+\.js$/ },
+            { name: 'profil', test: /[\\/]src[\\/]features[\\/](profil|avis|securite)[\\/][a-z]+\.js$/ },
           ],
         },
       },

@@ -72,6 +72,7 @@ export default function EditionProfil() {
   const [erreurPhoto, setErreurPhoto] = useState('')
   const [apercuOuvert, setApercuOuvert] = useState(false)
   const fichier = useRef(null)
+  const boutonApercu = useRef(null)
   const modifie = JSON.stringify(form) !== JSON.stringify(initial)
 
   // Lien « Ajoutez une photo » depuis l'accueil du profil : on amène directement au bon champ.
@@ -219,7 +220,7 @@ export default function EditionProfil() {
 
           {erreur && <p className="profil-enrichi__erreur" role="alert">{erreur}</p>}
           <div className="profil-enrichi__envoi">
-            {mobile && <Button variant="secondaire" icon={Eye} onClick={() => setApercuOuvert(true)}>Aperçu</Button>}
+            {mobile && <Button ref={boutonApercu} variant="secondaire" icon={Eye} onClick={() => setApercuOuvert(true)}>Aperçu</Button>}
             <Button type="submit" icon={modifie ? Save : Check} disabled={!modifie}>
               {modifie ? 'Enregistrer mon profil' : 'Profil enregistré'}
             </Button>
@@ -238,7 +239,7 @@ export default function EditionProfil() {
       </div>
 
       {mobile && (
-        <Feuille ouvert={apercuOuvert} onFermer={() => setApercuOuvert(false)} titre="Comment les autres vous voient">
+        <Feuille ouvert={apercuOuvert} onFermer={() => setApercuOuvert(false)} titre="Comment les autres vous voient" declencheur={boutonApercu}>
           <Apercu user={user} form={form} />
         </Feuille>
       )}
