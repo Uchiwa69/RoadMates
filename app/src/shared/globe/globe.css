@@ -1,0 +1,77 @@
+/* Globe : conteneur, squelette de chargement, bulles et étiquettes de villes. */
+.globe { position: relative; width: 100%; height: 100%; min-height: 240px; }
+.globe__rendu, .globe__scene { position: absolute; inset: 0; }
+.globe__scene canvas { display: block; outline: none; cursor: grab; }
+.globe__scene canvas:active { cursor: grabbing; }
+
+/* Squelette : une sphère qui respire pendant le chargement de three.js */
+.globe__squelette { position: absolute; inset: 0; display: grid; place-items: center; }
+.globe__squelette-sphere {
+  width: min(78%, 78vh, 460px); aspect-ratio: 1; border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, rgb(255 255 255 / .22), transparent 55%),
+    radial-gradient(circle at 50% 50%, #1B2444 0 68%, transparent 69%);
+  box-shadow: 0 0 60px 10px color-mix(in srgb, var(--corail) 35%, transparent);
+  animation: globe-respire 2.4s var(--ease) infinite alternate;
+}
+@keyframes globe-respire { from { transform: scale(.97); opacity: .75; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .globe__squelette-sphere { animation: none; } }
+
+/* Bulle au survol (remplace le style par défaut de globe.gl) */
+.globe .float-tooltip-kap { background: none; padding: 0; font: inherit; color: inherit; border-radius: 0; }
+.globe-bulle {
+  padding: 8px 12px; border-radius: var(--r-m);
+  background: var(--surface); color: var(--texte);
+  font-family: var(--police-texte); font-size: .875rem; font-weight: 600;
+  box-shadow: var(--ombre-2); border: 1px solid var(--bord);
+  white-space: nowrap;
+}
+
+/* Étiquettes de villes posées sur le globe, à gauche ou à droite de leur point */
+.globe-ancre { position: relative; width: 0; height: 0; }
+.globe-ville {
+  position: absolute; left: 0; top: 0;
+  display: inline-flex; align-items: center; gap: 6px;
+  transform: translate(12px, -50%);
+  padding: 5px 10px 5px 12px; border-radius: var(--r-rond);
+  border: 1.5px solid rgb(255 255 255 / .7);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  color: var(--texte); font: 650 .8rem/1.2 var(--police-texte);
+  box-shadow: var(--ombre-2); cursor: pointer; white-space: nowrap;
+  transition: background var(--d-rapide), border-color var(--d-rapide);
+}
+.globe-ville--gauche { transform: translate(calc(-100% - 12px), -50%); }
+.globe-ville:hover { border-color: var(--primaire); }
+.globe-ville__nb {
+  min-width: 20px; padding: 1px 6px; border-radius: var(--r-rond);
+  background: var(--primaire); color: var(--sur-primaire); font-size: .72rem; text-align: center;
+}
+.globe-ville--vide { font-weight: 550; }
+.globe-ville--active { background: var(--primaire); color: var(--sur-primaire); border-color: var(--primaire); }
+.globe-ville--active .globe-ville__nb { background: var(--sur-primaire); color: var(--primaire); }
+
+.globe-plat__pays, .globe-plat__point { cursor: pointer; }
+
+/* Commandes de zoom (en haut à droite du globe) et rappel du geste molette */
+.globe-zoom {
+  position: absolute; z-index: 2;
+  top: var(--globe-commandes-haut, 12px); right: var(--globe-commandes-droite, 12px);
+  display: grid; gap: 1px; overflow: hidden;
+  border-radius: var(--r-m); border: 1px solid var(--bord);
+  background: var(--bord); box-shadow: var(--ombre-2);
+}
+.globe-zoom__btn {
+  display: grid; place-items: center; width: 40px; height: 40px; border: none;
+  background: var(--surface); color: var(--texte); cursor: pointer;
+  transition: background var(--d-rapide), color var(--d-rapide);
+}
+.globe-zoom__btn:hover { background: var(--primaire-doux); color: var(--primaire-texte); }
+.globe-zoom__btn:active { background: var(--primaire); color: var(--sur-primaire); }
+.globe-zoom__astuce {
+  position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  margin: 0; padding: 10px 16px; border-radius: var(--r-rond);
+  background: rgb(11 16 32 / .82); color: #F6EFE9; font-size: .875rem; font-weight: 600;
+  pointer-events: none; white-space: nowrap;
+  animation: globe-astuce var(--d-moyen) var(--ease);
+}
+@keyframes globe-astuce { from { opacity: 0; } }

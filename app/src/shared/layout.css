@@ -1,0 +1,170 @@
+/* Gabarit : en-tête translucide, navigation, pastille de démo. */
+
+/* ---------- Lien d'évitement ---------- */
+.evitement {
+  position: fixed; z-index: 100; top: var(--e-2); left: var(--e-2);
+  padding: 10px 16px; border-radius: var(--r-m);
+  background: var(--texte); color: var(--fond); font-weight: 650; text-decoration: none;
+  transform: translateY(-200%);
+}
+.evitement:focus { transform: none; }
+
+/* ---------- En-tête ---------- */
+/* Le flou est porté par ::before : un backdrop-filter sur l'en-tête lui-même
+   piégerait les enfants en position fixe (onglets mobiles, pastille de démo). */
+.entete { position: sticky; top: 0; z-index: 40; }
+.entete::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: var(--surface-verre);
+  backdrop-filter: saturate(1.6) blur(16px);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--bord) 70%, transparent);
+}
+.entete__inner {
+  max-width: var(--largeur); margin: 0 auto; height: var(--haut-entete);
+  padding: 0 var(--e-4);
+  display: flex; align-items: center; gap: var(--e-6);
+}
+
+.logo { display: inline-flex; text-decoration: none; color: var(--texte); border-radius: var(--r-m); flex: none; }
+.logo-marque { display: inline-flex; align-items: center; gap: 10px; }
+.logo-texte { font-family: var(--police-titre); font-weight: 700; font-size: 1.3rem; letter-spacing: -.02em; }
+
+.entete__outils { margin-left: auto; display: flex; align-items: center; gap: var(--e-2); }
+.theme-btn {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: transparent; color: var(--texte); cursor: pointer;
+  transition: background var(--d-rapide);
+}
+.theme-btn:hover { background: var(--fond-2); }
+
+/* ---------- Navigation (ordinateur) ---------- */
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--e-1); }
+.nav__lien {
+  position: relative; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 40px; padding: 8px 14px; border-radius: var(--r-rond);
+  color: var(--texte-2); font-weight: 600; text-decoration: none;
+  transition: background var(--d-rapide), color var(--d-rapide);
+}
+.nav__lien:hover { color: var(--texte); background: var(--fond-2); }
+.nav__lien.active { color: var(--primaire-texte); background: var(--primaire-doux); }
+.nav__icone { position: relative; display: inline-grid; }
+.nav__icone svg { width: 18px; height: 18px; }
+.nav__notif {
+  position: absolute; top: -7px; right: -9px;
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-rond);
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--sur-accent);
+  font-size: .7rem; font-weight: 800; line-height: 1;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+/* ---------- Contenu ---------- */
+.main {
+  max-width: var(--largeur); margin: 0 auto;
+  padding: var(--e-8) var(--e-4) var(--e-16);
+}
+.main:focus { outline: none; }
+.main > div > section { min-width: 0; }
+
+/* Ordinateur : la pastille de notification se place dans le coin du lien, pas sur le libellé. */
+@media (min-width: 768px) {
+  .nav__icone { position: static; }
+  .nav__notif { top: -2px; right: -2px; }
+}
+
+/* ---------- Pastille « Mode démo » ---------- */
+.demo { position: relative; }
+.demo__pastille {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 6px 14px; border-radius: var(--r-rond);
+  border: 1.5px dashed var(--bord-fort);
+  background: var(--surface); color: var(--texte);
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  transition: border-color var(--d-rapide), box-shadow var(--d-rapide);
+}
+.demo__pastille:hover { border-color: var(--violet-texte); }
+.demo__pastille svg { color: var(--violet-texte); }
+.demo__sep { color: var(--texte-2); }
+.demo__panneau {
+  position: absolute; z-index: 50; right: 0; top: calc(100% + 8px);
+  width: min(300px, calc(100vw - 32px));
+  display: grid; gap: var(--e-3);
+  padding: var(--e-4); border-radius: var(--r-l);
+  background: var(--surface); border: 1px solid var(--bord); box-shadow: var(--ombre-3);
+  animation: demo-entree var(--d-moyen) var(--ease);
+}
+@keyframes demo-entree { from { opacity: 0; transform: translateY(-6px); } }
+.demo__tete { display: flex; align-items: center; justify-content: space-between; }
+.demo__titre { margin: 0; font-family: var(--police-titre); font-weight: 650; font-size: 1.1rem; }
+.demo__fermer {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: transparent; color: var(--texte-2); cursor: pointer;
+}
+.demo__fermer:hover { background: var(--fond-2); color: var(--texte); }
+.demo__aide { margin: 0; font-size: .85rem; color: var(--texte-2); }
+.demo__label { font-size: .85rem; font-weight: 650; margin-bottom: calc(var(--e-2) * -1); }
+.demo__choix { display: flex; align-items: center; gap: var(--e-3); }
+.demo__choix select { flex: 1; min-width: 0; }
+.demo__reset {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; border-radius: var(--r-rond);
+  border: 1.5px solid var(--bord-fort); background: transparent; color: var(--texte);
+  font-weight: 600; cursor: pointer;
+}
+.demo__reset:hover { background: var(--erreur-doux); color: var(--erreur); border-color: currentColor; }
+
+/* ---------- Ordinateur : pastille flottante en bas à droite ---------- */
+@media (min-width: 768px) {
+  .demo { position: fixed; z-index: 45; right: var(--e-6); bottom: var(--e-6); }
+  .demo__pastille { box-shadow: var(--ombre-2); }
+  .demo__panneau { top: auto; bottom: calc(100% + 8px); animation-name: demo-entree-haut; }
+  @keyframes demo-entree-haut { from { opacity: 0; transform: translateY(6px); } }
+}
+
+/* ---------- Mobile : barre d'onglets en bas ---------- */
+@media (max-width: 767px) {
+  .entete__inner { gap: var(--e-2); height: 56px; padding: 0 var(--e-3) 0 var(--e-4); }
+  .logo-texte { font-size: 1.15rem; }
+  .logo-marque svg { width: 28px; height: 28px; }
+  .demo__libelle, .demo__sep { display: none; }
+
+  .nav {
+    position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--surface-verre);
+    backdrop-filter: saturate(1.6) blur(16px);
+    -webkit-backdrop-filter: saturate(1.6) blur(16px);
+    border-top: 1px solid color-mix(in srgb, var(--bord) 70%, transparent);
+  }
+  .nav ul { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+  .nav__lien {
+    flex-direction: column; gap: 2px; width: 100%;
+    height: var(--haut-onglets); padding: 8px 2px; border-radius: 0;
+    font-size: .7rem; font-weight: 650; letter-spacing: .01em;
+  }
+  .nav__lien:hover { background: transparent; }
+  .nav__lien.active { background: transparent; }
+  .nav__icone { padding: 3px 14px; border-radius: var(--r-rond); transition: background var(--d-rapide); }
+  .nav__lien.active .nav__icone { background: var(--primaire-doux); }
+  .nav__icone svg { width: 22px; height: 22px; }
+  .nav__notif { top: -3px; right: 4px; }
+
+  .main { padding: var(--e-6) var(--e-4) calc(var(--haut-onglets) + var(--e-10) + env(safe-area-inset-bottom)); }
+}
+
+/* ---------- Squelette de chargement d'une page ---------- */
+.chargement { display: grid; gap: var(--e-4); padding-top: var(--e-4); }
+.chargement__ligne, .chargement__bloc {
+  display: block; border-radius: var(--r-m);
+  background: linear-gradient(90deg, var(--fond-2) 0%, var(--surface-2) 50%, var(--fond-2) 100%);
+  background-size: 200% 100%; animation: chargement-reflet 1.2s linear infinite;
+}
+.chargement__ligne { height: 18px; width: min(420px, 80%); }
+.chargement__ligne--titre { height: 40px; width: min(320px, 70%); }
+.chargement__bloc { height: 280px; border-radius: var(--r-xl); }
+@keyframes chargement-reflet { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .chargement__ligne, .chargement__bloc { animation: none; } }
+
+/* Les titres reçoivent le focus au changement de page : pas d'anneau à la souris */
+main h1[tabindex='-1']:focus:not(:focus-visible) { outline: none; }
