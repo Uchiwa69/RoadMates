@@ -11,7 +11,7 @@ export function itinerairesCommuns(db, monVoyage) {
   for (const autre of db.trips) {
     if (autre.userId === monVoyage.userId) continue
     const user = db.users.find((u) => u.id === autre.userId)
-    if (!user || profilMasque(user) || itineraireMasque(user)) continue
+    if (!user || profilMasque(user) || itineraireMasque(user) || bloqueEntre(db, monVoyage.userId, user.id)) continue
     const communes = []
     for (const mienne of monVoyage.etapes) {
       for (const sienne of autre.etapes) {
@@ -58,7 +58,7 @@ function presentsPendant(db, userId, mesEtapes, filtre) {
   for (const autre of db.trips) {
     if (autre.userId === userId) continue
     const user = db.users.find((candidat) => candidat.id === autre.userId)
-    if (!user || profilMasque(user) || itineraireMasque(user)) continue
+    if (!user || profilMasque(user) || itineraireMasque(user) || bloqueEntre(db, userId, user.id)) continue
     const communes = []
     for (const sienne of autre.etapes.filter(filtre)) {
       for (const mienne of mesEtapes) {
@@ -71,6 +71,13 @@ function presentsPendant(db, userId, mesEtapes, filtre) {
     }
   }
   return fusionnerParUser(resultats).sort((a, b) => b.compatibilite - a.compatibilite || b.jours - a.jours)
+}
+
+function bloqueEntre(db, userId, autreId) {
+  return (db.blocages ?? []).some((blocage) =>
+    (blocage.bloqueurId === userId && blocage.bloqueId === autreId) ||
+    (blocage.bloqueurId === autreId && blocage.bloqueId === userId),
+  )
 }
 
 // Un voyageur peut avoir plusieurs voyages : on n'affiche qu'une carte par personne.
