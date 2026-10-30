@@ -15,6 +15,8 @@ function dateLocale(date) {
   return `${annee}-${mois}-${jour}`
 }
 
+const AUJOURDHUI = dateLocale(new Date())
+
 function finDuVoyage(trips, userId) {
   const today = dateLocale(new Date())
   const fins = trips
@@ -44,7 +46,7 @@ function RegleAnonymat({ label, description, active, value, onChange, onQuick, i
         </span>
       </div>
       <Field label="Masquer jusqu’au">
-        <Input type="date" value={value} min={dateLocale(new Date())} onChange={(event) => onChange(event.target.value)} />
+        <Input type="date" value={value} min={AUJOURDHUI} onChange={(event) => onChange(event.target.value)} />
       </Field>
       <div className="confidentialite__durees" aria-label={`Durée pour : ${label}`}>
         <button type="button" onClick={() => onQuick('24h')}>24 h</button>
