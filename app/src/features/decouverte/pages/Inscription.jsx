@@ -105,7 +105,7 @@ export default function Inscription() {
               </Field>
               <fieldset className="inscription__genres" aria-describedby={erreur('genre') ? 'genre-err' : undefined}>
                 <legend>Genre</legend>
-                <p className="ui-field__aide">Il permet aux voyageuses de filtrer « femmes uniquement ».</p>
+                <p className="ui-field__aide">Choisissez ensuite les voyageurs que vous souhaitez voir dans la découverte.</p>
                 <div className="inscription__radios">
                   {GENRES.map(([v, l]) => (
                     <label key={v} className="inscription__radio">

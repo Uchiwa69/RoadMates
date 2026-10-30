@@ -1,6 +1,6 @@
 // Barre de critères cumulables de découverte.
 import { AnimatePresence, m } from 'motion/react'
-import { BadgeCheck, RotateCcw, SlidersHorizontal, Venus } from 'lucide-react'
+import { BadgeCheck, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { Chip, Field, Input, Select } from '../../shared/ui/index.js'
 import { FILTRES_VIDES, nombreFiltresActifs } from './filtres.js'
 
@@ -10,8 +10,12 @@ const INVESTISSEMENTS = [
   { valeur: 'tout', libelle: 'Tout le voyage' },
 ]
 
-export default function Filtres({ filtres, setFiltres, langues, centresInteret, total }) {
+export default function Filtres({ filtres, setFiltres, langues, centresInteret, total, preferenceGenre = 'tous' }) {
   const maj = (champ) => (event) => setFiltres((actuel) => ({ ...actuel, [champ]: event.target.value }))
+  const minValide = filtres.ageMin === '' || (Number.isInteger(Number(filtres.ageMin)) && Number(filtres.ageMin) >= 18 && Number(filtres.ageMin) <= 99)
+  const maxValide = filtres.ageMax === '' || (Number.isInteger(Number(filtres.ageMax)) && Number(filtres.ageMax) >= 18 && Number(filtres.ageMax) <= 99)
+  const ageInvalide = !minValide || !maxValide || (filtres.ageMin !== '' && filtres.ageMax !== '' && Number(filtres.ageMin) > Number(filtres.ageMax))
+  const budgetInvalide = filtres.budgetMax !== '' && (!Number.isFinite(Number(filtres.budgetMax)) || Number(filtres.budgetMax) < 0 || Number(filtres.budgetMax) > 10000)
   const actifs = nombreFiltresActifs(filtres)
 
   return (
@@ -34,9 +38,13 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
         </p>
       </div>
       <div className="filtres__champs">
-        <Chip actif={filtres.femmes} icon={Venus} onClick={() => setFiltres((actuel) => ({ ...actuel, femmes: !actuel.femmes }))}>
-          Femmes uniquement
-        </Chip>
+        <Field label="Genre souhaité" className="filtres__preference">
+          <Select value={filtres.genre} onChange={maj('genre')}>
+            <option value="H">Hommes</option>
+            <option value="F">Femmes</option>
+            <option value="tous">Les deux</option>
+          </Select>
+        </Field>
         <Chip actif={filtres.verifie} icon={BadgeCheck} onClick={() => setFiltres((actuel) => ({ ...actuel, verifie: !actuel.verifie }))}>
           Profils vérifiés
         </Chip>
@@ -58,8 +66,8 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
             {['routard', 'confort', 'aventure', 'culture', 'fête'].map((style) => <option key={style} value={style}>{style}</option>)}
           </Select>
         </Field>
-        <Field label="Budget max. par jour (€)" className="filtres__budget">
-          <Input type="number" min="0" max="10000" step="0.01" inputMode="decimal" value={filtres.budgetMax} onChange={maj('budgetMax')} />
+        <Field label="Budget max. par jour (€)" className="filtres__budget" error={budgetInvalide ? 'Le budget doit être compris entre 0 et 10 000 euros.' : undefined}>
+          <Input type="number" min="0" max="10000" step="0.01" inputMode="decimal" value={filtres.budgetMax} aria-invalid={budgetInvalide} onChange={maj('budgetMax')} />
         </Field>
         <Field label="Investissement" className="filtres__preference">
           <Select value={filtres.investissement} onChange={maj('investissement')}>
@@ -67,13 +75,13 @@ export default function Filtres({ filtres, setFiltres, langues, centresInteret, 
             {INVESTISSEMENTS.map(({ valeur, libelle }) => <option key={valeur} value={valeur}>{libelle}</option>)}
           </Select>
         </Field>
-        <Field label="Âge min." className="filtres__age">
-          <Input type="number" inputMode="numeric" min="18" max="99" value={filtres.ageMin} onChange={maj('ageMin')} />
+        <Field label="Âge min." className="filtres__age" error={!minValide ? 'L’âge doit être compris entre 18 et 99 ans.' : ageInvalide ? 'L’âge minimum ne peut pas dépasser l’âge maximum.' : undefined}>
+          <Input type="number" inputMode="numeric" min="18" max="99" value={filtres.ageMin} aria-invalid={ageInvalide} onChange={maj('ageMin')} />
         </Field>
-        <Field label="Âge max." className="filtres__age">
-          <Input type="number" inputMode="numeric" min="18" max="99" value={filtres.ageMax} onChange={maj('ageMax')} />
+        <Field label="Âge max." className="filtres__age" error={!maxValide ? 'L’âge doit être compris entre 18 et 99 ans.' : ageInvalide ? 'L’âge maximum doit être supérieur ou égal à l’âge minimum.' : undefined}>
+          <Input type="number" inputMode="numeric" min="18" max="99" value={filtres.ageMax} aria-invalid={ageInvalide} onChange={maj('ageMax')} />
         </Field>
-        <button type="button" className="filtres__reset" onClick={() => setFiltres({ ...FILTRES_VIDES })} disabled={actifs === 0}>
+        <button type="button" className="filtres__reset" onClick={() => setFiltres({ ...FILTRES_VIDES, genre: ['H', 'F'].includes(preferenceGenre) ? preferenceGenre : 'tous' })} disabled={actifs === 0}>
           <RotateCcw size={16} aria-hidden="true" /> Réinitialiser
         </button>
       </div>

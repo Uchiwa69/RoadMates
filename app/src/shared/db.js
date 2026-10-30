@@ -7,7 +7,9 @@
 //   requests  B  { id, fromId, toId, message, statut: 'en_attente'|'acceptee'|'refusee', creeLe }
 //   groups    B  { id, nom, destination, membres: userId[], creeLe }
 //   messages  B  { id, groupId, auteurId, texte, envoyeLe, systeme?: bool }  (systeme : « X a quitté le groupe »)
-//   expenses  B  { id, groupId, createurId, libelle, categorie, montantCentimes, dateReservation,
+//   avis      B  { id, groupId, auteurId, cibleId, note, commentaire, creeLe }
+//   blocages  A { id, bloqueurId, bloqueId, creeLe }
+//   expenses  B { id, groupId, createurId, libelle, categorie, montantCentimes, dateReservation,
 //                  parts: [{ userId, montantCentimes, payee: bool }], creeLe }
 //   session   —  { userId }  (voir session.js)
 //   version   —  version du jeu de démo (seed.js), pour compléter les anciennes données
@@ -31,6 +33,8 @@ function completerAvecSeed(db) {
     }
   }
   db.expenses ??= []
+  db.avis ??= []
+  db.blocages ??= []
   db.version = seed.version
   try {
     localStorage.setItem(KEY, JSON.stringify(db))
@@ -44,7 +48,15 @@ function load() {
   if (cache) return cache
   try {
     const raw = localStorage.getItem(KEY)
-    cache = raw ? completerAvecSeed(JSON.parse(raw)) : structuredClone(seed)
+    if (raw) {
+      cache = completerAvecSeed(JSON.parse(raw))
+      cache.avis ??= []
+      cache.blocages ??= []
+    } else {
+      cache = structuredClone(seed)
+      cache.avis = []
+      cache.blocages = []
+    }
   } catch {
     cache = structuredClone(seed)
   }

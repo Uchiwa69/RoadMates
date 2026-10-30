@@ -3,7 +3,7 @@ export const FILTRES_VIDES = {
   ageMin: '',
   ageMax: '',
   langue: '',
-  femmes: false,
+  genre: 'tous',
   centreInteret: '',
   styleVoyage: '',
   budgetMax: '',
@@ -11,18 +11,61 @@ export const FILTRES_VIDES = {
   verifie: false,
 }
 
-export function appliquerFiltres(resultats, filtres) {
-  const budgetMaxCentimes = filtres.budgetMax === '' ? null : Number(filtres.budgetMax) * 100
+export function preferenceAccepteGenre(preference, genre) {
+  return preference !== 'H' && preference !== 'F' && preference !== 'tous'
+    ? true
+    : preference === 'tous' || preference === genre
+}
+
+export function preferencesGenresCompatibles(a, b) {
+  return preferenceAccepteGenre(a?.preferenceGenre, b?.genre) && preferenceAccepteGenre(b?.preferenceGenre, a?.genre)
+}
+
+export function normaliserFiltres(filtres, preferenceGenre = 'tous') {
+  const source = filtres && typeof filtres === 'object' ? filtres : {}
+  const { femmes: ancienFiltreFemmes, ...criteres } = source
+  const genre = ['H', 'F', 'tous'].includes(source.genre)
+    ? source.genre
+    : ancienFiltreFemmes === true
+      ? 'F'
+      : (['H', 'F'].includes(preferenceGenre) ? preferenceGenre : 'tous')
+  return {
+    ...FILTRES_VIDES,
+    ...criteres,
+    genre,
+    ageMin: typeof source.ageMin === 'string' || typeof source.ageMin === 'number' ? String(source.ageMin) : '',
+    ageMax: typeof source.ageMax === 'string' || typeof source.ageMax === 'number' ? String(source.ageMax) : '',
+    langue: typeof source.langue === 'string' ? source.langue : '',
+    centreInteret: typeof source.centreInteret === 'string' ? source.centreInteret : '',
+    styleVoyage: typeof source.styleVoyage === 'string' ? source.styleVoyage : '',
+    budgetMax: typeof source.budgetMax === 'string' || typeof source.budgetMax === 'number' ? String(source.budgetMax) : '',
+    investissement: typeof source.investissement === 'string' ? source.investissement : '',
+    verifie: source.verifie === true,
+  }
+}
+
+export function appliquerFiltres(resultats, filtres, moi = null) {
+  const criteres = normaliserFiltres(filtres, moi?.preferenceGenre)
+  const ageMin = criteres.ageMin === '' ? null : Number(criteres.ageMin)
+  const ageMax = criteres.ageMax === '' ? null : Number(criteres.ageMax)
+  const ageMinValide = ageMin === null || (Number.isInteger(ageMin) && ageMin >= 18 && ageMin <= 99)
+  const ageMaxValide = ageMax === null || (Number.isInteger(ageMax) && ageMax >= 18 && ageMax <= 99)
+  const bornesValides = ageMinValide && ageMaxValide && (ageMin === null || ageMax === null || ageMin <= ageMax)
+  const budget = criteres.budgetMax === '' ? null : Number(criteres.budgetMax)
+  const budgetValide = budget === null || (Number.isFinite(budget) && budget >= 0 && budget <= 10000)
+  const budgetMaxCentimes = budget === null || !budgetValide ? null : Math.round(budget * 100)
   return resultats.filter(({ user }) =>
-    (filtres.ageMin === '' || user.age >= Number(filtres.ageMin)) &&
-    (filtres.ageMax === '' || user.age <= Number(filtres.ageMax)) &&
-    (filtres.langue === '' || user.langues?.includes(filtres.langue)) &&
-    (!filtres.femmes || user.genre === 'F') &&
-    (!filtres.centreInteret || user.centresInteret?.includes(filtres.centreInteret)) &&
-    (!filtres.styleVoyage || user.styleVoyage === filtres.styleVoyage) &&
+    bornesValides && budgetValide &&
+    (ageMin === null || user.age >= ageMin) &&
+    (ageMax === null || user.age <= ageMax) &&
+    (criteres.langue === '' || user.langues?.includes(criteres.langue)) &&
+    (criteres.genre === 'tous' || user.genre === criteres.genre) &&
+    (!moi || preferencesGenresCompatibles(moi, user)) &&
+    (!criteres.centreInteret || user.centresInteret?.includes(criteres.centreInteret)) &&
+    (!criteres.styleVoyage || user.styleVoyage === criteres.styleVoyage) &&
     (budgetMaxCentimes === null || (user.budgetJournalierCentimes != null && user.budgetJournalierCentimes <= budgetMaxCentimes)) &&
-    (!filtres.investissement || user.investissement === filtres.investissement) &&
-    (!filtres.verifie || user.verifie === true))
+    (!criteres.investissement || user.investissement === criteres.investissement) &&
+    (!criteres.verifie || user.verifie === true))
 }
 
 export function nombreFiltresActifs(filtres) {
@@ -30,7 +73,7 @@ export function nombreFiltresActifs(filtres) {
 }
 
 export function scoreCompatibilite(voyageur, moi) {
-  if (!voyageur || !moi) return 0
+  if (!voyageur || !moi || !preferencesGenresCompatibles(voyageur, moi)) return 0
   const comparaisons = []
   const ajouter = (poids, valeur) => comparaisons.push({ poids, valeur: Math.max(0, Math.min(1, valeur)) })
 

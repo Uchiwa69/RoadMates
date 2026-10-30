@@ -8,6 +8,7 @@ import { useCurrentUser } from '../../shared/session.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, Badge, Button, Card, EmptyState, Field, Textarea, Timeline, useToast } from '../../shared/ui/index.js'
 import { formatPeriode } from './format.js'
+import { avisPublics, moyenneAvis, ontVoyageCommunTermine } from '../avis/avis.js'
 
 const MAX = 300
 
@@ -16,8 +17,9 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const toast = useToast()
   const user = useDb((db) => db.users.find((candidate) => candidate.id === userId) ?? null)
-  const trips = useDb((db) => db.trips)
-  const requests = useDb((db) => db.requests)
+  const database = useDb((db) => db)
+  const trips = database.trips
+  const requests = database.requests
   const currentUser = useCurrentUser()
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -36,7 +38,11 @@ export default function ProfilePage() {
   const incoming = !!user && requests.some((request) =>
     request.fromId === user.id && request.toId === currentUser?.id && request.statut === 'en_attente',
   )
-  const peutDemander = !!user && !!currentUser && currentUser.id !== user.id && !connected && !outgoing && !incoming
+  const bloque = !!user && (database.blocages ?? []).some((blocage) =>
+    (blocage.bloqueurId === currentUser?.id && blocage.bloqueId === user.id) ||
+    (blocage.bloqueurId === user.id && blocage.bloqueId === currentUser?.id),
+  )
+  const peutDemander = !!user && !!currentUser && currentUser.id !== user.id && currentUser.verifie === true && !connected && !outgoing && !incoming && !bloque
 
   // Mobile : le bouton « Demander le contact » reste visible tant que le formulaire est hors écran.
   useEffect(() => {
@@ -55,6 +61,9 @@ export default function ProfilePage() {
   }
 
   const estMonProfil = currentUser?.id === user.id
+  if (bloque) {
+    return <EmptyState icon={ShieldCheck} titre="Profil indisponible"><p>Ce profil n’est pas disponible.</p></EmptyState>
+  }
   if (!estMonProfil && profilMasque(user)) {
     return (
       <EmptyState icon={ShieldCheck} titre="Profil masqué temporairement">
@@ -65,8 +74,23 @@ export default function ProfilePage() {
 
   const itineraireCache = !estMonProfil && itineraireMasque(user)
   const sesVoyages = itineraireCache ? [] : trips.filter((trip) => trip.userId === userId)
-  const mesEtapes = trips.filter((trip) => trip.userId === currentUser?.id).flatMap((trip) => trip.etapes)
+  const mesVoyages = trips.filter((trip) => trip.userId === currentUser?.id)
+  const mesEtapes = mesVoyages.flatMap((trip) => trip.etapes)
   const enCommun = (etape) => mesEtapes.some((e) => e.ville === etape.ville && e.debut <= etape.fin && etape.debut <= e.fin)
+  const amisRoute = currentUser?.amisRoute ?? []
+  const peutAjouterAmiRoute = !!connected && currentUser?.id !== user.id && !amisRoute.includes(user.id) && ontVoyageCommunTermine(mesVoyages, trips.filter((trip) => trip.userId === user.id))
+  const avisVisibles = avisPublics(database, user.id)
+
+  function ajouterAmiRoute() {
+    if (!peutAjouterAmiRoute) return
+    updateDb((db) => {
+      const moi = db.users.find((candidat) => candidat.id === currentUser.id)
+      if (!moi) return
+      moi.amisRoute ??= []
+      if (!moi.amisRoute.includes(user.id)) moi.amisRoute.push(user.id)
+    })
+    toast(`${user.prenom} a été ajouté à vos amis de route.`)
+  }
 
   function sendRequest(event) {
     event.preventDefault()
@@ -145,6 +169,16 @@ export default function ProfilePage() {
             </dl>
           </Card>
 
+          <section className="profil__section" aria-labelledby="avis-titre">
+            <h2 id="avis-titre">Avis mutuels</h2>
+            {avisVisibles.length === 0
+              ? <p className="profil__vide">Aucun avis mutuel publié.</p>
+              : <>
+                <p>Note moyenne : <strong>{moyenneAvis(avisVisibles).toLocaleString('fr-FR', { maximumFractionDigits: 1 })}/5</strong> ({avisVisibles.length} avis)</p>
+                <ul>{avisVisibles.map((avis) => <li key={avis.id}><strong>{avis.auteur} · {avis.note}/5</strong><p>{avis.commentaire || 'Aucun commentaire.'}</p></li>)}</ul>
+              </>}
+          </section>
+
           <section aria-labelledby="etapes-titre" className="profil__section">
             <h2 id="etapes-titre">Étapes de voyage</h2>
             {itineraireCache ? <p className="profil__vide">Itinéraire masqué temporairement.</p> : sesVoyages.length === 0 ? <p className="profil__vide">Aucun voyage déclaré pour le moment.</p> : (
@@ -175,6 +209,7 @@ export default function ProfilePage() {
             {connected ? (
               <>
                 <Badge ton="succes" icon={Check}>En contact</Badge>
+                {peutAjouterAmiRoute && <Button variant="secondaire" onClick={ajouterAmiRoute}>Ajouter à mes amis de route</Button>}
                 <p className="profil__aide">Vous pouvez l’ajouter à un groupe pour discuter et partager les frais.</p>
                 <Button to={paths.groupes} variant="secondaire">Voir mes groupes</Button>
               </>
@@ -190,6 +225,8 @@ export default function ProfilePage() {
               </>
             ) : currentUser?.id === user.id ? (
               <p className="profil__aide">C’est votre profil.</p>
+            ) : !currentUser?.verifie ? (
+              <p className="profil__aide">Vérifiez votre identité pour envoyer une demande de contact.</p>
             ) : (
               <form ref={formulaire} className="profil__form" onSubmit={sendRequest} noValidate>
                 <Field

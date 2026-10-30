@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Compass, Filter, MapPin, Route } from 'lucide-react'
-import { useDb } from '../../../shared/db.js'
+import { updateDb, useDb } from '../../../shared/db.js'
 import { useCurrentUser } from '../../../shared/session.js'
 import { paths } from '../../../shared/paths.js'
 import { Button, EmptyState, EntetePage } from '../../../shared/ui/index.js'
@@ -10,12 +10,20 @@ import { itinerairesCommuns } from '../matching.js'
 import { formatPeriode } from '../dates.js'
 import VoyageurCarte from '../VoyageurCarte.jsx'
 import Filtres from '../Filtres.jsx'
-import { appliquerFiltres, FILTRES_VIDES } from '../filtres.js'
+import { appliquerFiltres, FILTRES_VIDES, normaliserFiltres } from '../filtres.js'
 
 export default function Compagnons() {
   const user = useCurrentUser()
   const db = useDb((d) => d)
-  const [filtres, setFiltres] = useState(FILTRES_VIDES)
+  const [filtres, setFiltresEtat] = useState(() => normaliserFiltres(user?.filtresDecouverte, user?.preferenceGenre))
+  const setFiltres = (maj) => {
+    const prochains = normaliserFiltres(typeof maj === 'function' ? maj(filtres) : maj, user?.preferenceGenre)
+    setFiltresEtat(prochains)
+    updateDb((base) => {
+      const voyageur = base.users.find((candidat) => candidat.id === user?.id)
+      if (voyageur) voyageur.filtresDecouverte = prochains
+    })
+  }
   const mesVoyages = db.trips.filter((t) => t.userId === user?.id)
   const langues = [...new Set(db.users.flatMap((u) => u.langues ?? []))].sort()
   const centresInteret = [...new Set(db.users.flatMap((u) => u.centresInteret ?? []))].sort()
@@ -35,7 +43,7 @@ export default function Compagnons() {
 
   const parVoyage = mesVoyages.map((voyage) => {
     const tous = itinerairesCommuns(db, voyage)
-    return { voyage, tous, visibles: appliquerFiltres(tous, filtres) }
+    return { voyage, tous, visibles: appliquerFiltres(tous, filtres, user) }
   })
   const total = parVoyage.reduce((s, v) => s + v.visibles.length, 0)
 
@@ -46,7 +54,7 @@ export default function Compagnons() {
       </EntetePage>
       <Button to={paths.monProfil} variant="secondaire">Compléter mon profil</Button>
 
-      <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} centresInteret={centresInteret} total={total} />
+      <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} centresInteret={centresInteret} total={total} preferenceGenre={user?.preferenceGenre} />
 
       {parVoyage.map(({ voyage, tous, visibles }) => (
         <section key={voyage.id} className="compagnons__voyage" aria-labelledby={`voyage-${voyage.id}`}>
@@ -77,7 +85,7 @@ export default function Compagnons() {
             <EmptyState
               icon={Filter}
               titre="Aucun voyageur ne correspond à ces filtres."
-              action={<Button variant="secondaire" onClick={() => setFiltres(FILTRES_VIDES)}>Réinitialiser les filtres</Button>}
+              action={<Button variant="secondaire" onClick={() => setFiltres({ ...FILTRES_VIDES, genre: user?.preferenceGenre ?? 'tous' })}>Réinitialiser les filtres</Button>}
             />
           )}
 

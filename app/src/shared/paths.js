@@ -21,4 +21,5 @@ export const paths = {
   // Step-up — confidentialité (agent A) et profil enrichi (agent B)
   confidentialite: '/confidentialite',
   monProfil: '/profil',
+  avis: '/avis',
 }
