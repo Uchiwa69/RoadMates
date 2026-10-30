@@ -117,6 +117,54 @@ export const ACTIVITES = [
   a('a-prz-shadervan', 'Prizren', 'Terrasses de la place Shadërvan', 'food', 'Centre historique', '€',
     'Place pavée autour d’une fontaine, entourée de terrasses.',
     'Le soir, toute la ville s’y retrouve : facile de se joindre à une table.'),
+  a('a-prz-hammam', 'Prizren', 'Hammam de Gazi Mehmet Pacha', 'culture', 'Centre historique', 'gratuit',
+    'Bains ottomans du XVIe siècle, restaurés, au bord de la Bistrica.',
+    'Une courte visite à glisser entre deux cafés, à plusieurs.'),
+  a('a-prz-ligue', 'Prizren', 'Complexe de la Ligue de Prizren', 'culture', 'Centre historique', '€',
+    'Maison-musée consacrée à la Ligue albanaise de 1878, moment clé de l’histoire régionale.',
+    'On en ressort avec des questions : idéal pour en discuter ensuite.'),
+  a('a-prz-ljevis', 'Prizren', 'Église de Notre-Dame de Ljeviš', 'culture', 'Centre historique', '€',
+    'Église médiévale inscrite au patrimoine mondial, connue pour ses fresques.',
+    'Les détails des fresques se repèrent mieux à plusieurs paires d’yeux.'),
+
+  // Pristina (suite)
+  a('a-pri-imperiale', 'Pristina', 'Mosquée impériale', 'culture', 'Vieille ville', 'gratuit',
+    'Mosquée du XVe siècle, l’un des plus anciens monuments de la ville.',
+    'Visite calme et respectueuse, en petit groupe.'),
+  a('a-pri-gracanica', 'Pristina', 'Monastère de Gračanica', 'culture', 'Gračanica, à 10 km', '€',
+    'Monastère médiéval inscrit au patrimoine mondial, à quelques kilomètres de la capitale.',
+    'Le taxi ou le bus se partage : l’aller-retour revient moins cher à plusieurs.'),
+  a('a-pri-gadime', 'Pristina', 'Grotte de Gadime', 'plein-air', 'Gadime, à 25 km', '€',
+    'Grotte de marbre aux concrétions blanches, visitée en groupe avec un guide.',
+    'La visite se fait de toute façon en groupe : autant venir avec ses compagnons.'),
+  a('a-pri-soiree', 'Pristina', 'Soirée dans les bars du centre', 'nuit', 'Centre', '€',
+    'Rues piétonnes animées le soir, entre cafés, bars à concerts et terrasses.',
+    'Pour rentrer tard, mieux vaut ne pas être seul.'),
+
+  // Peja
+  a('a-peja-rugova', 'Peja', 'Gorges de la Rugova', 'plein-air', 'Ouest de la ville', 'gratuit',
+    'Canyon spectaculaire au pied des montagnes, avec sentiers et points de vue.',
+    'En montagne, on ne part jamais seul.'),
+  a('a-peja-viaferrata', 'Peja', 'Via ferrata dans la Rugova', 'plein-air', 'Gorges de la Rugova', '€€',
+    'Itinéraires équipés de câbles le long des falaises, à faire avec un guide.',
+    'Le guide se partage : à quatre, la sortie coûte bien moins cher.'),
+  a('a-peja-patriarcat', 'Peja', 'Patriarcat de Peć', 'culture', 'Entrée des gorges', '€',
+    'Ensemble d’églises médiévales inscrit au patrimoine mondial.',
+    'Une visite paisible avant ou après la randonnée.'),
+  a('a-peja-bazar', 'Peja', 'Vieux bazar de Peja', 'food', 'Centre', '€',
+    'Rues commerçantes et cafés autour de la mosquée du bazar.',
+    'On goûte à plusieurs les spécialités des petites échoppes.'),
+
+  // Gjakova
+  a('a-gjk-bazar', 'Gjakova', 'Grand bazar (Çarshia e Madhe)', 'culture', 'Vieille ville', 'gratuit',
+    'L’un des plus grands bazars des Balkans, aux maisons de bois restaurées.',
+    'Flâner, négocier, se perdre : c’est plus drôle à plusieurs.'),
+  a('a-gjk-hadum', 'Gjakova', 'Mosquée Hadum', 'culture', 'Vieille ville', 'gratuit',
+    'Mosquée du XVIe siècle au cœur du bazar, avec ses peintures murales.',
+    'Visite courte et calme, en petit groupe.'),
+  a('a-gjk-terzi', 'Gjakova', 'Pont de Terzi', 'plein-air', 'Hors de la ville', 'gratuit',
+    'Long pont de pierre ottoman au-dessus de l’Erenik, dans la campagne.',
+    'Il faut s’y rendre en voiture : le trajet se partage.'),
 ]
 
 export const activitesDe = (ville) => ACTIVITES.filter((x) => x.ville === ville)
@@ -128,4 +176,6 @@ export const RESUMES = {
   Marrakech: 'La ville rouge aux portes de l’Atlas : médina, souks, jardins et palais.',
   Pristina: 'Jeune capitale animée, connue pour ses cafés et son architecture singulière.',
   Prizren: 'Ville historique au pied des monts Sharr : forteresse, mosquées et pont ottoman.',
+  Peja: 'Porte des montagnes de la Rugova : gorges, via ferrata et patrimoine médiéval.',
+  Gjakova: 'Ville du grand bazar, aux maisons de bois et aux ponts ottomans.',
 }

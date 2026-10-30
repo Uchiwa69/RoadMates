@@ -21,7 +21,7 @@ const photoDemo = (lettre, c1, c2) => `data:image/svg+xml,${encodeURIComponent(
 export const seed = {
   // À incrémenter quand on ajoute des données : les navigateurs qui ont déjà joué la démo
   // les reçoivent sans perdre les leurs (voir completerAvecSeed dans db.js).
-  version: 6,
+  version: 7,
   session: { userId: 'u-lea', partenaireId: null },
 
   users: [
@@ -36,7 +36,7 @@ export const seed = {
     { id: 'u-lucas', ...profil(['train', 'randonnée', 'photographie'], 'routard', 3500, 'actif', 'trajet'), prenom: 'Lucas', email: 'lucas@roadmates.demo', age: 26, genre: 'H', langues: ['français', 'anglais'], bio: 'La côte espagnole en train et en stop.', verifie: true },
     { id: 'u-chiara', ...profil(['gastronomie', 'culture', 'plage'], 'confort', 9000, 'tranquille', 'activites'), prenom: 'Chiara', email: 'chiara@roadmates.demo', age: 25, genre: 'F', langues: ['italien', 'anglais', 'français'], bio: 'Je rentre au pays, envie de faire découvrir le sud.', verifie: true },
     { id: 'u-jonas', ...profil(['musées', 'train', 'histoire'], 'culture', 6000, 'modéré', 'tout'), prenom: 'Jonas', email: 'jonas@roadmates.demo', age: 28, genre: 'H', langues: ['allemand', 'anglais'], bio: 'Interrail entre les capitales d’Europe centrale.', verifie: true },
-    { id: 'u-emma', ...profil(['kayak', 'plage', 'nature'], 'aventure', 5000, 'actif', 'activites'), prenom: 'Emma', email: 'emma@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Kayak et criques en Croatie.', verifie: false },
+    { id: 'u-emma', ...profil(['kayak', 'plage', 'nature'], 'aventure', 5000, 'actif', 'activites'), prenom: 'Emma', email: 'emma@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Kayak et criques en Croatie.', verifie: true },
     { id: 'u-nora', ...profil(['vélo', 'musées', 'gastronomie'], 'culture', 7500, 'modéré', 'tout'), prenom: 'Nora', email: 'nora@roadmates.demo', age: 24, genre: 'F', langues: ['allemand', 'anglais'], bio: 'Vélo, musées et cafés.', verifie: true },
     { id: 'u-mateo', ...profil(['danse', 'randonnée', 'culture'], 'aventure', 5500, 'actif', 'activites'), prenom: 'Mateo', email: 'mateo@roadmates.demo', age: 30, genre: 'H', langues: ['espagnol', 'anglais'], bio: 'Flamenco et randonnée en Andalousie.', verifie: true },
     { id: 'u-zoe', ...profil(['plage', 'ferry', 'nature'], 'routard', 4000, 'tranquille', 'trajet'), prenom: 'Zoé', email: 'zoe@roadmates.demo', age: 27, genre: 'F', langues: ['français', 'italien'], bio: 'Les îles grecques, sac à dos et ferry.', verifie: true },
@@ -51,9 +51,16 @@ export const seed = {
     { id: 'u-hugo', ...profil(['gastronomie', 'plage', 'vélo'], 'confort', 7000, 'tranquille', 'activites'), prenom: 'Hugo', email: 'hugo@roadmates.demo', age: 29, genre: 'H', langues: ['français', 'espagnol', 'anglais'], bio: 'Tapas, vélo le long de la mer et longues soirées : Barcelone puis Valence.', verifie: true },
     { id: 'u-sara', ...profil(['musées', 'histoire', 'gastronomie'], 'culture', 6000, 'modéré', 'tout'), prenom: 'Sara', email: 'sara@roadmates.demo', age: 24, genre: 'F', langues: ['italien', 'anglais', 'français'], bio: 'Rome et Florence pour mon mémoire en histoire de l’art, et beaucoup de glaces.', verifie: true },
     { id: 'u-malik', ...profil(['randonnée', 'photographie', 'culture'], 'aventure', 4500, 'actif', 'activites'), prenom: 'Malik', email: 'malik@roadmates.demo', age: 27, genre: 'H', langues: ['français', 'arabe', 'anglais'], bio: 'Photographe amateur, je pars vers l’Atlas au lever du jour.', verifie: true },
-    { id: 'u-clara', ...profil(['street art', 'musées', 'rencontres'], 'routard', 3500, 'actif', 'trajet'), prenom: 'Clara', email: 'clara@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante en design : fresques à Lyon, puis Paris en covoiturage.', verifie: false },
+    { id: 'u-clara', ...profil(['street art', 'musées', 'rencontres'], 'routard', 3500, 'actif', 'trajet'), prenom: 'Clara', email: 'clara@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante en design : fresques à Lyon, puis Paris en covoiturage.', verifie: true },
     { id: 'u-dren', ...profil(['randonnée', 'histoire', 'rencontres'], 'routard', 3000, 'actif', 'tout'), prenom: 'Dren', email: 'dren@roadmates.demo', age: 25, genre: 'H', langues: ['albanais', 'anglais', 'italien'], bio: 'Né à Prizren, je guide volontiers vers les monts Sharr.', verifie: true },
     { id: 'u-julie', ...profil(['musées', 'train', 'photographie'], 'culture', 5500, 'tranquille', 'trajet'), prenom: 'Julie', email: 'julie@roadmates.demo', age: 30, genre: 'F', langues: ['français', 'allemand', 'anglais'], bio: 'Prague et Vienne en train de nuit, appareil photo argentique en bandoulière.', verifie: true },
+
+    // Version 7 : le Kosovo s'anime (Pristina, Prizren, Peja, Gjakova), voyageurs vérifiés.
+    { id: 'u-elira', ...profil(['randonnée', 'culture', 'gastronomie'], 'aventure', 4000, 'modéré', 'activites'), prenom: 'Elira', email: 'elira@roadmates.demo', age: 24, genre: 'F', langues: ['albanais', 'anglais', 'français'], bio: 'Je rentre voir ma famille à Pristina et je file randonner dans la Rugova.', verifie: true },
+    { id: 'u-luan', ...profil(['histoire', 'photographie', 'rencontres'], 'culture', 4500, 'tranquille', 'activites'), prenom: 'Luan', email: 'luan@roadmates.demo', age: 28, genre: 'H', langues: ['albanais', 'anglais', 'italien'], bio: 'Bazars, ponts ottomans et cafés : Prizren puis Gjakova, appareil photo à la main.', verifie: true },
+    { id: 'u-nina', ...profil(['randonnée', 'musées', 'street art'], 'routard', 3500, 'actif', 'tout'), prenom: 'Nina', email: 'nina@roadmates.demo', age: 26, genre: 'F', langues: ['français', 'allemand', 'anglais'], bio: 'Trois semaines dans les Balkans en bus, je cherche des compagnons pour tout le voyage.', verifie: true },
+    { id: 'u-blerim', ...profil(['escalade', 'randonnée', 'nature'], 'aventure', 4000, 'actif', 'activites'), prenom: 'Blerim', email: 'blerim@roadmates.demo', age: 31, genre: 'H', langues: ['albanais', 'anglais', 'allemand'], bio: 'Grimpeur, je passe l’été dans la Rugova : via ferrata et bivouacs.', verifie: true },
+    { id: 'u-marie', ...profil(['culture', 'rencontres', 'gastronomie'], 'confort', 6000, 'modéré', 'activites'), prenom: 'Marie', email: 'marie@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais'], bio: 'Premier voyage solo : Pristina, ses cafés et ses musées.', verifie: true },
 
     // « Full » : le personnage qui peut tout montrer (profil complet, voyages passés et à venir,
     // contacts, groupes, dépenses, avis, amis de route). Aucune interaction avec le parcours de Léa.
@@ -166,6 +173,26 @@ export const seed = {
       { ville: 'Prague', pays: 'Tchéquie', debut: '2027-07-08', fin: '2027-07-11' },
       { ville: 'Vienne', pays: 'Autriche', debut: '2027-07-12', fin: '2027-07-15' },
     ] },
+    // Version 7 : Kosovo
+    { id: 't-elira', userId: 'u-elira', destination: 'Kosovo en famille', etapes: [
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-15', fin: '2027-07-18' },
+      { ville: 'Peja', pays: 'Kosovo', debut: '2027-07-19', fin: '2027-07-22' },
+    ] },
+    { id: 't-luan', userId: 'u-luan', destination: 'Bazars du Kosovo', etapes: [
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-19', fin: '2027-07-23' },
+      { ville: 'Gjakova', pays: 'Kosovo', debut: '2027-07-24', fin: '2027-07-26' },
+    ] },
+    { id: 't-nina', userId: 'u-nina', destination: 'Balkans en bus', etapes: [
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-17', fin: '2027-07-20' },
+      { ville: 'Prizren', pays: 'Kosovo', debut: '2027-07-21', fin: '2027-07-24' },
+      { ville: 'Peja', pays: 'Kosovo', debut: '2027-07-25', fin: '2027-07-27' },
+    ] },
+    { id: 't-blerim', userId: 'u-blerim', destination: 'Rugova', etapes: [
+      { ville: 'Peja', pays: 'Kosovo', debut: '2027-07-20', fin: '2027-07-26' },
+    ] },
+    { id: 't-marie', userId: 'u-marie', destination: 'Pristina', etapes: [
+      { ville: 'Pristina', pays: 'Kosovo', debut: '2027-07-18', fin: '2027-07-21' },
+    ] },
     // Full : un voyage terminé (Split, été 2026, partagé avec Camille et Arben) et un voyage à venir.
     { id: 't-full-ete', userId: 'u-full', destination: 'Croatie (été 2026)', etapes: [
       { ville: 'Split', pays: 'Croatie', debut: '2026-08-10', fin: '2026-08-14' },
@@ -247,6 +274,8 @@ export const seed = {
     { id: 'p-dartajine', nom: 'Dar Tajine', ville: 'Marrakech', categorie: 'restaurant', description: 'Cours de cuisine marocaine suivis du repas.', valide: true },
     { id: 'p-bulevardi', nom: 'Hostel Bulevardi', ville: 'Pristina', categorie: 'hebergement', description: 'Auberge près du boulevard Mère-Teresa.', valide: true },
     { id: 'p-sharrtrek', nom: 'Sharr Trek', ville: 'Prizren', categorie: 'activite', description: 'Randonnées guidées dans les monts Sharr.', valide: true },
+    { id: 'p-pejaride', nom: 'Peja Ride', ville: 'Peja', categorie: 'location', description: 'Location de VTT et de vélos électriques pour la vallée de la Rugova.', valide: true },
+    { id: 'p-bazari', nom: 'Maison du Bazar', ville: 'Gjakova', categorie: 'hebergement', description: 'Maison d’hôtes dans une ancienne demeure du grand bazar.', valide: true },
   ],
 
   // reductionPct : pourcentage entier ; minVoyageurs : taille minimale du groupe ; debut/fin : validité.
@@ -265,5 +294,7 @@ export const seed = {
     { id: 'o-dartajine', partenaireId: 'p-dartajine', titre: 'Cours de tajine et dîner', description: 'Marché, cours et repas sur la terrasse.', reductionPct: 10, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
     { id: 'o-bulevardi', partenaireId: 'p-bulevardi', titre: 'Dortoir de groupe à Pristina', description: 'Lits côte à côte et casiers, à deux pas du boulevard.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-09-01T08:00:00Z' },
     { id: 'o-sharrtrek', partenaireId: 'p-sharrtrek', titre: 'Journée dans les monts Sharr', description: 'Randonnée guidée et pique-nique, transport depuis Prizren.', reductionPct: 20, minVoyageurs: 4, debut: '2027-05-01', fin: '2027-10-15', active: true, creeLe: '2026-10-01T08:00:00Z' },
+    { id: 'o-pejaride', partenaireId: 'p-pejaride', titre: 'VTT pour la journée dans la Rugova', description: 'Casques et carte des sentiers fournis.', reductionPct: 20, minVoyageurs: 2, debut: '2026-09-01', fin: '2027-10-31', active: true, creeLe: '2026-10-30T08:00:00Z' },
+    { id: 'o-bazari', partenaireId: 'p-bazari', titre: 'La maison d’hôtes pour votre groupe', description: 'Quatre chambres autour de la cour, petit-déjeuner compris.', reductionPct: 15, minVoyageurs: 3, debut: '2026-09-01', fin: '2027-12-31', active: true, creeLe: '2026-10-30T08:00:00Z' },
   ],
 }
