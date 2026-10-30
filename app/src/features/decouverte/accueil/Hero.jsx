@@ -1,6 +1,6 @@
 // Hero de l'accueil : la promesse, la recherche « Où partez-vous ? » et le globe vitrine.
 // Le champ de recherche et la liste des villes suffisent seuls : le globe est un plus.
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Globe2, MapPin, Search, X } from 'lucide-react'
 import { useDb } from '../../../shared/db.js'
@@ -12,7 +12,7 @@ import GlobeTerre from '../../../shared/globe/Globe.jsx'
 import { Button, Combobox, Field } from '../../../shared/ui/index.js'
 import { VILLES, trouverVille } from '../villes.js'
 import { aujourdhui } from '../dates.js'
-import ChampQuand from '../recherche/ChampQuand.jsx'
+import ChampQuand, { FeuilleDates } from '../recherche/ChampQuand.jsx'
 import { arcsVoyages, pointsVoyageurs, villesDuPays } from '../globe.js'
 import { suggestionsContenus } from '../../partenaires/recherche.js'
 import { activitesDe } from '../../partenaires/activites.js'
@@ -29,6 +29,9 @@ export default function Hero() {
   const [villeActive, setVilleActive] = useState(null)
   const [dates, setDates] = useState({ debut: '', fin: '' })
   const [erreurRecherche, setErreurRecherche] = useState('')
+  // Ville dont on choisit les dates depuis sa carte (« Choisir mes dates »), et le bouton qui a ouvert le calendrier.
+  const [villeSansDates, setVilleSansDates] = useState(null)
+  const boutonCarte = useRef(null)
 
   const points = useMemo(() => pointsVoyageurs(db), [db])
   const arcs = useMemo(() => arcsVoyages(db), [db])
@@ -209,9 +212,15 @@ export default function Hero() {
                                 Voir qui sera là<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
                               </Link>
                             ) : (
-                              <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
-                                Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
-                              </Link>
+                              // Sans dates : on les demande ici, puis on va aux résultats (voyage enregistrable en un clic).
+                              <button
+                                type="button"
+                                className="hero__ville-action"
+                                aria-haspopup="dialog"
+                                onClick={(e) => { boutonCarte.current = e.currentTarget; setVilleSansDates(v.ville) }}
+                              >
+                                Choisir mes dates<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                              </button>
                             )}
                             {nbActivites > 0 && (
                               <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
@@ -245,6 +254,18 @@ export default function Hero() {
           </div>
         )}
       </div>
+
+      <FeuilleDates
+        ouvert={Boolean(villeSansDates)}
+        onFermer={() => setVilleSansDates(null)}
+        titre={villeSansDates ? `Vos dates à ${villeSansDates}` : 'Vos dates'}
+        moisInitial={moisSuggere}
+        declencheur={boutonCarte}
+        onValider={(choisies) => {
+          setDates(choisies)
+          navigate(paths.destinationRecherche(villeSansDates, choisies.debut, choisies.fin))
+        }}
+      />
     </section>
   )
 }

@@ -339,3 +339,5 @@
 @media (max-width: 480px) {
   .hero__quand .ui-btn { flex: 1 1 100%; }
 }
+
+.hero__ville-choix button.hero__ville-action { border: none; font: inherit; font-size: .85rem; font-weight: 650; color: var(--primaire-texte); cursor: pointer; }
