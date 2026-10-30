@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { CalendarDays, Check, MapPin, MessagesSquare, Plus, UserPlus } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
+import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, Card, EmptyState, EntetePage, Field, Input, useToast } from '../../shared/ui/index.js'
 import { aujourdhuiIso, formatJour } from './format.js'
@@ -88,9 +89,13 @@ export default function GroupsPage() {
       ) : (
         <ul className="ui-grille groupes__liste">
           {userGroups.map((group) => {
-            const membres = group.membres.map((id) => users.find((u) => u.id === id)).filter(Boolean)
-            const dernier = messages.filter((m) => m.groupId === group.id).at(-1)
-            const auteur = dernier && users.find((u) => u.id === dernier.auteurId)
+            const membres = group.membres.map((id) => {
+              const membre = users.find((user) => user.id === id)
+              return membre && profilMasque(membre) ? { ...membre, prenom: 'Voyageur anonyme' } : membre
+            }).filter(Boolean)
+            const dernier = messages.filter((message) => message.groupId === group.id).at(-1)
+            const auteur = dernier && users.find((user) => user.id === dernier.auteurId)
+            const auteurAffiche = auteur && profilMasque(auteur) ? { ...auteur, prenom: 'Voyageur anonyme' } : auteur
             return (
               <li key={group.id}>
                 <article className="groupe-carte">
@@ -109,7 +114,11 @@ export default function GroupsPage() {
                   )}
                   {dernier && (
                     <p className="groupe-carte__dernier">
-                      {dernier.systeme ? dernier.texte : <><strong>{auteur?.id === currentUser?.id ? 'Vous' : auteur?.prenom}</strong> : {dernier.texte}</>}
+                      {dernier.systeme
+                        ? dernier.chiffre
+                          ? profilMasque(auteur) ? 'Un voyageur anonyme a quitté le groupe.' : 'Un membre a quitté le groupe.'
+                          : profilMasque(auteur) && dernier.texte?.includes('a quitté le groupe') ? 'Un voyageur anonyme a quitté le groupe.' : dernier.texte
+                        : <><strong>{auteur?.id === currentUser?.id ? 'Vous' : auteurAffiche?.prenom}</strong> : {dernier.chiffre ? 'Message chiffré' : dernier.texte}</>}
                     </p>
                   )}
                 </article>
@@ -148,8 +157,8 @@ export default function GroupsPage() {
                       checked={selectedContacts.includes(contact.id)}
                       onChange={() => toggleContact(contact.id)}
                     />
-                    <Avatar user={contact} taille={36} />
-                    <span>{contact.prenom}</span>
+                    <Avatar user={profilMasque(contact) ? { ...contact, prenom: 'Voyageur anonyme' } : contact} taille={36} />
+                    <span>{profilMasque(contact) ? 'Voyageur anonyme' : contact.prenom}</span>
                     <Check size={18} aria-hidden="true" className="groupes__coche" />
                   </label>
                 ))}

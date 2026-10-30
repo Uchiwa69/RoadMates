@@ -83,18 +83,25 @@ function Conversation({ groupId, currentUser, users }) {
         {messages.length === 0 ? <p className="conversation__vide">Aucun message pour le moment. Lancez la discussion !</p> : (
           messages.map((message, i) => {
             const author = users.find((user) => user.id === message.auteurId)
+            const auteurMasque = profilMasque(author)
+            const auteurAffiche = auteurMasque ? { ...author, prenom: 'Voyageur anonyme' } : author
             const moi = message.auteurId === currentUser?.id
             if (message.systeme) {
-              return <p key={message.id} className="conversation__systeme">{message.texte}</p>
+              const auteurSysteme = users.find((user) => user.id === message.auteurId)
+              const texteSysteme = textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)
+              const texteAffiche = profilMasque(auteurSysteme) && texteSysteme?.includes('a quitté le groupe')
+                ? 'Un voyageur anonyme a quitté le groupe.'
+                : texteSysteme
+              return <p key={message.id} className="conversation__systeme">{texteAffiche}</p>
             }
             const suite = !messages[i - 1]?.systeme && messages[i - 1]?.auteurId === message.auteurId
             return (
               <article key={message.id} className={`bulle${moi ? ' bulle--moi' : ''}${suite ? ' bulle--suite' : ''}`}>
-                {!moi && (suite ? <span className="bulle__place" aria-hidden="true" /> : <Avatar user={author} taille={32} />)}
+                {!moi && (suite ? <span className="bulle__place" aria-hidden="true" /> : <Avatar user={auteurAffiche} taille={32} />)}
                 <div className="bulle__corps">
                   {!suite && (
                     <p className="bulle__auteur">
-                      {moi ? 'Vous' : profilMasque(author) ? 'Voyageur anonyme' : author?.prenom ?? 'Voyageur inconnu'}
+                      {moi ? 'Vous' : auteurAffiche?.prenom ?? 'Voyageur inconnu'}
                       {message.envoyeLe && <span className="bulle__heure"> · {formatMoment(message.envoyeLe)}</span>}
                     </p>
                   )}
@@ -149,25 +156,33 @@ export default function GroupPage() {
     )
   }
 
-  const membres = group.membres.map((id) => users.find((u) => u.id === id)).filter(Boolean)
+  const membres = group.membres.map((id) => {
+    const membre = users.find((user) => user.id === id)
+    return membre && profilMasque(membre) ? { ...membre, prenom: 'Voyageur anonyme' } : membre
+  }).filter(Boolean)
   // US-10.4 — quitter le groupe : les autres membres en sont informés dans la conversation.
   // Les parts de dépenses déjà créées restent dues (les règles de partage ne changent pas).
-  function quitter() {
-    updateDb((db) => {
-      const g = db.groups.find((candidate) => candidate.id === groupId)
-      if (!g?.membres.includes(currentUser.id)) return
-      g.membres = g.membres.filter((id) => id !== currentUser.id)
-      db.messages.push({
-        id: newId('m'),
-        groupId,
-        auteurId: currentUser.id,
-        texte: `${currentUser.prenom} a quitté le groupe.`,
-        envoyeLe: new Date().toISOString(),
-        systeme: true,
+  async function quitter() {
+    try {
+      const chiffre = await chiffrerMessage(groupId, `${currentUser.prenom} a quitté le groupe.`)
+      updateDb((db) => {
+        const g = db.groups.find((candidate) => candidate.id === groupId)
+        if (!g?.membres.includes(currentUser.id)) return
+        g.membres = g.membres.filter((id) => id !== currentUser.id)
+        db.messages.push({
+          id: newId('m'),
+          groupId,
+          auteurId: currentUser.id,
+          ...chiffre,
+          envoyeLe: new Date().toISOString(),
+          systeme: true,
+        })
       })
-    })
-    toast(`Vous avez quitté « ${group.nom} ».`)
-    navigate(paths.groupes)
+      toast(`Vous avez quitté « ${group.nom} ».`)
+      navigate(paths.groupes)
+    } catch {
+      toast('Le message de départ n’a pas pu être chiffré. Vous êtes toujours dans le groupe.')
+    }
   }
 
   const allerA = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
