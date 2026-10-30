@@ -136,3 +136,5 @@
 @media (max-width: 480px) {
   .espace-partenaire__ligne { grid-template-columns: minmax(0, 1fr); }
 }
+
+.destination__choix { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--e-2); }

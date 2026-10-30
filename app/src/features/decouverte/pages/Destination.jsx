@@ -25,7 +25,7 @@ import '../../partenaires/partenaires.css'
 const ONGLETS = ['voyageurs', 'a-faire', 'bons-plans']
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`
 
-function OngletVoyageurs({ ville, mesEtapes }) {
+function OngletVoyageurs({ ville, mesEtapes, voirActivites }) {
   const user = useCurrentUser()
   const db = useDb((d) => d)
   const [elargi, setElargi] = useState(false)
@@ -44,7 +44,12 @@ function OngletVoyageurs({ ville, mesEtapes }) {
       <EmptyState
         icon={MapPin}
         titre={`Vous n'avez pas de voyage déclaré à ${ville}.`}
-        action={<Button to={paths.nouveauVoyageVers(ville)}>Déclarer un voyage à {ville}</Button>}
+        action={(
+          <div className="destination__choix">
+            <Button to={paths.nouveauVoyageVers(ville)}>Créer un voyage à {ville}</Button>
+            {voirActivites && <Button variant="secondaire" onClick={voirActivites}>Voir ce qu’on peut y faire</Button>}
+          </div>
+        )}
       >
         <p>Déclarez vos dates pour voir qui sera là en même temps que vous.</p>
       </EmptyState>
@@ -175,7 +180,13 @@ export default function Destination() {
         ]}
       />
       <TabPanel id="destination" onglet={onglet}>
-        {onglet === 'voyageurs' && <OngletVoyageurs ville={ville} mesEtapes={mesEtapes} />}
+        {onglet === 'voyageurs' && (
+          <OngletVoyageurs
+            ville={ville}
+            mesEtapes={mesEtapes}
+            voirActivites={nbActivites > 0 ? () => setParams({ onglet: 'a-faire' }, { replace: true }) : null}
+          />
+        )}
         {onglet === 'a-faire' && <OngletAFaire ville={ville} carte={carte} voyageurs={nbVoyageurs} />}
         {onglet === 'bons-plans' && <OngletBonsPlans ville={ville} pays={pays} carte={carte} />}
       </TabPanel>

@@ -48,10 +48,8 @@ export default function Hero() {
   const populaires = [...points].sort((a, b) => b.nb - a.nb).slice(0, 5)
 
   // Une ville où je vais déjà → ses voyageurs ; sinon → déclarer un voyage prérempli.
-  // Une ville avec un guide (activités) → ce qu'on peut y faire, avant même de déclarer un voyage.
-  const cible = (ville) => (mesVilles.has(ville)
-    ? paths.destination(ville)
-    : activitesDe(ville).length ? paths.destinationOnglet(ville, 'a-faire') : paths.nouveauVoyageVers(ville))
+  // Une ville avec un guide propose en plus « Découvrir la ville » (voir la carte ci-dessous).
+  const cible = (ville) => (mesVilles.has(ville) ? paths.destination(ville) : paths.nouveauVoyageVers(ville))
 
   const choisirPays = (iso2) => {
     setPays(iso2)
@@ -164,19 +162,46 @@ export default function Hero() {
             </div>
             {villes.length > 0 ? (
               <ul className="hero__villes">
-                {villes.map((v) => (
-                  <li key={v.ville}>
-                    <Link to={cible(v.ville)} className={`hero__ville${v.ville === villeActive ? ' hero__ville--active' : ''}`}>
+                {villes.map((v) => {
+                  const nbActivites = activitesDe(v.ville).length
+                  const classes = `hero__ville${v.ville === villeActive ? ' hero__ville--active' : ''}`
+                  const infos = (
+                    <>
                       <MapPin size={18} aria-hidden="true" />
                       <span className="hero__ville-nom">{v.ville}</span>
-                      <span className="hero__ville-nb">{v.nb ? pluriel(v.nb, 'voyageur') : 'Personne encore'}{activitesDe(v.ville).length > 0 && ` · ${pluriel(activitesDe(v.ville).length, 'activité')}`}</span>
-                      <span className="hero__ville-action">
-                        {mesVilles.has(v.ville) ? 'Voir qui est là' : activitesDe(v.ville).length ? 'Découvrir la ville' : 'Déclarer un voyage'}
-                        <ArrowRight size={16} aria-hidden="true" />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                      <span className="hero__ville-nb">{v.nb ? pluriel(v.nb, 'voyageur') : 'Personne encore'}{nbActivites > 0 && ` · ${pluriel(nbActivites, 'activité')}`}</span>
+                    </>
+                  )
+                  // Pas encore de voyage dans une ville qui a un guide : deux choix, créer le voyage d'abord.
+                  if (!mesVilles.has(v.ville) && nbActivites > 0) {
+                    return (
+                      <li key={v.ville}>
+                        <div className={`${classes} hero__ville--choix`}>
+                          {infos}
+                          <span className="hero__ville-choix">
+                            <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
+                              Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                            </Link>
+                            <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
+                              Découvrir<span className="sr-only"> {v.ville}</span>
+                            </Link>
+                          </span>
+                        </div>
+                      </li>
+                    )
+                  }
+                  return (
+                    <li key={v.ville}>
+                      <Link to={cible(v.ville)} className={classes}>
+                        {infos}
+                        <span className="hero__ville-action">
+                          {mesVilles.has(v.ville) ? 'Voir qui est là' : 'Déclarer un voyage'}
+                          <ArrowRight size={16} aria-hidden="true" />
+                        </span>
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             ) : (
               <p className="hero__pays-vide">
