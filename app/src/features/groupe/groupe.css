@@ -125,7 +125,11 @@
 }
 .conversation__titre {
   display: flex; align-items: center; gap: var(--e-2); margin: 0;
-  padding: var(--e-4) var(--e-5); font-size: 1.15rem; border-bottom: 1px solid var(--bord);
+  padding: var(--e-4) var(--e-5); font-size: 1.15rem;
+}
+.conversation__chiffrement {
+  display: flex; align-items: center; gap: 6px; margin: 0; padding: 0 var(--e-5) var(--e-3);
+  color: var(--succes); font-size: .78rem; font-weight: 650; border-bottom: 1px solid var(--bord);
 }
 .conversation__fil { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: var(--e-4); background: var(--surface-2); overscroll-behavior: contain; }
 .conversation__fil:focus-visible { outline-offset: -3px; }
