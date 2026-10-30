@@ -52,7 +52,7 @@ export default function Compagnons() {
       <EntetePage surtitre="Compagnons de route" titre="Itinéraires communs">
         <p>Les voyageurs qui partagent au moins une étape avec vous, le même jour au même endroit.</p>
       </EntetePage>
-      <Button to={paths.monProfil} variant="secondaire">Compléter mon profil</Button>
+      <Button to={paths.profilModifier} variant="secondaire">Compléter mon profil</Button>
 
       <Filtres filtres={filtres} setFiltres={setFiltres} langues={langues} centresInteret={centresInteret} total={total} preferenceGenre={user?.preferenceGenre} />
 

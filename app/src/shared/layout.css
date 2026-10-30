@@ -50,6 +50,12 @@
 .nav__lien.active { color: var(--primaire-texte); background: var(--primaire-doux); }
 .nav__icone { position: relative; display: inline-grid; }
 .nav__icone svg { width: 18px; height: 18px; }
+.nav__avatar { --taille: 22px; width: 22px; height: 22px; font-size: .62rem; }
+.nav__lien.active .nav__avatar { box-shadow: 0 0 0 2px var(--primaire-doux), 0 0 0 3.5px var(--primaire-texte); }
+.nav__point {
+  position: absolute; top: -2px; right: -3px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 2px var(--surface);
+}
 .nav__notif {
   position: absolute; top: -7px; right: -9px;
   min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-rond);
@@ -86,10 +92,13 @@
 .demo__pastille:hover { border-color: var(--violet-texte); }
 .demo__pastille svg { color: var(--violet-texte); }
 .demo__sep { color: var(--texte-2); }
+.demo__qui { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 767px) { .demo__qui { max-width: 14ch; } }
 .demo__panneau {
   position: absolute; z-index: 50; right: 0; top: calc(100% + 8px);
   width: min(300px, calc(100vw - 32px));
-  display: grid; gap: var(--e-3);
+  /* minmax(0, 1fr) : un nom long dans « Je suis » ne doit pas élargir le panneau au-delà de 300 px */
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-3);
   padding: var(--e-4); border-radius: var(--r-l);
   background: var(--surface); border: 1px solid var(--bord); box-shadow: var(--ombre-3);
   animation: demo-entree var(--d-moyen) var(--ease);
@@ -105,7 +114,7 @@
 .demo__aide { margin: 0; font-size: .85rem; color: var(--texte-2); }
 .demo__label { font-size: .85rem; font-weight: 650; margin-bottom: calc(var(--e-2) * -1); }
 .demo__choix { display: flex; align-items: center; gap: var(--e-3); }
-.demo__choix select { flex: 1; min-width: 0; }
+.demo__choix select { flex: 1; min-width: 0; width: 100%; text-overflow: ellipsis; }
 .demo__reset {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 40px; border-radius: var(--r-rond);
@@ -137,7 +146,7 @@
     -webkit-backdrop-filter: saturate(1.6) blur(16px);
     border-top: 1px solid color-mix(in srgb, var(--bord) 70%, transparent);
   }
-  .nav ul { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+  .nav ul { display: grid; grid-template-columns: repeat(var(--n, 5), 1fr); gap: 0; }
   .nav__lien {
     flex-direction: column; gap: 2px; width: 100%;
     height: var(--haut-onglets); padding: 8px 2px; border-radius: 0;

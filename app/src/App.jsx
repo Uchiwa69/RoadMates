@@ -6,6 +6,7 @@ import { paths } from './shared/paths.js'
 import { Button, EmptyState } from './shared/ui/index.js'
 import { decouverteRoutes } from './features/decouverte/routes.jsx'
 import { groupeRoutes } from './features/groupe/routes.jsx'
+import { partenairesRoutes } from './features/partenaires/routes.jsx'
 
 function Introuvable() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {[...decouverteRoutes, ...groupeRoutes].map((r) => (
+        {[...decouverteRoutes, ...groupeRoutes, ...partenairesRoutes].map((r) => (
           <Route key={r.path} path={r.path} element={r.element} />
         ))}
         <Route path="*" element={<Introuvable />} />

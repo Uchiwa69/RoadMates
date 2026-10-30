@@ -5,6 +5,7 @@ import { ArrowLeft, Lock, LogOut, MapPin, MessagesSquare, SendHorizontal, Wallet
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { chiffrerMessage, dechiffrerMessage } from '../../shared/chiffrement.js'
+import OffreDansMessage from '../partenaires/OffreDansMessage.jsx'
 import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
@@ -120,6 +121,7 @@ function Conversation({ groupId, groupMembers, currentUser, users }) {
                     </p>
                   )}
                   <p className="bulle__texte">{textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)}</p>
+                  {message.offreId && <OffreDansMessage offreId={message.offreId} />}
                 </div>
               </article>
             )
@@ -161,11 +163,11 @@ export default function GroupPage() {
   const [confirmerDepart, setConfirmerDepart] = useState(false)
 
   if (!group) {
-    return <EmptyState icon={MessagesSquare} titre="Groupe introuvable" action={<Button to={paths.groupes}>Retour à mes groupes</Button>} />
+    return <EmptyState icon={MessagesSquare} titre="Groupe introuvable" action={<Button to={paths.messagesOnglet('groupes')}>Retour à mes groupes</Button>} />
   }
   if (!isMember) {
     return (
-      <EmptyState icon={Lock} titre="Accès refusé" action={<Button to={paths.groupes}>Retour à mes groupes</Button>}>
+      <EmptyState icon={Lock} titre="Accès refusé" action={<Button to={paths.messagesOnglet('groupes')}>Retour à mes groupes</Button>}>
         <p>Ce groupe ne fait pas partie de vos groupes.</p>
       </EmptyState>
     )
@@ -194,7 +196,7 @@ export default function GroupPage() {
         })
       })
       toast(`Vous avez quitté « ${group.nom} ».`)
-      navigate(paths.groupes)
+      navigate(paths.messagesOnglet('groupes'))
     } catch {
       toast('Le message de départ n’a pas pu être chiffré. Vous êtes toujours dans le groupe.')
     }
@@ -204,7 +206,7 @@ export default function GroupPage() {
 
   return (
     <section className="groupe">
-      <Link to={paths.groupes} className="ui-retour"><ArrowLeft size={18} aria-hidden="true" /> Mes groupes</Link>
+      <Link to={paths.messagesOnglet('groupes')} className="ui-retour"><ArrowLeft size={18} aria-hidden="true" /> Mes groupes</Link>
       <header className="groupe__tete">
         <div className="groupe__titres">
           <h1 className="groupe__nom">{group.nom}</h1>

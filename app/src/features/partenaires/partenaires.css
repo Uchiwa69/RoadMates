@@ -1,0 +1,140 @@
+/* Guide de ville : « À faire » (éditorial, sans badge) et « Bons plans » (partenaires, badge et réduction). */
+.ui-page-tete__desc .destination__compteurs { margin-top: var(--e-2); font-weight: 650; color: var(--texte); }
+.destination__recherche { max-width: 560px; margin-bottom: var(--e-5); }
+.destination .ui-tabs { margin-bottom: var(--e-2); }
+
+.guide { display: grid; gap: var(--e-4); }
+.guide__puces { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.guide__note { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--texte-2); font-size: .875rem; }
+.guide__note svg { flex: none; }
+.guide__grille > li { display: grid; }
+
+/* Mise en évidence d'une carte ouverte depuis la recherche */
+.activite--evidence, .offre--evidence {
+  box-shadow: 0 0 0 3px var(--primaire-texte), var(--ombre-2);
+  animation: evidence 1.2s var(--ease) 2;
+}
+@keyframes evidence { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--primaire-texte) 35%, transparent), var(--ombre-2); } }
+.activite:focus, .offre:focus { outline: none; }
+.activite:focus-visible, .offre:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* ---------- Activité ---------- */
+.activite {
+  display: grid; grid-template-rows: auto 1fr; overflow: hidden; height: 100%;
+  border-radius: var(--r-xl); background: var(--surface); border: 1px solid var(--bord); box-shadow: var(--ombre-1);
+}
+.activite__illustration {
+  display: grid; place-items: center; height: 92px; color: #FFFFFF;
+  background: linear-gradient(135deg, var(--ciel-1), var(--ciel-2));
+}
+.activite__illustration svg { filter: drop-shadow(0 2px 6px rgb(0 0 0 / .18)); }
+.activite__illustration--culture { background: linear-gradient(135deg, #F2558C, #7A4BDB); }
+.activite__illustration--plein-air { background: linear-gradient(135deg, #FFB36B, #3E9E6E); }
+.activite__illustration--food { background: linear-gradient(135deg, #FFB36B, #FF6B5B); }
+.activite__illustration--nuit { background: linear-gradient(135deg, #2A2F6B, #C2416A); }
+.activite__illustration--bien-etre { background: linear-gradient(135deg, #FF9F45, #F2558C); }
+.activite__corps { display: grid; gap: var(--e-2); align-content: start; padding: var(--e-4) var(--e-5) var(--e-5); }
+.activite__meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0;
+  color: var(--texte-2); font-size: .85rem; font-weight: 600;
+}
+.activite__meta svg { vertical-align: -2px; }
+.activite__prix {
+  margin-left: auto; padding: 2px 10px; border-radius: var(--r-rond);
+  background: var(--fond-2); color: var(--texte); font-weight: 700;
+}
+.activite__titre { margin: 0; font-size: 1.15rem; }
+.activite__description { margin: 0; color: var(--texte-2); }
+.activite__plusieurs { margin: 0; padding: var(--e-3); border-radius: var(--r-m); background: var(--surface-2); font-size: .925rem; }
+.activite__plusieurs strong { color: var(--primaire-texte); }
+.activite__voyageurs {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; justify-self: start;
+  color: var(--violet-texte); font-weight: 650; font-size: .9rem;
+}
+
+/* ---------- Offre partenaire ---------- */
+.offre {
+  display: grid; gap: var(--e-3); align-content: start; height: 100%; padding: var(--e-5);
+  border-radius: var(--r-xl); background: var(--surface);
+  border: 1.5px solid color-mix(in srgb, var(--violet-texte) 35%, var(--bord));
+  box-shadow: var(--ombre-1);
+}
+.offre__tete { display: flex; align-items: flex-start; gap: var(--e-3); }
+.offre__icone {
+  display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: var(--r-m);
+  background: var(--violet-doux); color: var(--violet-texte);
+}
+.offre__qui { flex: 1; min-width: 0; display: grid; gap: 2px; justify-items: start; }
+.offre__badge { margin-bottom: 2px; }
+.offre__nom { margin: 0; font-weight: 750; }
+.offre__categorie { margin: 0; color: var(--texte-2); font-size: .85rem; }
+.offre__reduction {
+  flex: none; margin: 0; font-family: var(--police-titre); font-size: 1.9rem; font-weight: 700; line-height: 1;
+  color: var(--accent-texte);
+}
+.offre__titre { margin: 0; font-size: 1.1rem; }
+.offre__description { margin: 0; color: var(--texte-2); }
+.offre__conditions { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-4); margin: 0; font-size: .9rem; font-weight: 600; }
+.offre__conditions span { display: inline-flex; align-items: center; gap: 6px; }
+
+.proposer { display: grid; gap: var(--e-2); }
+.proposer .ui-btn { justify-self: start; }
+.proposer__choix { display: grid; gap: 4px; }
+.proposer__choix label { font-size: .85rem; font-weight: 600; }
+.proposer__aide { margin: 0; font-size: .9rem; color: var(--texte-2); }
+
+@media (max-width: 480px) {
+  .destination .ui-tabs { display: flex; width: 100%; }
+  .destination .ui-tabs__tab { flex: 1 1 auto; justify-content: center; padding: 8px 10px; }
+}
+
+/* ---------- Offre proposée dans une conversation de groupe ---------- */
+.offre-message {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; padding: 8px 12px;
+  border-radius: var(--r-m); background: var(--violet-doux); color: var(--texte); font-size: .875rem;
+}
+.offre-message > svg { flex: none; color: var(--violet-texte); }
+.offre-message__texte { flex: 1 1 180px; }
+.offre-message__badge {
+  display: inline-block; padding: 1px 8px; border-radius: var(--r-rond);
+  background: var(--surface); color: var(--violet-texte); font-size: .75rem; font-weight: 700;
+}
+.offre-message a { color: var(--violet-texte); font-weight: 700; }
+.offre-message__fin { color: var(--texte-2); }
+
+/* ---------- Espace partenaire ---------- */
+.espace-partenaire { display: grid; gap: var(--e-6); max-width: 1080px; margin: 0 auto; }
+.espace-partenaire--etroit { max-width: 720px; }
+.espace-partenaire .ui-page-tete { margin-bottom: 0; }
+.espace-partenaire__bloc { display: grid; gap: var(--e-4); }
+.espace-partenaire__bloc h2, .espace-partenaire__apercu h2, .espace-partenaire__form h2 { margin: 0; font-size: 1.2rem; }
+.espace-partenaire__bloc > .ui-btn { justify-self: start; }
+.espace-partenaire__offre { display: grid; gap: var(--e-2); align-content: start; }
+.espace-partenaire__offre > .ui-badge { justify-self: start; }
+.espace-partenaire__actions { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.espace-partenaire__validation {
+  display: flex; gap: var(--e-3); align-items: flex-start; padding: var(--e-4); border-radius: var(--r-l);
+  background: var(--alerte-doux); color: var(--alerte);
+}
+.espace-partenaire__validation svg { flex: none; }
+.espace-partenaire__validation p { margin: 0 0 4px; }
+.espace-partenaire__edition { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--e-5); align-items: start; }
+.espace-partenaire__form { display: grid; gap: var(--e-4); }
+.espace-partenaire__ligne { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
+.espace-partenaire__apercu { display: grid; gap: var(--e-3); position: sticky; top: calc(var(--haut-entete) + var(--e-4)); }
+.espace-partenaire__note { margin: 0; color: var(--texte-2); font-size: .9rem; }
+.espace-partenaire__profil { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e-4); align-items: center; }
+.espace-partenaire__profil h2 { margin: 0 0 4px; }
+.espace-partenaire__profil p { margin: 0 0 6px; color: var(--texte-2); }
+.espace-partenaire__description, .espace-partenaire__profil .espace-partenaire__note { grid-column: 1 / -1; }
+.espace-partenaire__description { color: var(--texte) !important; }
+.espace-partenaire--etroit > .ui-btn { justify-self: start; }
+@media (max-width: 860px) {
+  .espace-partenaire__edition { grid-template-columns: minmax(0, 1fr); }
+  .espace-partenaire__apercu { position: static; }
+}
+@media (max-width: 480px) {
+  .espace-partenaire__ligne { grid-template-columns: minmax(0, 1fr); }
+}
+
+.destination__choix { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--e-2); }

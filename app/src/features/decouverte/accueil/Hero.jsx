@@ -10,8 +10,12 @@ import { filtrerEtClasser, normaliser } from '../../../shared/texte.js'
 import { PAYS, nomPays } from '../../../shared/globe/pays.js'
 import GlobeTerre from '../../../shared/globe/Globe.jsx'
 import { Button, Combobox, Field } from '../../../shared/ui/index.js'
-import { VILLES } from '../villes.js'
+import { VILLES, trouverVille } from '../villes.js'
+import { aujourdhui } from '../dates.js'
+import ChampQuand from '../recherche/ChampQuand.jsx'
 import { arcsVoyages, pointsVoyageurs, villesDuPays } from '../globe.js'
+import { suggestionsContenus } from '../../partenaires/recherche.js'
+import { activitesDe } from '../../partenaires/activites.js'
 
 const ISO_DE_VILLE = new Map(VILLES.map((v) => [v.ville, v.iso]))
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`
@@ -23,6 +27,8 @@ export default function Hero() {
   const [saisie, setSaisie] = useState('')
   const [pays, setPays] = useState(null)
   const [villeActive, setVilleActive] = useState(null)
+  const [dates, setDates] = useState({ debut: '', fin: '' })
+  const [erreurRecherche, setErreurRecherche] = useState('')
 
   const points = useMemo(() => pointsVoyageurs(db), [db])
   const arcs = useMemo(() => arcsVoyages(db), [db])
@@ -46,6 +52,7 @@ export default function Hero() {
   const populaires = [...points].sort((a, b) => b.nb - a.nb).slice(0, 5)
 
   // Une ville où je vais déjà → ses voyageurs ; sinon → déclarer un voyage prérempli.
+  // Une ville avec un guide propose en plus « Découvrir la ville » (voir la carte ci-dessous).
   const cible = (ville) => (mesVilles.has(ville) ? paths.destination(ville) : paths.nouveauVoyageVers(ville))
 
   const choisirPays = (iso2) => {
@@ -68,15 +75,29 @@ export default function Hero() {
   const suggestions = q ? [
     ...filtrerEtClasser(VILLES, q, 'ville').slice(0, 4).map((v) => {
       const nb = points.find((p) => p.ville === v.ville)?.nb ?? 0
-      return { id: `v-${v.ville}`, label: v.ville, detail: nb ? `${v.pays} · ${pluriel(nb, 'voyageur')}` : v.pays, icon: MapPin, ville: v }
+      return { id: `v-${v.ville}`, groupe: 'Villes', label: v.ville, detail: nb ? `${v.pays} · ${pluriel(nb, 'voyageur')}` : v.pays, icon: MapPin, ville: v }
     }),
     ...filtrerEtClasser(PAYS, q, 'nom').slice(0, 4).map((p) => {
       const nb = voyageursParPays.get(p.iso2)?.size ?? 0
-      return { id: `p-${p.iso2}`, label: p.nom, detail: nb ? pluriel(nb, 'voyageur') : 'Pays', icon: Globe2, iso2: p.iso2 }
+      return { id: `p-${p.iso2}`, groupe: 'Pays', label: p.nom, detail: nb ? pluriel(nb, 'voyageur') : 'Pays', icon: Globe2, iso2: p.iso2 }
     }),
+    ...suggestionsContenus(db, saisie),
   ] : []
 
   const nbDansPays = pays ? voyageursParPays.get(pays)?.size ?? 0 : 0
+
+  // « Rechercher » : la page de résultats de la ville, aux dates choisies (sans rien enregistrer).
+  const rechercher = (e) => {
+    e.preventDefault()
+    const ville = trouverVille(saisie)
+    if (!ville) {
+      setErreurRecherche(pays ? 'Choisissez une ville de ce pays pour lancer la recherche.' : 'Choisissez une ville (ex. Lisbonne) pour lancer la recherche.')
+      return
+    }
+    navigate(paths.destinationRecherche(ville.ville, dates.debut, dates.fin))
+  }
+  // Le calendrier s'ouvre sur le premier mois où des voyageurs sont annoncés.
+  const moisSuggere = db.trips.flatMap((t) => t.etapes).map((e) => e.debut).filter((d) => d >= aujourdhui()).sort()[0]?.slice(0, 7)
 
   return (
     <section className={`hero${pays ? ' hero--zoome' : ''}`} aria-labelledby="hero-titre">
@@ -90,18 +111,23 @@ export default function Hero() {
           et partagez la voiture : chacun paie sa part dans l'application.
         </p>
 
-        <form className="hero__recherche" role="search" onSubmit={(e) => e.preventDefault()}>
-          <Field label="Où partez-vous ?" aide="Un pays ou une ville : le globe vous y emmène.">
+        <form className="hero__recherche" role="search" onSubmit={rechercher}>
+          <Field label="Où partez-vous ?" aide="Un pays, une ville, une activité : le globe vous y emmène.">
             <Combobox
               valeur={saisie}
-              onValeur={(v) => { setSaisie(v); if (!v) toutVoir() }}
+              onValeur={(v) => { setSaisie(v); setErreurRecherche(''); if (!v) toutVoir() }}
               suggestions={suggestions}
-              onChoix={(s) => (s.iso2 ? choisirPays(s.iso2) : choisirVille(s.ville))}
+              onChoix={(s) => { setErreurRecherche(''); if (s.onglet) navigate(paths.destinationOnglet(s.ville, s.onglet, s.carte)); else if (s.iso2) choisirPays(s.iso2); else choisirVille(s.ville) }}
               placeholder="Portugal, Lisbonne, Croatie…"
               vide="Aucun pays ni aucune ville trouvés."
               icon={Search}
             />
           </Field>
+          <div className="hero__quand">
+            <ChampQuand debut={dates.debut} fin={dates.fin} moisInitial={moisSuggere} onChange={setDates} />
+            <Button type="submit" icon={Search}>Rechercher</Button>
+          </div>
+          {erreurRecherche && <p className="hero__erreur" role="alert">{erreurRecherche}</p>}
         </form>
 
         {!pays && (
@@ -120,8 +146,9 @@ export default function Hero() {
         )}
 
         <div className="hero__actions">
-          <Button to={paths.nouveauVoyage} taille="grand" iconEnd={ArrowRight}>Déclarer mon voyage</Button>
-          <Button to={paths.compagnons} variant="secondaire" taille="grand">Voir mes compagnons</Button>
+          {/* « Rechercher » est l'action principale ; on peut aussi déclarer d'emblée un voyage à plusieurs étapes. */}
+          <Button to={paths.nouveauVoyage} variant="secondaire" iconEnd={ArrowRight}>Déclarer un voyage à plusieurs étapes</Button>
+          <Button to={paths.compagnons} variant="fantome">Voir mes compagnons</Button>
         </div>
         <p className="hero__compte">
           Pas encore de compte ? <Link to={paths.inscription}>Créer un compte</Link>
@@ -158,19 +185,48 @@ export default function Hero() {
             </div>
             {villes.length > 0 ? (
               <ul className="hero__villes">
-                {villes.map((v) => (
-                  <li key={v.ville}>
-                    <Link to={cible(v.ville)} className={`hero__ville${v.ville === villeActive ? ' hero__ville--active' : ''}`}>
+                {villes.map((v) => {
+                  const nbActivites = activitesDe(v.ville).length
+                  const classes = `hero__ville${v.ville === villeActive ? ' hero__ville--active' : ''}`
+                  const infos = (
+                    <>
                       <MapPin size={18} aria-hidden="true" />
                       <span className="hero__ville-nom">{v.ville}</span>
-                      <span className="hero__ville-nb">{v.nb ? pluriel(v.nb, 'voyageur') : 'Personne encore'}</span>
-                      <span className="hero__ville-action">
-                        {mesVilles.has(v.ville) ? 'Voir qui est là' : 'Déclarer un voyage'}
-                        <ArrowRight size={16} aria-hidden="true" />
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                      <span className="hero__ville-nb">{v.nb ? pluriel(v.nb, 'voyageur') : 'Personne encore'}{nbActivites > 0 && ` · ${pluriel(nbActivites, 'activité')}`}</span>
+                    </>
+                  )
+                  // Pas encore de voyage dans la ville : « Créer un voyage », plus « Découvrir » s'il existe un guide.
+                  if (!mesVilles.has(v.ville)) {
+                    return (
+                      <li key={v.ville}>
+                        <div className={`${classes} hero__ville--choix`}>
+                          {infos}
+                          <span className="hero__ville-choix">
+                            <Link to={paths.nouveauVoyageVers(v.ville)} className="hero__ville-action">
+                              Créer un voyage<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                            </Link>
+                            {nbActivites > 0 && (
+                              <Link to={paths.destinationOnglet(v.ville, 'a-faire')} className="hero__ville-action hero__ville-action--second">
+                                Découvrir<span className="sr-only"> {v.ville}</span>
+                              </Link>
+                            )}
+                          </span>
+                        </div>
+                      </li>
+                    )
+                  }
+                  return (
+                    <li key={v.ville}>
+                      <Link to={paths.destination(v.ville)} className={classes}>
+                        {infos}
+                        <span className="hero__ville-action">
+                          Voir qui est là
+                          <ArrowRight size={16} aria-hidden="true" />
+                        </span>
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             ) : (
               <p className="hero__pays-vide">

@@ -24,6 +24,7 @@ export const VILLES = [
   ['Split', 'Croatie', 'HR', 43.51, 16.44], ['Dubrovnik', 'Croatie', 'HR', 42.65, 18.09],
   ['Zagreb', 'Croatie', 'HR', 45.81, 15.98],
   ['Istanbul', 'Turquie', 'TR', 41.01, 28.98], ['Marrakech', 'Maroc', 'MA', 31.63, -8.01],
+  ['Pristina', 'Kosovo', 'XK', 42.66, 21.17], ['Prizren', 'Kosovo', 'XK', 42.21, 20.74],
 ].map(([ville, pays, iso, lat, lng]) => ({ ville, pays, iso, lat, lng }))
 
 const norm = (s) => s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')

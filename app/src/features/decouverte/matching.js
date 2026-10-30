@@ -52,6 +52,13 @@ export function presentsDansLePays(db, userId, ville) {
   return presentsPendant(db, userId, mesEtapes, (e) => e.pays === pays)
 }
 
+// Recherche sans voyage déclaré (page de résultats) : les voyageurs présents dans la ville — ou,
+// avec `pays`, dans tout le pays — au moins un jour entre `debut` et `fin`. Mêmes exclusions que
+// ci-dessus : profils et itinéraires masqués, blocages, et soi-même.
+export function presentsSurPeriode(db, userId, ville, debut, fin, pays = null) {
+  return presentsPendant(db, userId, [{ ville, debut, fin }], pays ? (e) => e.pays === pays : (e) => e.ville === ville)
+}
+
 function presentsPendant(db, userId, mesEtapes, filtre) {
   const resultats = []
   const moi = db.users.find((user) => user.id === userId)

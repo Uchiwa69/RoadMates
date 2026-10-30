@@ -1,4 +1,5 @@
 // US-10 — mes groupes de voyage, et création d'un groupe avec des contacts acceptés.
+// Contenu de l'onglet « Groupes » de la page Messages (MessagesPage.jsx).
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CalendarDays, Check, MapPin, MessagesSquare, Plus, UserPlus } from 'lucide-react'
@@ -6,7 +7,7 @@ import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
-import { Avatar, AvatarStack, Button, Card, EmptyState, EntetePage, Field, Input, useToast } from '../../shared/ui/index.js'
+import { Avatar, AvatarStack, Button, Card, EmptyState, Field, Input, useToast } from '../../shared/ui/index.js'
 import { aujourdhuiIso, formatJour } from './format.js'
 
 export default function GroupsPage() {
@@ -78,10 +79,6 @@ export default function GroupsPage() {
 
   return (
     <section className="groupes">
-      <EntetePage surtitre="Entre compagnons" titre="Mes groupes">
-        <p>Discutez et partagez les frais avec les voyageurs qui ont accepté votre demande.</p>
-      </EntetePage>
-
       {userGroups.length === 0 ? (
         <EmptyState icon={MessagesSquare} titre="Vous ne faites partie d’aucun groupe.">
           <p>Créez-en un ci-dessous avec vos contacts acceptés.</p>

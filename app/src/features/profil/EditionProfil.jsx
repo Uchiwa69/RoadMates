@@ -1,27 +1,29 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { BadgeCheck, Camera, Check, Save } from 'lucide-react'
+// « Modifier mon profil » : photo, présentation, langues, centres d'intérêt et façon de voyager,
+// avec l'aperçu de la carte telle que les autres la voient.
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { BadgeCheck, Camera, Check, Eye, ImagePlus, Save, Trash2 } from 'lucide-react'
 import { updateDb, useDb } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
-import { Badge, Button, Card, EntetePage, Field, Input, Select, Textarea, useToast } from '../../shared/ui/index.js'
-import { paths } from '../../shared/paths.js'
-import { profilMasque, itineraireMasque } from '../../shared/confidentialite.js'
-import { aujourdhui } from '../decouverte/dates.js'
+import { Avatar, Badge, Button, Card, EntetePage, Feuille, Field, Input, Textarea, useToast } from '../../shared/ui/index.js'
+import { useMediaQuery } from '../../shared/useMediaQuery.js'
+import RetourProfil from './RetourProfil.jsx'
+import { ChoixUnique, PucesSaisie } from './ChampsChoix.jsx'
+import { BUDGETS, PARTAGES, RYTHMES, STYLES, libellePartage, libelleStyle, niveauBudget } from './options.js'
+import { reduirePhoto } from './photo.js'
 
-const STYLES = ['routard', 'confort', 'aventure', 'culture', 'fête']
-const RYTHMES = ['tranquille', 'modéré', 'actif']
-const INVESTISSEMENTS = [
-  { valeur: 'trajet', libelle: 'Juste un trajet' },
-  { valeur: 'activites', libelle: 'Quelques activités' },
-  { valeur: 'tout', libelle: 'Tout le voyage' },
+const GENRES = [
+  { valeur: 'tous', libelle: 'Tout le monde' },
+  { valeur: 'F', libelle: 'Des femmes' },
+  { valeur: 'H', libelle: 'Des hommes' },
 ]
 
 function initialiser(user) {
   return {
     photoUrl: user.photoUrl ?? '',
     bio: user.bio ?? '',
-    langues: (user.langues ?? []).join(', '),
-    centresInteret: (user.centresInteret ?? []).join(', '),
+    langues: user.langues ?? [],
+    centresInteret: user.centresInteret ?? [],
     styleVoyage: user.styleVoyage ?? 'routard',
     budgetEuros: user.budgetJournalierCentimes == null ? '' : String(user.budgetJournalierCentimes / 100),
     rythme: user.rythme ?? 'modéré',
@@ -30,186 +32,217 @@ function initialiser(user) {
   }
 }
 
-function AvatarProfil({ user, taille = 88 }) {
-  return user.photoUrl ? (
-    <img className="profil-enrichi__photo" src={user.photoUrl} alt="" referrerPolicy="no-referrer" style={{ width: taille, height: taille }} />
-  ) : (
-    <span className="profil-enrichi__initiale" aria-hidden="true" style={{ width: taille, height: taille }}>
-      {(user.prenom ?? '?').trim().charAt(0).toUpperCase()}
-    </span>
+// Carte « Comment les autres vous voient », mise à jour pendant la saisie.
+function Apercu({ user, form }) {
+  const budget = form.budgetEuros === '' ? null : niveauBudget(Number(form.budgetEuros) * 100)
+  return (
+    <div className="apercu-profil">
+      <div className="apercu-profil__qui">
+        <Avatar user={{ ...user, photoUrl: form.photoUrl }} taille={64} photo />
+        <div>
+          <p className="apercu-profil__nom">{user.prenom}{user.age ? `, ${user.age} ans` : ''}</p>
+          <p className="apercu-profil__style">Style {libelleStyle(form.styleVoyage).toLowerCase()} · rythme {form.rythme}</p>
+        </div>
+      </div>
+      {user.verifie && <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>}
+      <p className="apercu-profil__bio">{form.bio || 'Votre présentation apparaîtra ici.'}</p>
+      {form.centresInteret.length > 0 && (
+        <ul className="identite__tags" aria-label="Centres d’intérêt">
+          {form.centresInteret.map((tag) => <li key={tag}>{tag}</li>)}
+        </ul>
+      )}
+      <dl className="apercu-profil__infos">
+        <div><dt>Langues</dt><dd>{form.langues.length ? form.langues.join(', ') : 'Non renseignées'}</dd></div>
+        <div><dt>Budget</dt><dd>{budget ? `${budget.libelle} (${budget.detail} par jour)` : 'Non renseigné'}</dd></div>
+        <div><dt>Veut partager</dt><dd>{libellePartage(form.investissement)}</dd></div>
+      </dl>
+    </div>
   )
 }
 
 export default function EditionProfil() {
   const user = useCurrentUser()
-  const db = useDb((base) => base)
+  const users = useDb((db) => db.users)
   const toast = useToast()
-  const [form, setForm] = useState(() => initialiser(user ?? {}))
+  const [params] = useSearchParams()
+  const mobile = useMediaQuery('(max-width: 767px)')
+  const [initial, setInitial] = useState(() => initialiser(user ?? {}))
+  const [form, setForm] = useState(initial)
   const [erreur, setErreur] = useState('')
-  const [enregistre, setEnregistre] = useState(false)
+  const [erreurPhoto, setErreurPhoto] = useState('')
+  const [apercuOuvert, setApercuOuvert] = useState(false)
+  const fichier = useRef(null)
+  const boutonApercu = useRef(null)
+  const modifie = JSON.stringify(form) !== JSON.stringify(initial)
+
+  // Lien « Ajoutez une photo » depuis l'accueil du profil : on amène directement au bon champ.
+  const champ = params.get('champ')
+  useEffect(() => {
+    if (!champ) return
+    const minuteur = setTimeout(() => {
+      const cible = document.getElementById(`champ-${champ}`)
+      cible?.scrollIntoView({ block: 'center' })
+      cible?.focus({ preventScroll: true })
+    }, 350)
+    return () => clearTimeout(minuteur)
+  }, [champ])
+
+  // Modifications non enregistrées : on prévient avant de quitter la page ou l'application.
+  useEffect(() => {
+    if (!modifie) return
+    const avantDechargement = (e) => { e.preventDefault(); e.returnValue = '' }
+    const clicLien = (e) => {
+      const lien = e.target.closest?.('a[href]')
+      if (!lien || e.defaultPrevented) return
+      if (!window.confirm('Vous avez des modifications non enregistrées. Quitter sans enregistrer ?')) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+    window.addEventListener('beforeunload', avantDechargement)
+    document.addEventListener('click', clicLien, true)
+    return () => {
+      window.removeEventListener('beforeunload', avantDechargement)
+      document.removeEventListener('click', clicLien, true)
+    }
+  }, [modifie])
 
   if (!user) {
     return <Card><h1>Profil indisponible</h1><p>Aucun voyageur n’est connecté.</p></Card>
   }
 
-  const modifier = (champ) => (event) => {
-    setForm((actuel) => ({ ...actuel, [champ]: event.target.value }))
+  const maj = (champModifie, valeur) => {
+    setForm((actuel) => ({ ...actuel, [champModifie]: valeur }))
     setErreur('')
-    setEnregistre(false)
+  }
+
+  const suggestionsLangues = [...new Set(users.flatMap((u) => u.langues ?? []))].sort().slice(0, 10)
+  const suggestionsInterets = [...new Set(users.flatMap((u) => u.centresInteret ?? []))].sort().slice(0, 14)
+  const budgetChoisi = form.budgetEuros === '' ? null : niveauBudget(Number(form.budgetEuros) * 100)?.valeur
+
+  async function choisirPhoto(e) {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    setErreurPhoto('')
+    try {
+      maj('photoUrl', await reduirePhoto(f))
+    } catch (err) {
+      setErreurPhoto(err.message)
+    }
   }
 
   function enregistrer(event) {
     event.preventDefault()
-    const photoUrl = form.photoUrl.trim()
-    if (photoUrl) {
-      try {
-        const url = new URL(photoUrl)
-        if (!['https:', 'http:'].includes(url.protocol)) throw new Error('URL invalide')
-      } catch {
-        setErreur('Saisissez une adresse de photo valide commençant par http:// ou https://.')
-        return
-      }
-    }
     const budget = form.budgetEuros.trim() === '' ? null : Number(form.budgetEuros)
     if (budget !== null && (!Number.isFinite(budget) || budget < 0 || budget > 10000)) {
-      setErreur('Le budget doit être compris entre 0 et 10 000 euros par jour.')
+      setErreur('Le budget doit être compris entre 0 et 10 000 € par jour.')
       return
     }
-
     updateDb((db) => {
       const voyageur = db.users.find((candidat) => candidat.id === user.id)
       if (!voyageur) return
-      voyageur.photoUrl = photoUrl
+      voyageur.photoUrl = form.photoUrl
       voyageur.bio = form.bio.trim()
-      voyageur.langues = [...new Set(form.langues.split(',').map((valeur) => valeur.trim()).filter(Boolean))]
-      voyageur.centresInteret = [...new Set(form.centresInteret.split(',').map((valeur) => valeur.trim()).filter(Boolean))]
+      voyageur.langues = form.langues
+      voyageur.centresInteret = form.centresInteret
       voyageur.styleVoyage = form.styleVoyage
       voyageur.budgetJournalierCentimes = budget === null ? null : Math.round(budget * 100)
       voyageur.rythme = form.rythme
       voyageur.investissement = form.investissement
       voyageur.preferenceGenre = form.preferenceGenre
     })
-    setEnregistre(true)
+    setInitial(form)
     toast('Votre profil a été mis à jour.')
   }
 
-  const investissement = INVESTISSEMENTS.find((option) => option.valeur === form.investissement)?.libelle
-  const aujourdHui = aujourdhui()
-  const amis = new Set(user.amisRoute ?? [])
-  const amisVisibles = db.users.filter((candidat) => amis.has(candidat.id) && !profilMasque(candidat) && !(db.blocages ?? []).some((blocage) => (blocage.bloqueurId === user.id && blocage.bloqueId === candidat.id) || (blocage.bloqueurId === candidat.id && blocage.bloqueId === user.id)))
-  const prochainesDestinations = (user.amisRoute ?? []).flatMap((amiId) => {
-    const ami = db.users.find((candidat) => candidat.id === amiId)
-    if (!ami || profilMasque(ami) || itineraireMasque(ami) || (db.blocages ?? []).some((blocage) => (blocage.bloqueurId === user.id && blocage.bloqueId === ami.id) || (blocage.bloqueurId === ami.id && blocage.bloqueId === user.id))) return []
-    const voyagesMoi = db.trips.filter((trip) => trip.userId === user.id)
-    const voyagesAmi = db.trips.filter((trip) => trip.userId === amiId)
-    const communes = []
-    for (const voyageMoi of voyagesMoi) for (const voyageAmi of voyagesAmi) for (const etapeMoi of voyageMoi.etapes) for (const etapeAmi of voyageAmi.etapes) {
-      const debut = etapeMoi.debut > etapeAmi.debut ? etapeMoi.debut : etapeAmi.debut
-      const fin = etapeMoi.fin < etapeAmi.fin ? etapeMoi.fin : etapeAmi.fin
-      if (etapeMoi.ville === etapeAmi.ville && debut <= fin && fin >= aujourdHui) communes.push({ amiId, ami: ami.prenom, ville: etapeMoi.ville, debut, fin })
-    }
-    return communes
-  }).sort((a, b) => a.debut.localeCompare(b.debut))
-
   return (
     <section className="profil-enrichi">
-      <EntetePage surtitre="Votre espace" titre="Mon profil">
+      <EntetePage avant={<RetourProfil page="Modifier mon profil" />} surtitre="Mon profil" titre="Modifier mon profil">
         <p>Présentez votre façon de voyager pour trouver des compagnons qui vous correspondent.</p>
       </EntetePage>
 
       <div className="profil-enrichi__grille">
-        <Card as="form" className="profil-enrichi__form" onSubmit={enregistrer}>
-          <div className="profil-enrichi__identite">
-            <AvatarProfil user={{ ...user, photoUrl: form.photoUrl.trim() }} />
-            <div>
-              <h2>{user.prenom}</h2>
-              <p>{user.age} ans</p>
-              {user.verifie
-                ? <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>
-                : <Badge ton="neutre">Identité non vérifiée</Badge>}
+        <Card as="form" className="profil-enrichi__form" onSubmit={enregistrer} noValidate>
+          <fieldset className="choix photo-champ" id="champ-photo" tabIndex={-1}>
+            <legend className="choix__legende">Photo</legend>
+            <div className="photo-champ__ligne">
+              <Avatar user={{ ...user, photoUrl: form.photoUrl }} taille={88} photo />
+              <div className="photo-champ__actions">
+                <input ref={fichier} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={choisirPhoto} />
+                <Button variant="secondaire" icon={ImagePlus} onClick={() => fichier.current?.click()}>
+                  {form.photoUrl ? 'Changer la photo' : 'Choisir une photo'}
+                </Button>
+                {form.photoUrl && <Button variant="fantome" icon={Trash2} onClick={() => maj('photoUrl', '')}>Retirer la photo</Button>}
+              </div>
             </div>
+            <p className="choix__aide">La photo reste sur cet appareil : elle est recadrée et réduite avant d’être enregistrée.</p>
+            {erreurPhoto && <p className="profil-enrichi__erreur" role="alert">{erreurPhoto}</p>}
+          </fieldset>
+
+          <Field id="champ-bio" label="Présentation" aide={`Quelques mots pour vous présenter aux autres voyageurs. ${form.bio.length}/500`}>
+            <Textarea value={form.bio} onChange={(e) => maj('bio', e.target.value)} rows={4} maxLength={500} />
+          </Field>
+
+          <PucesSaisie
+            id="langues" legende="Langues parlées" valeurs={form.langues} suggestions={suggestionsLangues}
+            onChange={(v) => maj('langues', v)} placeholder="Autre langue"
+          />
+          <PucesSaisie
+            id="interets" legende="Centres d’intérêt" aide="Ils s’affichent sur votre profil et servent à calculer la compatibilité."
+            valeurs={form.centresInteret} suggestions={suggestionsInterets}
+            onChange={(v) => maj('centresInteret', v)} placeholder="Autre centre d’intérêt"
+          />
+
+          <ChoixUnique id="style" nom="style" legende="Style de voyage" options={STYLES} valeur={form.styleVoyage} onChange={(v) => maj('styleVoyage', v)} />
+          <ChoixUnique id="rythme" nom="rythme" legende="Rythme" options={RYTHMES} valeur={form.rythme} onChange={(v) => maj('rythme', v)} />
+
+          <div className="budget-champ">
+            <ChoixUnique
+              id="budget" nom="budget" legende="Budget par jour"
+              aide="Logement, repas et transports sur place."
+              options={BUDGETS} valeur={budgetChoisi} onChange={(v) => maj('budgetEuros', String(v))}
+            />
+            <Field id="champ-budget-montant" label="Montant précis (facultatif)" aide="Par exemple 50 € par jour.">
+              <Input type="number" min="0" max="10000" step="1" inputMode="numeric" value={form.budgetEuros} onChange={(e) => maj('budgetEuros', e.target.value)} placeholder="50" />
+            </Field>
           </div>
 
-          <Field label="Adresse de la photo" aide="Laissez vide pour afficher votre initiale.">
-            <Input type="url" value={form.photoUrl} onChange={modifier('photoUrl')} placeholder="https://exemple.fr/photo.jpg" autoComplete="url" />
-          </Field>
-          <Field label="Présentation" aide="Quelques mots pour vous présenter aux autres voyageurs.">
-            <Textarea value={form.bio} onChange={modifier('bio')} rows={4} maxLength={500} />
-          </Field>
-          <Field label="Langues parlées" aide="Séparez les langues par des virgules.">
-            <Input value={form.langues} onChange={modifier('langues')} placeholder="français, anglais" />
-          </Field>
-          <Field label="Centres d’intérêt" aide="Saisissez des mots-clés séparés par des virgules; ils seront affichés comme des tags.">
-            <Input value={form.centresInteret} onChange={modifier('centresInteret')} placeholder="randonnée, cuisine, photographie" />
-          </Field>
-          <div className="profil-enrichi__ligne">
-            <Field label="Style de voyage">
-              <Select value={form.styleVoyage} onChange={modifier('styleVoyage')}>
-                {STYLES.map((style) => <option key={style} value={style}>{style[0].toUpperCase() + style.slice(1)}</option>)}
-              </Select>
-            </Field>
-            <Field label="Rythme">
-              <Select value={form.rythme} onChange={modifier('rythme')}>
-                {RYTHMES.map((rythme) => <option key={rythme} value={rythme}>{rythme[0].toUpperCase() + rythme.slice(1)}</option>)}
-              </Select>
-            </Field>
-          </div>
-          <Field label="Genre des voyageurs souhaités">
-            <Select value={form.preferenceGenre} onChange={modifier('preferenceGenre')}>
-              <option value="H">Hommes</option>
-              <option value="F">Femmes</option>
-              <option value="tous">Les deux</option>
-            </Select>
-          </Field>
-          <div className="profil-enrichi__ligne">
-            <Field label="Budget par jour (€)" aide="Montant enregistré en centimes.">
-              <Input type="number" min="0" max="10000" step="0.01" inputMode="decimal" value={form.budgetEuros} onChange={modifier('budgetEuros')} placeholder="50" />
-            </Field>
-            <Field label="Investissement souhaité">
-              <Select value={form.investissement} onChange={modifier('investissement')}>
-                {INVESTISSEMENTS.map(({ valeur, libelle }) => <option key={valeur} value={valeur}>{libelle}</option>)}
-              </Select>
-            </Field>
-          </div>
+          <ChoixUnique
+            id="partage" nom="partage" legende="Ce que je veux partager" options={PARTAGES} cartes
+            valeur={form.investissement} onChange={(v) => maj('investissement', v)}
+          />
+          <ChoixUnique
+            id="genre" nom="genre" legende="Je préfère voyager avec"
+            aide="Sert à vos filtres de découverte ; ce choix n’est pas affiché sur votre profil public."
+            options={GENRES} valeur={form.preferenceGenre} onChange={(v) => maj('preferenceGenre', v)}
+          />
+
           {erreur && <p className="profil-enrichi__erreur" role="alert">{erreur}</p>}
-          <Button type="submit" icon={enregistre ? Check : Save}>Enregistrer mon profil</Button>
-          {enregistre && <p className="sr-only" role="status">Profil enregistré.</p>}
+          <div className="profil-enrichi__envoi">
+            {mobile && <Button ref={boutonApercu} variant="secondaire" icon={Eye} onClick={() => setApercuOuvert(true)}>Aperçu</Button>}
+            <Button type="submit" icon={modifie ? Save : Check} disabled={!modifie}>
+              {modifie ? 'Enregistrer mon profil' : 'Profil enregistré'}
+            </Button>
+          </div>
         </Card>
 
-        <p className="sr-only" role="note">La préférence de genre est enregistrée pour vos filtres de découverte et n’est pas affichée sur votre profil public.</p>
-
-        <Card as="aside" className="profil-enrichi__apercu" aria-label="Aperçu du profil">
-          <div className="profil-enrichi__apercu-tete">
-            <Camera size={18} aria-hidden="true" />
-            <h2>Aperçu</h2>
-          </div>
-          <div className="profil-enrichi__identite">
-            <AvatarProfil user={{ ...user, photoUrl: form.photoUrl.trim() }} taille={64} />
-            <div><h3>{user.prenom}, {user.age} ans</h3><p>{form.styleVoyage}</p></div>
-          </div>
-          <p>{form.bio || 'Votre présentation apparaîtra ici.'}</p>
-          <ul className="profil-enrichi__tags" aria-label="Centres d’intérêt">
-            {form.centresInteret.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag) => <li key={tag}>{tag}</li>)}
-          </ul>
-          <p>{form.langues ? `Langues : ${form.langues}` : 'Langues non renseignées'}</p>
-          <p>{form.budgetEuros ? `${Number(form.budgetEuros).toLocaleString('fr-FR')} € par jour` : 'Budget non renseigné'}</p>
-          <p>Rythme {form.rythme}; {investissement?.toLowerCase()}.</p>
-          {user.verifie && <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>}
-        </Card>
+        {!mobile && (
+          <Card as="aside" className="profil-enrichi__apercu" aria-labelledby="apercu-profil-titre">
+            <div className="profil-enrichi__apercu-tete">
+              <Camera size={18} aria-hidden="true" />
+              <h2 id="apercu-profil-titre">Comment les autres vous voient</h2>
+            </div>
+            <Apercu user={user} form={form} />
+          </Card>
+        )}
       </div>
 
-      <Card as="section" className="profil-enrichi__amis" aria-labelledby="amis-route-titre">
-        <h2 id="amis-route-titre">Amis de route</h2>
-        <p>Les voyageurs ajoutés après un parcours partagé et leurs prochaines destinations en commun.</p>
-        {amisVisibles.length === 0
-          ? <p>Vous n’avez pas encore d’ami de route.</p>
-          : <ul>{amisVisibles.map((ami) => <li key={ami.id}><Link to={paths.profil(ami.id)}>{ami.prenom}</Link></li>)}</ul>}
-        <h3>Destinations communes à venir</h3>
-        {prochainesDestinations.length === 0
-          ? <p>Aucun voyage commun à venir pour le moment.</p>
-          : <ul>{prochainesDestinations.map((destination) => <li key={`${destination.amiId}-${destination.ville}-${destination.debut}`}><Link to={paths.destination(destination.ville)}>{destination.ville}</Link> avec {destination.ami} · {destination.debut} – {destination.fin}</li>)}</ul>}
-        <Button to={paths.avis} variant="secondaire">Laisser ou consulter des avis</Button>
-      </Card>
+      {mobile && (
+        <Feuille ouvert={apercuOuvert} onFermer={() => setApercuOuvert(false)} titre="Comment les autres vous voient" declencheur={boutonApercu}>
+          <Apercu user={user} form={form} />
+        </Feuille>
+      )}
     </section>
   )
 }

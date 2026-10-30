@@ -318,3 +318,24 @@
   .partage__prenom { font-size: .72rem; }
   .cta-final { padding: var(--e-12) var(--e-5); margin: 0 calc(var(--e-4) * -1); border-radius: 28px; }
 }
+
+/* Ville avec un guide, sans voyage déclaré : « Créer un voyage » (principal) ou « Découvrir » */
+.hero__ville--choix { grid-template-areas: 'icone nom' 'icone nb' 'choix choix'; row-gap: 2px; }
+.hero__ville--choix:hover { transform: none; }
+.hero__ville--choix > svg { align-self: start; margin-top: 3px; }
+.hero__ville-choix { grid-area: choix; display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-2); }
+.hero__ville-choix .hero__ville-action {
+  justify-content: center; min-height: 40px; padding: 6px 12px; border-radius: var(--r-rond);
+  background: var(--primaire-doux); text-decoration: none; flex: 1 1 auto;
+}
+.hero__ville-choix .hero__ville-action:hover { background: color-mix(in srgb, var(--primaire-doux) 70%, var(--primaire-texte) 12%); }
+.hero__ville-choix .hero__ville-action--second { background: transparent; border: 1.5px solid var(--bord-fort); color: var(--texte); }
+.hero__ville-choix .hero__ville-action--second:hover { background: var(--fond-2); }
+/* « Quand ? » + « Rechercher » sous le champ « Où partez-vous ? » */
+.hero__quand { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-3); }
+.hero__quand .champ-quand { flex: 1 1 220px; width: auto; min-height: 52px; border-radius: var(--r-rond); padding-inline: 18px; }
+.hero__quand .ui-btn { flex: 0 0 auto; min-height: 52px; }
+.hero__erreur { margin: var(--e-2) 0 0; padding-left: var(--e-5); color: var(--erreur); font-weight: 600; font-size: .9rem; }
+@media (max-width: 480px) {
+  .hero__quand .ui-btn { flex: 1 1 100%; }
+}

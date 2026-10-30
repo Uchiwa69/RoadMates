@@ -1,4 +1,5 @@
 // US-09 — accepter ou refuser les demandes de contact ; suivre celles envoyées.
+// Contenu de l'onglet « Demandes » de la page Messages (MessagesPage.jsx).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Clock, Inbox, Send, Users, X } from 'lucide-react'
@@ -6,7 +7,7 @@ import { useDb, updateDb } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
-import { Avatar, Badge, Button, EmptyState, EntetePage, Tabs, TabPanel, useToast } from '../../shared/ui/index.js'
+import { Avatar, Badge, Button, EmptyState, Tabs, TabPanel, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
 import ActionsSecurite from '../securite/ActionsSecurite.jsx'
 import { estBloque } from '../securite/securite.js'
@@ -82,7 +83,7 @@ export default function RequestsPage() {
             </div>
           )}
           {request.statut === 'acceptee' && (
-            <Link to={paths.groupes} className="demande__suite"><Users size={16} aria-hidden="true" /> Créer un groupe pour discuter</Link>
+            <Link to={paths.messagesOnglet('groupes')} className="demande__suite"><Users size={16} aria-hidden="true" /> Créer un groupe pour discuter</Link>
           )}
         </article>
       </li>
@@ -91,10 +92,6 @@ export default function RequestsPage() {
 
   return (
     <section className="demandes">
-      <EntetePage surtitre="Contacts" titre="Demandes de contact">
-        <p>On ne discute qu’avec les voyageurs dont on a accepté la demande.</p>
-      </EntetePage>
-
       <Tabs
         id="demandes"
         label="Demandes de contact"

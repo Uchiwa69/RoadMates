@@ -24,12 +24,23 @@ export function useTheme() {
 }
 
 export function basculerTheme() {
-  const suivant = themeEffectif() === 'dark' ? 'light' : 'dark'
-  document.documentElement.dataset.theme = suivant
+  choisirTheme(themeEffectif() === 'dark' ? 'light' : 'dark')
+}
+
+// Choix explicite depuis le profil : 'light', 'dark', ou 'auto' pour suivre le système.
+export function choisirTheme(choix) {
+  if (choix === 'auto') delete document.documentElement.dataset.theme
+  else document.documentElement.dataset.theme = choix
   try {
-    localStorage.setItem(KEY, suivant)
+    if (choix === 'auto') localStorage.removeItem(KEY)
+    else localStorage.setItem(KEY, choix)
   } catch {
     // stockage indisponible : le choix vaut pour la session
   }
   listeners.forEach((l) => l())
+}
+
+// Le choix tel que l'utilisateur l'a fait : 'light', 'dark' ou 'auto'.
+export function useChoixTheme() {
+  return useSyncExternalStore(subscribe, () => document.documentElement.dataset.theme || 'auto', () => 'auto')
 }
