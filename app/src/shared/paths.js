@@ -10,6 +10,9 @@ export const paths = {
   nouveauVoyageVers: (ville) => `/voyages/nouveau?ville=${encodeURIComponent(ville)}`,
   mesVoyages: '/voyages',
   destination: (ville) => `/destination/${encodeURIComponent(ville)}`,
+  // Guide de ville : onglet 'voyageurs' | 'a-faire' | 'bons-plans', et carte à mettre en évidence.
+  destinationOnglet: (ville, onglet, carte) =>
+    `/destination/${encodeURIComponent(ville)}?onglet=${onglet}${carte ? `&carte=${encodeURIComponent(carte)}` : ''}`,
   compagnons: '/compagnons',
 
   // Partie B — groupe

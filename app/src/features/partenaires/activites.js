@@ -120,3 +120,12 @@ export const ACTIVITES = [
 ]
 
 export const activitesDe = (ville) => ACTIVITES.filter((x) => x.ville === ville)
+
+// Une phrase de présentation pour l'en-tête du guide de ville.
+export const RESUMES = {
+  Lyon: 'Ville de gastronomie entre Rhône et Saône, dont le quartier Renaissance est classé au patrimoine mondial.',
+  Paris: 'Des musées immenses, des quartiers aux airs de village et des soirées au bord de l’eau.',
+  Marrakech: 'La ville rouge aux portes de l’Atlas : médina, souks, jardins et palais.',
+  Pristina: 'Jeune capitale animée, connue pour ses cafés et son architecture singulière.',
+  Prizren: 'Ville historique au pied des monts Sharr : forteresse, mosquées et pont ottoman.',
+}

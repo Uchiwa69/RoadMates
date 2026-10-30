@@ -12,6 +12,7 @@ import GlobeTerre from '../../../shared/globe/Globe.jsx'
 import { Button, Combobox, Field } from '../../../shared/ui/index.js'
 import { VILLES } from '../villes.js'
 import { arcsVoyages, pointsVoyageurs, villesDuPays } from '../globe.js'
+import { suggestionsContenus } from '../../partenaires/recherche.js'
 
 const ISO_DE_VILLE = new Map(VILLES.map((v) => [v.ville, v.iso]))
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`
@@ -68,12 +69,13 @@ export default function Hero() {
   const suggestions = q ? [
     ...filtrerEtClasser(VILLES, q, 'ville').slice(0, 4).map((v) => {
       const nb = points.find((p) => p.ville === v.ville)?.nb ?? 0
-      return { id: `v-${v.ville}`, label: v.ville, detail: nb ? `${v.pays} · ${pluriel(nb, 'voyageur')}` : v.pays, icon: MapPin, ville: v }
+      return { id: `v-${v.ville}`, groupe: 'Villes', label: v.ville, detail: nb ? `${v.pays} · ${pluriel(nb, 'voyageur')}` : v.pays, icon: MapPin, ville: v }
     }),
     ...filtrerEtClasser(PAYS, q, 'nom').slice(0, 4).map((p) => {
       const nb = voyageursParPays.get(p.iso2)?.size ?? 0
-      return { id: `p-${p.iso2}`, label: p.nom, detail: nb ? pluriel(nb, 'voyageur') : 'Pays', icon: Globe2, iso2: p.iso2 }
+      return { id: `p-${p.iso2}`, groupe: 'Pays', label: p.nom, detail: nb ? pluriel(nb, 'voyageur') : 'Pays', icon: Globe2, iso2: p.iso2 }
     }),
+    ...suggestionsContenus(db, saisie),
   ] : []
 
   const nbDansPays = pays ? voyageursParPays.get(pays)?.size ?? 0 : 0
@@ -91,12 +93,12 @@ export default function Hero() {
         </p>
 
         <form className="hero__recherche" role="search" onSubmit={(e) => e.preventDefault()}>
-          <Field label="Où partez-vous ?" aide="Un pays ou une ville : le globe vous y emmène.">
+          <Field label="Où partez-vous ?" aide="Un pays, une ville, une activité : le globe vous y emmène.">
             <Combobox
               valeur={saisie}
               onValeur={(v) => { setSaisie(v); if (!v) toutVoir() }}
               suggestions={suggestions}
-              onChoix={(s) => (s.iso2 ? choisirPays(s.iso2) : choisirVille(s.ville))}
+              onChoix={(s) => (s.onglet ? navigate(paths.destinationOnglet(s.ville, s.onglet, s.carte)) : s.iso2 ? choisirPays(s.iso2) : choisirVille(s.ville))}
               placeholder="Portugal, Lisbonne, Croatie…"
               vide="Aucun pays ni aucune ville trouvés."
               icon={Search}

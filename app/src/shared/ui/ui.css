@@ -267,6 +267,12 @@
   box-shadow: var(--ombre-3); max-height: 320px; overflow-y: auto;
 }
 .ui-combo__liste[hidden] { display: none; }
+.ui-combo__liste { max-height: min(60vh, 440px); overflow-y: auto; overscroll-behavior: contain; }
+.ui-combo__groupe + .ui-combo__groupe { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--bord); }
+.ui-combo__groupe-nom {
+  padding: 8px 12px 4px; font-size: .75rem; font-weight: 750; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--texte-2);
+}
 .ui-combo__option {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 12px; border-radius: var(--r-m); cursor: pointer;

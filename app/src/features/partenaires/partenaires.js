@@ -2,6 +2,7 @@
 // Les partenaires du jeu de démo sont fictifs : aucune vraie entreprise n'est présentée comme partenaire.
 import { aujourdhui } from '../decouverte/dates.js'
 import { presentsDansLaVille } from '../decouverte/matching.js'
+import { formatJour } from '../groupe/format.js'
 
 export const CATEGORIES_PARTENAIRE = {
   hebergement: 'Hébergement',
@@ -60,4 +61,9 @@ export function groupesPourLaVille(db, userId, ville, pays) {
     [g.destination, g.nom].some((texte) => norm(texte).includes(norm(ville))) ||
     (pays && norm(g.destination) === norm(pays))
   ))
+}
+
+// Texte du message envoyé au groupe par « Proposer à mon groupe ».
+export function texteOffre(offre, partenaire) {
+  return `Bon plan partenaire à ${partenaire.ville} : ${partenaire.nom}, « ${offre.titre} », ${formatReduction(offre.reductionPct)} ${conditionGroupe(offre.minVoyageurs)}, jusqu’au ${formatJour(offre.fin)}. Ça vous tente ?`
 }

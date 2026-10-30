@@ -1,6 +1,6 @@
 // Champ avec suggestions (motif ARIA combobox) : flèches haut/bas, Entrée, Échap.
 // Le parent filtre les suggestions à partir de `valeur` : [{ id, label, detail, icon }].
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useField } from './fieldContext.js'
 
 export default function Combobox({
@@ -15,6 +15,18 @@ export default function Combobox({
 
   const visible = ouvert && valeur.trim() !== ''
   const optionId = (i) => `${id}-opt-${i}`
+  // Regroupe les suggestions consécutives d'un même `groupe` ; l'index i reste celui de la liste à plat.
+  const groupes = []
+  suggestions.forEach((s, i) => {
+    const dernier = groupes.at(-1)
+    if (dernier && dernier.nom === s.groupe) dernier.items.push({ s, i })
+    else groupes.push({ nom: s.groupe, items: [{ s, i }] })
+  })
+
+  // La liste défile : l'option active au clavier reste visible.
+  useEffect(() => {
+    if (actif >= 0) document.getElementById(`${id}-opt-${actif}`)?.scrollIntoView({ block: 'nearest' })
+  }, [actif, id])
 
   const choisir = (s) => {
     onChoix(s)
@@ -62,24 +74,33 @@ export default function Combobox({
         onKeyDown={onKeyDown}
         {...inputProps}
       />
-      <ul id={listeId} role="listbox" className="ui-combo__liste" hidden={!visible}>
-        {suggestions.map((s, i) => (
-          <li
-            key={s.id}
-            id={optionId(i)}
-            role="option"
-            aria-selected={i === actif}
-            className="ui-combo__option"
-            onMouseDown={(e) => { e.preventDefault(); choisir(s) }}
-            onMouseEnter={() => setActif(i)}
-          >
-            {s.icon && <s.icon size={18} aria-hidden="true" className="ui-combo__opt-icone" />}
-            <span className="ui-combo__opt-label">{s.label}</span>
-            {s.detail && <span className="ui-combo__opt-detail">{s.detail}</span>}
-          </li>
-        ))}
-        {suggestions.length === 0 && vide && <li className="ui-combo__vide" role="presentation">{vide}</li>}
-      </ul>
+      <div id={listeId} role="listbox" className="ui-combo__liste" hidden={!visible}>
+        {groupes.map(({ nom, items }, g) => {
+          const options = items.map(({ s, i }) => (
+            <div
+              key={s.id}
+              id={optionId(i)}
+              role="option"
+              aria-selected={i === actif}
+              className="ui-combo__option"
+              onMouseDown={(e) => { e.preventDefault(); choisir(s) }}
+              onMouseEnter={() => setActif(i)}
+            >
+              {s.icon && <s.icon size={18} aria-hidden="true" className="ui-combo__opt-icone" />}
+              <span className="ui-combo__opt-label">{s.label}</span>
+              {s.detail && <span className="ui-combo__opt-detail">{s.detail}</span>}
+            </div>
+          ))
+          // Suggestions groupées (Villes, Activités…) : chaque groupe est annoncé par son intitulé.
+          return nom ? (
+            <div key={nom} role="group" aria-labelledby={`${id}-groupe-${g}`} className="ui-combo__groupe">
+              <div id={`${id}-groupe-${g}`} role="presentation" className="ui-combo__groupe-nom">{nom}</div>
+              {options}
+            </div>
+          ) : options
+        })}
+        {suggestions.length === 0 && vide && <div className="ui-combo__vide" role="presentation">{vide}</div>}
+      </div>
       <span className="sr-only" role="status" aria-live="polite">
         {visible ? (suggestions.length ? `${suggestions.length} suggestion${suggestions.length > 1 ? 's' : ''}` : vide) : ''}
       </span>
