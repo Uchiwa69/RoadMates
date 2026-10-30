@@ -1,8 +1,10 @@
 // Repli sans WebGL : globe statique en SVG (projection orthographique d3-geo).
 // Mêmes props que GlobeWebGL ; pas d'animation, transitions instantanées.
+import { useState } from 'react'
 import { geoDistance, geoOrthographic, geoPath } from 'd3-geo'
 import { PAYS_GEO, VUE_INITIALE, focusPays } from './monde.js'
 import { COULEURS_GLOBE, SELECTION, etiquettesVisibles } from './rendu.js'
+import CommandesZoom from './CommandesZoom.jsx'
 
 export default function GlobePlat({
   largeur, hauteur, theme, pays, villeActive, points, arcs, villes, onPays, onVille, etiquettes = 'actives',
@@ -10,7 +12,11 @@ export default function GlobePlat({
   const c = COULEURS_GLOBE[theme] ?? COULEURS_GLOBE.light
   const focus = (pays && focusPays(pays)) || VUE_INITIALE
   const rayon = (Math.min(largeur, hauteur) / 2) * 0.86
-  const zoom = pays ? Math.min(Math.max(1.4 / focus.altitude, 1), 5) : 1
+  // Zoom manuel (boutons) : un facteur propre au pays affiché, remis à 1 quand le pays change.
+  const [manuel, setManuel] = useState({ pays, facteur: 1 })
+  const facteur = manuel.pays === pays ? manuel.facteur : 1
+  const zoomer = (f) => setManuel({ pays, facteur: Math.min(8, Math.max(0.6, facteur * f)) })
+  const zoom = (pays ? Math.min(Math.max(1.4 / focus.altitude, 1), 5) : 1) * facteur
   const projection = geoOrthographic()
     .rotate([-focus.lng, -focus.lat])
     .translate([largeur / 2, hauteur / 2])
@@ -81,6 +87,7 @@ export default function GlobePlat({
           </button>
         )
       })}
+      <CommandesZoom onPlus={() => zoomer(1.5)} onMoins={() => zoomer(1 / 1.5)} onRecentrer={() => setManuel({ pays, facteur: 1 })} />
     </div>
   )
 }

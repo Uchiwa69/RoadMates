@@ -51,3 +51,27 @@
 .globe-ville--active .globe-ville__nb { background: var(--sur-primaire); color: var(--primaire); }
 
 .globe-plat__pays, .globe-plat__point { cursor: pointer; }
+
+/* Commandes de zoom (en haut à droite du globe) et rappel du geste molette */
+.globe-zoom {
+  position: absolute; z-index: 2;
+  top: var(--globe-commandes-haut, 12px); right: var(--globe-commandes-droite, 12px);
+  display: grid; gap: 1px; overflow: hidden;
+  border-radius: var(--r-m); border: 1px solid var(--bord);
+  background: var(--bord); box-shadow: var(--ombre-2);
+}
+.globe-zoom__btn {
+  display: grid; place-items: center; width: 40px; height: 40px; border: none;
+  background: var(--surface); color: var(--texte); cursor: pointer;
+  transition: background var(--d-rapide), color var(--d-rapide);
+}
+.globe-zoom__btn:hover { background: var(--primaire-doux); color: var(--primaire-texte); }
+.globe-zoom__btn:active { background: var(--primaire); color: var(--sur-primaire); }
+.globe-zoom__astuce {
+  position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  margin: 0; padding: 10px 16px; border-radius: var(--r-rond);
+  background: rgb(11 16 32 / .82); color: #F6EFE9; font-size: .875rem; font-weight: 600;
+  pointer-events: none; white-space: nowrap;
+  animation: globe-astuce var(--d-moyen) var(--ease);
+}
+@keyframes globe-astuce { from { opacity: 0; } }

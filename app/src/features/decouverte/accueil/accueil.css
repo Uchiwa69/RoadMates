@@ -72,7 +72,12 @@
 .hero__compte { margin: 0; font-size: .95rem; color: var(--texte-2); }
 
 /* Globe et soleil couchant derrière lui */
-.hero__globe { position: relative; align-self: stretch; min-height: 540px; min-width: 0; }
+.hero__globe {
+  position: relative; align-self: stretch; min-height: 540px; min-width: 0;
+  /* Le canevas déborde de la colonne : les commandes de zoom restent alignées sur elle */
+  --globe-commandes-haut: calc(var(--e-12) + var(--e-3));
+  --globe-commandes-droite: calc(var(--e-12) + var(--e-3));
+}
 .hero__globe::before {
   content: ''; position: absolute; z-index: -1; left: 50%; top: 50%;
   width: 90%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
@@ -91,7 +96,8 @@
 }
 /* Zoomé sur un pays, l'océan remplit le cadre : on l'affiche dans une fenêtre arrondie
    alignée sur la colonne, plutôt que de le fondre dans le ciel. */
-.hero--zoome .hero__globe > .globe {
+.hero--zoome .hero__globe > .globe,
+.hero__globe > .globe:has(.globe__scene[data-proche]) {
   -webkit-mask-image: none; mask-image: none;
   clip-path: inset(var(--e-12) var(--e-12) var(--e-10) 40px round var(--r-xl));
 }
@@ -261,7 +267,8 @@
 @media (max-width: 1023px) {
   .hero { grid-template-columns: minmax(0, 1fr); padding: var(--e-10) var(--e-8) var(--e-6); min-height: 0; }
   .hero__globe { min-height: 460px; }
-  .hero__globe > .globe, .hero--zoome .hero__globe > .globe { inset: calc(var(--e-4) * -1) calc(var(--e-8) * -1) calc(var(--e-6) * -1); -webkit-mask-image: none; mask-image: none; clip-path: none; }
+  .hero__globe { --globe-commandes-haut: calc(var(--e-4) + var(--e-3)); --globe-commandes-droite: calc(var(--e-8) + var(--e-3)); }
+  .hero__globe > .globe, .hero--zoome .hero__globe > .globe, .hero__globe > .globe:has(.globe__scene[data-proche]) { inset: calc(var(--e-4) * -1) calc(var(--e-8) * -1) calc(var(--e-6) * -1); -webkit-mask-image: none; mask-image: none; clip-path: none; }
   .promesses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .exemple, .confiance { grid-template-columns: minmax(0, 1fr); gap: var(--e-8); }
 }
@@ -277,7 +284,7 @@
   .hero__titre { font-size: clamp(2.1rem, 1.4rem + 4vw, 2.6rem); }
   .hero__intro { font-size: 1rem; }
   .hero__actions .ui-btn { flex: 1 1 100%; }
-  .hero__globe { min-height: 360px; display: flex; flex-direction: column; }
+  .hero__globe { min-height: 360px; display: flex; flex-direction: column; --globe-commandes-haut: var(--e-3); --globe-commandes-droite: var(--e-3); }
   .hero__globe > .globe { position: relative; inset: auto; height: 380px; flex: none; margin: 0 calc(var(--e-4) * -1); width: auto; }
   .hero__pays { position: relative; margin-top: calc(var(--e-6) * -1); }
   .promesses { grid-template-columns: minmax(0, 1fr); }

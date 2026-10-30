@@ -149,7 +149,7 @@ export default function Hero() {
               <div>
                 <h2 className="hero__pays-nom">{nomPays(pays)}</h2>
                 <p className="hero__pays-meta">
-                  {nbDansPays ? `${pluriel(nbDansPays, 'voyageur')} y passent cet été` : 'Personne pour l’instant : soyez le premier.'}
+                  {nbDansPays ? `${pluriel(nbDansPays, 'voyageur')} y ${nbDansPays > 1 ? 'passent' : 'passe'} cet été` : 'Personne pour l’instant : soyez le premier.'}
                 </p>
               </div>
               <button type="button" className="hero__fermer" onClick={toutVoir} aria-label="Revenir au globe entier">
