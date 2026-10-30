@@ -265,7 +265,7 @@ export default function Destination() {
               </p>
               <span className="enregistrer-voyage__actions">
                 <Link to={paths.nouveauVoyageVers(ville, periode.debut, periode.fin)} className="enregistrer-voyage__etapes">Plusieurs étapes ?</Link>
-                <Button onClick={enregistrer}>Enregistrer ce voyage</Button>
+                <Button onClick={enregistrer}>Enregistrer<span className="enregistrer-voyage__suite"> ce voyage</span></Button>
               </span>
             </>
           )}

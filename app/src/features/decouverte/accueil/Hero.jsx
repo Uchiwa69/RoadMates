@@ -219,7 +219,7 @@ export default function Hero() {
                                 aria-haspopup="dialog"
                                 onClick={(e) => { boutonCarte.current = e.currentTarget; setVilleSansDates(v.ville) }}
                               >
-                                Choisir mes dates<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
+                                Voir qui sera là<span className="sr-only"> à {v.ville}</span> <ArrowRight size={16} aria-hidden="true" />
                               </button>
                             )}
                             {nbActivites > 0 && (

@@ -267,3 +267,13 @@
   .enregistrer-voyage__actions { flex: 1 1 100%; flex-direction: row-reverse; justify-content: space-between; }
   .enregistrer-voyage__actions .ui-btn { flex: 1 1 auto; }
 }
+
+/* Mobile : bandeau sur une seule ligne (ville et dates, bouton « Enregistrer ») */
+@media (max-width: 767px) {
+  .enregistrer-voyage { flex-wrap: nowrap; gap: var(--e-2); padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4); }
+  .enregistrer-voyage__texte { flex: 1; font-size: .9rem; }
+  .enregistrer-voyage__actions { flex: none; }
+  .enregistrer-voyage__actions .ui-btn { flex: none; }
+  .enregistrer-voyage__etapes { display: none; }
+  .enregistrer-voyage__suite { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
