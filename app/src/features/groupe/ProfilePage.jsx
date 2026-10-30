@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, Check, Clock, Inbox, Languages, Send, ShieldCheck, UserRoundX, Users } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
+import { itineraireMasque, profilMasque } from '../../shared/confidentialite.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, Badge, Button, Card, EmptyState, Field, Textarea, Timeline, useToast } from '../../shared/ui/index.js'
@@ -53,7 +54,17 @@ export default function ProfilePage() {
     )
   }
 
-  const sesVoyages = trips.filter((trip) => trip.userId === userId)
+  const estMonProfil = currentUser?.id === user.id
+  if (!estMonProfil && profilMasque(user)) {
+    return (
+      <EmptyState icon={ShieldCheck} titre="Profil masqué temporairement">
+        <p>Ce voyageur a choisi de masquer son profil pour le moment.</p>
+      </EmptyState>
+    )
+  }
+
+  const itineraireCache = !estMonProfil && itineraireMasque(user)
+  const sesVoyages = itineraireCache ? [] : trips.filter((trip) => trip.userId === userId)
   const mesEtapes = trips.filter((trip) => trip.userId === currentUser?.id).flatMap((trip) => trip.etapes)
   const enCommun = (etape) => mesEtapes.some((e) => e.ville === etape.ville && e.debut <= etape.fin && etape.debut <= e.fin)
 
@@ -100,7 +111,9 @@ export default function ProfilePage() {
         <div className="profil__principal">
           <Card className="profil__tete">
             <div className="profil__fond" aria-hidden="true" />
-            <Avatar user={user} taille={96} />
+            {user.photoUrl
+              ? <img src={user.photoUrl} alt={`Photo de ${user.prenom}`} className="profil__photo profil__photo--avatar" referrerPolicy="no-referrer" />
+              : <Avatar user={user} taille={96} />}
             <div className="profil__identite">
               <h1 className="profil__nom">{user.prenom}</h1>
               <p className="profil__age">{user.age} ans</p>
@@ -116,11 +129,25 @@ export default function ProfilePage() {
               {user.langues?.length ? `Parle ${user.langues.join(', ')}` : 'Langues non renseignées'}
             </p>
             <blockquote className="profil__bio">{user.bio || 'Aucune présentation.'}</blockquote>
+            {user.centresInteret?.length > 0 && (
+              <section aria-label="Centres d’intérêt">
+                <h2>Centres d’intérêt</h2>
+                <ul className="profil__interets">
+                  {user.centresInteret.map((interet) => <li key={interet}>{interet}</li>)}
+                </ul>
+              </section>
+            )}
+            <dl className="profil__preferences">
+              {user.styleVoyage && <div><dt>Style de voyage</dt><dd>{user.styleVoyage}</dd></div>}
+              {user.budgetJournalierCentimes != null && <div><dt>Budget par jour</dt><dd>{(user.budgetJournalierCentimes / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</dd></div>}
+              {user.rythme && <div><dt>Rythme</dt><dd>{user.rythme}</dd></div>}
+              {user.investissement && <div><dt>Investissement souhaité</dt><dd>{({ trajet: 'Juste un trajet', activites: 'Quelques activités', tout: 'Tout le voyage' })[user.investissement] ?? user.investissement}</dd></div>}
+            </dl>
           </Card>
 
           <section aria-labelledby="etapes-titre" className="profil__section">
             <h2 id="etapes-titre">Étapes de voyage</h2>
-            {sesVoyages.length === 0 ? <p className="profil__vide">Aucun voyage déclaré pour le moment.</p> : (
+            {itineraireCache ? <p className="profil__vide">Itinéraire masqué temporairement.</p> : sesVoyages.length === 0 ? <p className="profil__vide">Aucun voyage déclaré pour le moment.</p> : (
               <div className="profil__voyages">
                 {sesVoyages.map((trip) => (
                   <Card key={trip.id} as="article" className="profil__voyage">

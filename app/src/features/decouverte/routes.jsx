@@ -2,6 +2,7 @@
 // Chaque page est chargée à la demande : la première visite ne télécharge que la page affichée.
 import { lazy } from 'react'
 import { paths } from '../../shared/paths.js'
+import { profilRoutes } from '../profil/routes.jsx'
 import './decouverte.css'
 
 const pages = {
@@ -22,4 +23,5 @@ export const decouverteRoutes = [
   { path: paths.mesVoyages, element: <pages.MesVoyages /> },
   { path: '/destination/:ville', element: <pages.Destination /> },
   { path: paths.compagnons, element: <pages.Compagnons /> },
+  ...profilRoutes,
 ]

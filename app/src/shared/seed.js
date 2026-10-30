@@ -1,30 +1,39 @@
 // données de démo, reprises du parcours de Léa (vision produit §4.2).
 // Elles permettent à chaque partie de travailler sans attendre l'autre.
 
+const profil = (centresInteret, styleVoyage, budgetJournalierCentimes, rythme, investissement) => ({
+  photoUrl: '',
+  centresInteret,
+  styleVoyage,
+  budgetJournalierCentimes,
+  rythme,
+  investissement,
+})
+
 export const seed = {
   // À incrémenter quand on ajoute des données : les navigateurs qui ont déjà joué la démo
   // les reçoivent sans perdre les leurs (voir completerAvecSeed dans db.js).
-  version: 2,
+  version: 3,
   session: { userId: 'u-lea' },
 
   users: [
-    { id: 'u-lea', prenom: 'Léa', email: 'lea@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais', 'portugais'], bio: 'Erasmus à Lisbonne, road trip dans l’Algarve cet été.', verifie: true },
-    { id: 'u-ines', prenom: 'Inès', email: 'ines@roadmates.demo', age: 24, genre: 'F', langues: ['français', 'espagnol'], bio: 'Étudiante en archi, fan de surf.', verifie: true },
-    { id: 'u-karim', prenom: 'Karim', email: 'karim@roadmates.demo', age: 34, genre: 'H', langues: ['français', 'anglais', 'arabe'], bio: 'En télétravail, je cherche des randos et des dîners à plusieurs.', verifie: true },
-    { id: 'u-sofia', prenom: 'Sofia', email: 'sofia@roadmates.demo', age: 27, genre: 'F', langues: ['espagnol', 'anglais'], bio: 'Photographe, je voyage léger.', verifie: true },
-    { id: 'u-tom', prenom: 'Tom', email: 'tom@roadmates.demo', age: 22, genre: 'H', langues: ['anglais', 'français'], bio: 'Backpacker, budget serré.', verifie: false },
-    { id: 'u-maya', prenom: 'Maya', email: 'maya@roadmates.demo', age: 29, genre: 'F', langues: ['allemand', 'anglais'], bio: 'Je découvre le Portugal du nord au sud.', verifie: true },
+    { id: 'u-lea', ...profil(['surf', 'randonnée', 'gastronomie'], 'aventure', 5500, 'modéré', 'activites'), prenom: 'Léa', email: 'lea@roadmates.demo', age: 23, genre: 'F', langues: ['français', 'anglais', 'portugais'], bio: 'Erasmus à Lisbonne, road trip dans l’Algarve cet été.', verifie: true },
+    { id: 'u-ines', ...profil(['surf', 'nature', 'culture'], 'aventure', 4500, 'actif', 'activites'), prenom: 'Inès', email: 'ines@roadmates.demo', age: 24, genre: 'F', langues: ['français', 'espagnol'], bio: 'Étudiante en archi, fan de surf.', verifie: true },
+    { id: 'u-karim', ...profil(['randonnée', 'gastronomie', 'culture'], 'confort', 8000, 'modéré', 'tout'), prenom: 'Karim', email: 'karim@roadmates.demo', age: 34, genre: 'H', langues: ['français', 'anglais', 'arabe'], bio: 'En télétravail, je cherche des randos et des dîners à plusieurs.', verifie: true },
+    { id: 'u-sofia', ...profil(['photographie', 'culture', 'nature'], 'culture', 6500, 'tranquille', 'trajet'), prenom: 'Sofia', email: 'sofia@roadmates.demo', age: 27, genre: 'F', langues: ['espagnol', 'anglais'], bio: 'Photographe, je voyage léger.', verifie: true },
+    { id: 'u-tom', ...profil(['randonnée', 'rencontres', 'nature'], 'routard', 3000, 'actif', 'activites'), prenom: 'Tom', email: 'tom@roadmates.demo', age: 22, genre: 'H', langues: ['anglais', 'français'], bio: 'Backpacker, budget serré.', verifie: false },
+    { id: 'u-maya', ...profil(['culture', 'gastronomie', 'plage'], 'confort', 7000, 'modéré', 'tout'), prenom: 'Maya', email: 'maya@roadmates.demo', age: 29, genre: 'F', langues: ['allemand', 'anglais'], bio: 'Je découvre le Portugal du nord au sud.', verifie: true },
     // Voyageurs de la vitrine (globe de l'accueil). Aucun ne passe par le Portugal :
     // ils ne changent pas les résultats du parcours de démo.
-    { id: 'u-lucas', prenom: 'Lucas', email: 'lucas@roadmates.demo', age: 26, genre: 'H', langues: ['français', 'anglais'], bio: 'La côte espagnole en train et en stop.', verifie: true },
-    { id: 'u-chiara', prenom: 'Chiara', email: 'chiara@roadmates.demo', age: 25, genre: 'F', langues: ['italien', 'anglais', 'français'], bio: 'Je rentre au pays, envie de faire découvrir le sud.', verifie: true },
-    { id: 'u-jonas', prenom: 'Jonas', email: 'jonas@roadmates.demo', age: 28, genre: 'H', langues: ['allemand', 'anglais'], bio: 'Interrail entre les capitales d’Europe centrale.', verifie: true },
-    { id: 'u-emma', prenom: 'Emma', email: 'emma@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Kayak et criques en Croatie.', verifie: false },
-    { id: 'u-nora', prenom: 'Nora', email: 'nora@roadmates.demo', age: 24, genre: 'F', langues: ['allemand', 'anglais'], bio: 'Vélo, musées et cafés.', verifie: true },
-    { id: 'u-mateo', prenom: 'Mateo', email: 'mateo@roadmates.demo', age: 30, genre: 'H', langues: ['espagnol', 'anglais'], bio: 'Flamenco et randonnée en Andalousie.', verifie: true },
-    { id: 'u-zoe', prenom: 'Zoé', email: 'zoe@roadmates.demo', age: 27, genre: 'F', langues: ['français', 'italien'], bio: 'Les îles grecques, sac à dos et ferry.', verifie: true },
-    { id: 'u-yasmine', prenom: 'Yasmine', email: 'yasmine@roadmates.demo', age: 26, genre: 'F', langues: ['français', 'arabe'], bio: 'Marrakech puis le désert, à plusieurs c’est mieux.', verifie: true },
-    { id: 'u-anouk', prenom: 'Anouk', email: 'anouk@roadmates.demo', age: 21, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante à Lyon, cap sur la Méditerranée.', verifie: true },
+    { id: 'u-lucas', ...profil(['train', 'randonnée', 'photographie'], 'routard', 3500, 'actif', 'trajet'), prenom: 'Lucas', email: 'lucas@roadmates.demo', age: 26, genre: 'H', langues: ['français', 'anglais'], bio: 'La côte espagnole en train et en stop.', verifie: true },
+    { id: 'u-chiara', ...profil(['gastronomie', 'culture', 'plage'], 'confort', 9000, 'tranquille', 'activites'), prenom: 'Chiara', email: 'chiara@roadmates.demo', age: 25, genre: 'F', langues: ['italien', 'anglais', 'français'], bio: 'Je rentre au pays, envie de faire découvrir le sud.', verifie: true },
+    { id: 'u-jonas', ...profil(['musées', 'train', 'histoire'], 'culture', 6000, 'modéré', 'tout'), prenom: 'Jonas', email: 'jonas@roadmates.demo', age: 28, genre: 'H', langues: ['allemand', 'anglais'], bio: 'Interrail entre les capitales d’Europe centrale.', verifie: true },
+    { id: 'u-emma', ...profil(['kayak', 'plage', 'nature'], 'aventure', 5000, 'actif', 'activites'), prenom: 'Emma', email: 'emma@roadmates.demo', age: 22, genre: 'F', langues: ['français', 'anglais'], bio: 'Kayak et criques en Croatie.', verifie: false },
+    { id: 'u-nora', ...profil(['vélo', 'musées', 'gastronomie'], 'culture', 7500, 'modéré', 'tout'), prenom: 'Nora', email: 'nora@roadmates.demo', age: 24, genre: 'F', langues: ['allemand', 'anglais'], bio: 'Vélo, musées et cafés.', verifie: true },
+    { id: 'u-mateo', ...profil(['danse', 'randonnée', 'culture'], 'aventure', 5500, 'actif', 'activites'), prenom: 'Mateo', email: 'mateo@roadmates.demo', age: 30, genre: 'H', langues: ['espagnol', 'anglais'], bio: 'Flamenco et randonnée en Andalousie.', verifie: true },
+    { id: 'u-zoe', ...profil(['plage', 'ferry', 'nature'], 'routard', 4000, 'tranquille', 'trajet'), prenom: 'Zoé', email: 'zoe@roadmates.demo', age: 27, genre: 'F', langues: ['français', 'italien'], bio: 'Les îles grecques, sac à dos et ferry.', verifie: true },
+    { id: 'u-yasmine', ...profil(['culture', 'randonnée', 'gastronomie'], 'aventure', 5000, 'modéré', 'tout'), prenom: 'Yasmine', email: 'yasmine@roadmates.demo', age: 26, genre: 'F', langues: ['français', 'arabe'], bio: 'Marrakech puis le désert, à plusieurs c’est mieux.', verifie: true },
+    { id: 'u-anouk', ...profil(['plage', 'randonnée', 'rencontres'], 'routard', 3500, 'actif', 'activites'), prenom: 'Anouk', email: 'anouk@roadmates.demo', age: 21, genre: 'F', langues: ['français', 'anglais'], bio: 'Étudiante à Lyon, cap sur la Méditerranée.', verifie: true },
   ],
 
   trips: [
