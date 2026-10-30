@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Shield } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff, Shield, Trash2 } from 'lucide-react'
 import { useCurrentUser } from '../../shared/session.js'
-import { updateDb, useDb } from '../../shared/db.js'
+import { newId, updateDb, useDb } from '../../shared/db.js'
 import { profilMasque, itineraireMasque } from '../../shared/confidentialite.js'
+import { paths } from '../../shared/paths.js'
 import { Button, Card, EntetePage, Field, Input, useToast } from '../../shared/ui/index.js'
 import './confidentialite.css'
 
@@ -59,10 +61,13 @@ function RegleAnonymat({ label, description, active, value, onChange, onQuick, i
 
 export default function Confidentialite() {
   const user = useCurrentUser()
+  const navigate = useNavigate()
+  const users = useDb((db) => db.users)
   const trips = useDb((db) => db.trips)
   const toast = useToast()
   const [profilJusqua, setProfilJusqua] = useState(user?.anonymat?.profilJusqua ?? '')
   const [itineraireJusqua, setItineraireJusqua] = useState(user?.anonymat?.itineraireJusqua ?? '')
+  const [confirmerSuppression, setConfirmerSuppression] = useState(false)
   const profilMasqueActif = profilMasque(user)
   const itineraireMasqueActif = itineraireMasque(user)
 
@@ -77,6 +82,50 @@ export default function Confidentialite() {
       }
     })
     toast('Vos réglages de confidentialité sont enregistrés.')
+  }
+
+  function supprimerCompteLocal() {
+    if (!confirmerSuppression || !user) return
+    if (users.length <= 1) {
+      toast('Suppression impossible : aucun autre compte de démonstration ne permet de poursuivre la navigation.')
+      return
+    }
+    const idAnonyme = newId('anonyme')
+    updateDb((db) => {
+      const comptesRestants = db.users.filter((candidate) => candidate.id !== user.id)
+      db.users = [...comptesRestants, {
+        id: idAnonyme,
+        prenom: 'Voyageur supprimé',
+        age: null,
+        genre: 'autre',
+        langues: [],
+        bio: '',
+        verifie: false,
+        photoUrl: '',
+      }]
+      db.trips = db.trips.filter((trip) => trip.userId !== user.id)
+      db.requests = db.requests.filter((request) => request.fromId !== user.id && request.toId !== user.id)
+      db.groups.forEach((group) => {
+        group.membres = [...new Set(group.membres.map((memberId) => memberId === user.id ? idAnonyme : memberId))]
+      })
+      db.messages = db.messages.filter((message) => message.auteurId !== user.id)
+      db.expenses.forEach((expense) => {
+        if (expense.createurId === user.id) expense.createurId = idAnonyme
+        expense.parts.forEach((part) => {
+          if (part.userId === user.id) part.userId = idAnonyme
+        })
+      })
+      db.blocages = (db.blocages ?? []).filter((item) => item.bloqueurId !== user.id && item.bloqueId !== user.id)
+      db.signalements = (db.signalements ?? []).filter((item) => item.auteurId !== user.id && item.cibleId !== user.id)
+      db.avis = (db.avis ?? []).filter((item) => item.auteurId !== user.id).map((item) => ({
+        ...item,
+        cibleId: item.cibleId === user.id ? idAnonyme : item.cibleId,
+      }))
+      db.session.userId = comptesRestants[0].id
+    })
+    setConfirmerSuppression(false)
+    toast('Compte et données directement identifiantes supprimés de ce navigateur. Les références de dépenses et de groupe sont anonymisées.')
+    navigate(paths.accueil, { replace: true })
   }
 
   function redevenirVisible() {
@@ -124,6 +173,19 @@ export default function Confidentialite() {
             <Button variant="secondaire" onClick={redevenirVisible}>Redevenir visible</Button>
           )}
         </div>
+      </Card>
+      <Card className="confidentialite__suppression">
+        <h2>Supprimer mon compte</h2>
+        <p>Cette action supprime les données du compte de ce navigateur et anonymise les références nécessaires aux dépenses et groupes. Dans ce prototype local, cela n’efface aucune donnée sur un serveur et ne déclenche aucune procédure réglementaire.</p>
+        {!confirmerSuppression ? (
+          <Button variant="secondaire" icon={Trash2} onClick={() => setConfirmerSuppression(true)}>Demander la suppression locale</Button>
+        ) : (
+          <div className="confidentialite__confirmation" role="group" aria-label="Confirmer la suppression locale du compte">
+            <p>Cette action est irréversible dans les données de démonstration de ce navigateur.</p>
+            <Button icon={Trash2} onClick={supprimerCompteLocal}>Confirmer la suppression locale</Button>
+            <Button variant="fantome" onClick={() => setConfirmerSuppression(false)}>Annuler</Button>
+          </div>
+        )}
       </Card>
     </section>
   )

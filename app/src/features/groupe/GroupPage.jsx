@@ -95,7 +95,7 @@ function Conversation({ groupId, groupMembers, currentUser, users }) {
             const auteurAffiche = auteurMasque ? { ...author, prenom: 'Voyageur anonyme' } : author
             const moi = message.auteurId === currentUser?.id
             const masqueApresSignalement = !moi && signalements.some((signalement) =>
-              signalement.auteurId === currentUser?.id && signalement.cibleId === message.auteurId && signalement.groupId === groupId,
+              signalement.auteurId === currentUser?.id && signalement.cibleId === message.auteurId && (!signalement.groupId || signalement.groupId === groupId),
             )
             if (masqueApresSignalement) {
               return <p key={message.id} className="conversation__systeme">Message masqué après votre signalement.</p>
