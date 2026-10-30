@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BadgeCheck, Camera, Check, Save } from 'lucide-react'
-import { updateDb } from '../../shared/db.js'
+import { updateDb, useDb } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { Badge, Button, Card, EntetePage, Field, Input, Select, Textarea, useToast } from '../../shared/ui/index.js'
+import { paths } from '../../shared/paths.js'
+import { profilMasque, itineraireMasque } from '../../shared/confidentialite.js'
+import { aujourdhui } from '../decouverte/dates.js'
 
 const STYLES = ['routard', 'confort', 'aventure', 'culture', 'fête']
 const RYTHMES = ['tranquille', 'modéré', 'actif']
@@ -22,6 +26,7 @@ function initialiser(user) {
     budgetEuros: user.budgetJournalierCentimes == null ? '' : String(user.budgetJournalierCentimes / 100),
     rythme: user.rythme ?? 'modéré',
     investissement: user.investissement ?? 'activites',
+    preferenceGenre: ['H', 'F', 'tous'].includes(user.preferenceGenre) ? user.preferenceGenre : 'tous',
   }
 }
 
@@ -37,6 +42,7 @@ function AvatarProfil({ user, taille = 88 }) {
 
 export default function EditionProfil() {
   const user = useCurrentUser()
+  const db = useDb((base) => base)
   const toast = useToast()
   const [form, setForm] = useState(() => initialiser(user ?? {}))
   const [erreur, setErreur] = useState('')
@@ -81,12 +87,29 @@ export default function EditionProfil() {
       voyageur.budgetJournalierCentimes = budget === null ? null : Math.round(budget * 100)
       voyageur.rythme = form.rythme
       voyageur.investissement = form.investissement
+      voyageur.preferenceGenre = form.preferenceGenre
     })
     setEnregistre(true)
     toast('Votre profil a été mis à jour.')
   }
 
   const investissement = INVESTISSEMENTS.find((option) => option.valeur === form.investissement)?.libelle
+  const aujourdHui = aujourdhui()
+  const amis = new Set(user.amisRoute ?? [])
+  const amisVisibles = db.users.filter((candidat) => amis.has(candidat.id) && !profilMasque(candidat) && !(db.blocages ?? []).some((blocage) => (blocage.bloqueurId === user.id && blocage.bloqueId === candidat.id) || (blocage.bloqueurId === candidat.id && blocage.bloqueId === user.id)))
+  const prochainesDestinations = (user.amisRoute ?? []).flatMap((amiId) => {
+    const ami = db.users.find((candidat) => candidat.id === amiId)
+    if (!ami || profilMasque(ami) || itineraireMasque(ami) || (db.blocages ?? []).some((blocage) => (blocage.bloqueurId === user.id && blocage.bloqueId === ami.id) || (blocage.bloqueurId === ami.id && blocage.bloqueId === user.id))) return []
+    const voyagesMoi = db.trips.filter((trip) => trip.userId === user.id)
+    const voyagesAmi = db.trips.filter((trip) => trip.userId === amiId)
+    const communes = []
+    for (const voyageMoi of voyagesMoi) for (const voyageAmi of voyagesAmi) for (const etapeMoi of voyageMoi.etapes) for (const etapeAmi of voyageAmi.etapes) {
+      const debut = etapeMoi.debut > etapeAmi.debut ? etapeMoi.debut : etapeAmi.debut
+      const fin = etapeMoi.fin < etapeAmi.fin ? etapeMoi.fin : etapeAmi.fin
+      if (etapeMoi.ville === etapeAmi.ville && debut <= fin && fin >= aujourdHui) communes.push({ amiId, ami: ami.prenom, ville: etapeMoi.ville, debut, fin })
+    }
+    return communes
+  }).sort((a, b) => a.debut.localeCompare(b.debut))
 
   return (
     <section className="profil-enrichi">
@@ -131,6 +154,13 @@ export default function EditionProfil() {
               </Select>
             </Field>
           </div>
+          <Field label="Genre des voyageurs souhaités">
+            <Select value={form.preferenceGenre} onChange={modifier('preferenceGenre')}>
+              <option value="H">Hommes</option>
+              <option value="F">Femmes</option>
+              <option value="tous">Les deux</option>
+            </Select>
+          </Field>
           <div className="profil-enrichi__ligne">
             <Field label="Budget par jour (€)" aide="Montant enregistré en centimes.">
               <Input type="number" min="0" max="10000" step="0.01" inputMode="decimal" value={form.budgetEuros} onChange={modifier('budgetEuros')} placeholder="50" />
@@ -145,6 +175,8 @@ export default function EditionProfil() {
           <Button type="submit" icon={enregistre ? Check : Save}>Enregistrer mon profil</Button>
           {enregistre && <p className="sr-only" role="status">Profil enregistré.</p>}
         </Card>
+
+        <p className="sr-only" role="note">La préférence de genre est enregistrée pour vos filtres de découverte et n’est pas affichée sur votre profil public.</p>
 
         <Card as="aside" className="profil-enrichi__apercu" aria-label="Aperçu du profil">
           <div className="profil-enrichi__apercu-tete">
@@ -165,6 +197,19 @@ export default function EditionProfil() {
           {user.verifie && <Badge ton="succes" icon={BadgeCheck}>Identité vérifiée</Badge>}
         </Card>
       </div>
+
+      <Card as="section" className="profil-enrichi__amis" aria-labelledby="amis-route-titre">
+        <h2 id="amis-route-titre">Amis de route</h2>
+        <p>Les voyageurs ajoutés après un parcours partagé et leurs prochaines destinations en commun.</p>
+        {amisVisibles.length === 0
+          ? <p>Vous n’avez pas encore d’ami de route.</p>
+          : <ul>{amisVisibles.map((ami) => <li key={ami.id}><Link to={paths.profil(ami.id)}>{ami.prenom}</Link></li>)}</ul>}
+        <h3>Destinations communes à venir</h3>
+        {prochainesDestinations.length === 0
+          ? <p>Aucun voyage commun à venir pour le moment.</p>
+          : <ul>{prochainesDestinations.map((destination) => <li key={`${destination.amiId}-${destination.ville}-${destination.debut}`}><Link to={paths.destination(destination.ville)}>{destination.ville}</Link> avec {destination.ami} · {destination.debut} – {destination.fin}</li>)}</ul>}
+        <Button to={paths.avis} variant="secondaire">Laisser ou consulter des avis</Button>
+      </Card>
     </section>
   )
 }

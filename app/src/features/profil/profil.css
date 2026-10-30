@@ -12,6 +12,10 @@
 .profil-enrichi__apercu-tete h2 { margin: 0; font-size: 1.15rem; }
 .profil-enrichi__tags { display: flex; flex-wrap: wrap; gap: var(--e-2); margin: 0; padding: 0; list-style: none; }
 .profil-enrichi__tags li { padding: 5px 10px; border-radius: var(--r-rond); background: var(--primaire-doux); color: var(--primaire-texte); font-size: .875rem; font-weight: 600; }
+.profil-enrichi__amis { display: grid; gap: var(--e-3); }
+.profil-enrichi__amis :is(h2, h3, p) { margin: 0; }
+.profil-enrichi__amis ul { display: grid; gap: var(--e-2); margin: 0; padding-left: 1.25rem; }
+
 @media (max-width: 767px) {
   .profil-enrichi__grille { grid-template-columns: minmax(0, 1fr); }
   .profil-enrichi__apercu { position: static; }
