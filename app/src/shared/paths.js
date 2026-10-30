@@ -17,4 +17,8 @@ export const paths = {
   demandes: '/demandes',
   groupes: '/groupes',
   groupe: (groupId) => `/groupes/${groupId}`,
+
+  // Step-up — confidentialité (agent A) et profil enrichi (agent B)
+  confidentialite: '/confidentialite',
+  monProfil: '/profil',
 }
