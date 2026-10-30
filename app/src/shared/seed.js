@@ -8,12 +8,15 @@ const profil = (centresInteret, styleVoyage, budgetJournalierCentimes, rythme, i
   budgetJournalierCentimes,
   rythme,
   investissement,
+  preferenceGenre: 'tous',
+  filtresDecouverte: null,
+  amisRoute: [],
 })
 
 export const seed = {
   // À incrémenter quand on ajoute des données : les navigateurs qui ont déjà joué la démo
   // les reçoivent sans perdre les leurs (voir completerAvecSeed dans db.js).
-  version: 3,
+  version: 4,
   session: { userId: 'u-lea' },
 
   users: [
@@ -113,4 +116,6 @@ export const seed = {
   ],
 
   expenses: [],
+  avis: [],
+  blocages: [],
 }

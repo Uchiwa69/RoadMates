@@ -27,7 +27,7 @@ const ETAPES = [
 const CONFIANCE = [
   { icon: BadgeCheck, titre: 'Identité vérifiée', texte: 'Pièce officielle et selfie au premier contact ; la copie est supprimée sous 30 jours.' },
   { icon: MessageCircleHeart, titre: 'Messagerie après acceptation', texte: 'Personne ne peut vous écrire tant que vous n’avez pas accepté sa demande.' },
-  { icon: Venus, titre: 'Filtre « femmes uniquement »', texte: 'Ne voyez que les voyageuses, et filtrez aussi par âge et par langue.' },
+  { icon: Venus, titre: 'Préférence de genre', texte: 'Choisissez Hommes, Femmes ou Les deux, puis affinez par âge, langue et profil.' },
   { icon: Flag, titre: 'Signalement', texte: 'Un profil inadapté se signale en deux clics ; la modération répond sous 24 h.' },
 ]
 
