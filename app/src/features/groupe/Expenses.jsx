@@ -7,7 +7,7 @@ import { useCurrentUser } from '../../shared/session.js'
 import { profilMasque } from '../../shared/confidentialite.js'
 import { Avatar, Badge, Button, Card, Field, Input, ProgressBar, useToast } from '../../shared/ui/index.js'
 import { estComplete, formatEuros, nbPayees, repartir } from './depenses.js'
-import { formatJourLong } from './format.js'
+import { aujourdhuiIso, formatJourLong } from './format.js'
 
 const CATEGORIES = [
   { id: 'voiture', label: 'Voiture', icon: Car },
@@ -32,7 +32,7 @@ async function celebrer(origine) {
   })
 }
 
-function Depense({ expense, users, currentUser, onPayer, paiement }) {
+function Depense({ expense, users, currentUser, onPayer, paiement, onChangerStatut }) {
   const complete = estComplete(expense)
   const payees = nbPayees(expense)
   const total = expense.parts.length
@@ -48,9 +48,13 @@ function Depense({ expense, users, currentUser, onPayer, paiement }) {
             {formatEuros(expense.montantCentimes)} au total · {expense.categorie}
           </p>
         </div>
-        {complete
-          ? <Badge ton="succes" icon={Check} className="depense__statut">Complète</Badge>
-          : <Badge ton="alerte" icon={Clock} className="depense__statut">En attente</Badge>}
+        {expense.statut === 'remboursee'
+          ? <Badge ton="neutre" className="depense__statut">Annulée</Badge>
+          : expense.statut === 'reservee'
+            ? <Badge ton="succes" icon={Check} className="depense__statut">Réservation lancée</Badge>
+            : complete
+              ? <Badge ton="succes" icon={Check} className="depense__statut">Complète</Badge>
+              : <Badge ton="alerte" icon={Clock} className="depense__statut">En attente</Badge>}
       </div>
 
       {mienne && (
@@ -88,12 +92,27 @@ function Depense({ expense, users, currentUser, onPayer, paiement }) {
 
       <p className="depense__reservation">
         <CalendarClock size={16} aria-hidden="true" />
-        {complete
-          ? 'Toutes les parts sont payées : la réservation peut être lancée.'
-          : `Réservation prévue le ${formatJourLong(expense.dateReservation)} si toutes les parts sont payées.`}
+        {expense.statut === 'remboursee'
+          ? 'Dépense annulée : remboursement simulé au créateur (aucune transaction réelle).'
+          : expense.statut === 'reservee'
+            ? 'Réservation marquée comme lancée dans cette démonstration (aucune réservation réelle).'
+            : complete
+              ? 'Toutes les parts sont payées : le créateur peut lancer la réservation.'
+              : `Aucun engagement avant paiement intégral. Date limite : ${formatJourLong(expense.dateReservation)}.`}
       </p>
+      {expense.createurId === currentUser?.id && expense.statut !== 'remboursee' && (
+        <div className="depense__actions-createur">
+          {complete && expense.statut !== 'reservee' && (
+            <Button type="button" onClick={() => onChangerStatut(expense.id, 'reservee')}>Marquer la réservation lancée</Button>
+          )}
+          <Button type="button" variant="secondaire" onClick={() => onChangerStatut(expense.id, 'remboursee')}>
+            {complete ? 'Annuler et simuler le remboursement' : 'Annuler la dépense'}
+          </Button>
+        </div>
+      )}
+      {expense.statut === 'reservee' && <p className="depense__note">La réservation est engagée dans l’état de démonstration.</p>}
 
-      {mienne && !mienne.payee && (
+      {mienne && !mienne.payee && !['reservee', 'remboursee'].includes(expense.statut) && expense.dateReservation >= aujourdhuiIso() && (
         <Button
           taille="grand"
           icon={Wallet}
@@ -104,7 +123,8 @@ function Depense({ expense, users, currentUser, onPayer, paiement }) {
           {paiement === expense.id ? 'Paiement en cours…' : `Payer ma part · ${formatEuros(mienne.montantCentimes)}`}
         </Button>
       )}
-      {mienne && !mienne.payee && <p className="depense__note">Paiement simulé : aucune transaction réelle dans le prototype.</p>}
+      {mienne && !mienne.payee && !['reservee', 'remboursee'].includes(expense.statut) && expense.dateReservation < aujourdhuiIso() && <p className="depense__note">Date limite dépassée : contactez le créateur, aucun paiement ne peut être simulé.</p>}
+      {mienne && !mienne.payee && !['reservee', 'remboursee'].includes(expense.statut) && expense.dateReservation >= aujourdhuiIso() && <p className="depense__note">Paiement simulé : aucune transaction réelle dans le prototype.</p>}
     </article>
   )
 }
@@ -121,6 +141,31 @@ export default function Expenses({ group }) {
   const [error, setError] = useState('')
   const [paiement, setPaiement] = useState(null)
 
+  function changerStatut(expenseId, statut) {
+    let modifiee = false
+    updateDb((db) => {
+      const expense = db.expenses.find((candidate) => candidate.id === expenseId && candidate.groupId === group.id)
+      if (!expense || expense.createurId !== currentUser?.id || expense.statut === 'remboursee') return
+      if (statut === 'reservee' && (expense.statut === 'reservee' || !expense.parts.length || !estComplete(expense))) return
+      if (statut === 'remboursee') {
+        expense.statut = 'remboursee'
+        expense.annuleeLe = new Date().toISOString()
+        expense.remboursement = { beneficiaireId: expense.createurId, statut: 'simule', creeLe: new Date().toISOString() }
+        modifiee = true
+        return
+      }
+      if (statut === 'reservee' && expense.parts.length > 0 && estComplete(expense)) {
+        expense.statut = 'reservee'
+        expense.reserveeLe = new Date().toISOString()
+        modifiee = true
+      }
+    })
+    if (modifiee) toast(statut === 'reservee'
+      ? 'Réservation marquée comme lancée localement. Aucun prestataire n’a été contacté.'
+      : 'Dépense annulée ; remboursement au créateur simulé localement.')
+    else if (statut === 'reservee') toast('La réservation reste bloquée tant que toutes les parts ne sont pas payées.')
+  }
+
   const memberIds = [...new Set(group.membres)]
   const apercuCentimes = Math.round(Number(montant) * 100)
   const apercu = Number.isFinite(apercuCentimes) && apercuCentimes > 0 && memberIds.length
@@ -129,17 +174,28 @@ export default function Expenses({ group }) {
 
   // Paiement simulé : un court délai, puis la part passe à « payée » (une seule fois).
   function payPart(expense, bouton) {
-    if (paiement) return
+    if (paiement || ['reservee', 'remboursee'].includes(expense.statut) || expense.dateReservation < aujourdhuiIso()) return
+    const currentPart = expense.parts.find((part) => part.userId === currentUser?.id)
+    if (!currentPart || currentPart.payee) return
     setPaiement(expense.id)
-    const derniere = expense.parts.filter((part) => !part.payee).length === 1
     setTimeout(() => {
+      let modifiee = false
+      let complete = false
       updateDb((db) => {
         const cible = db.expenses.find((candidate) => candidate.id === expense.id && candidate.groupId === group.id)
         const part = cible?.parts.find((candidate) => candidate.userId === currentUser?.id)
-        if (part && !part.payee) part.payee = true
+        if (cible && !['reservee', 'remboursee'].includes(cible.statut) && cible.dateReservation >= aujourdhuiIso() && part && !part.payee) {
+          part.payee = true
+          modifiee = true
+          complete = estComplete(cible)
+        }
       })
       setPaiement(null)
-      if (derniere) {
+      if (!modifiee) {
+        toast('Le paiement simulé n’a pas été appliqué : la dépense a changé, a expiré ou a été annulée.')
+        return
+      }
+      if (complete) {
         const r = bouton.getBoundingClientRect()
         celebrer({ x: (r.left + r.width / 2) / window.innerWidth, y: r.top / window.innerHeight })
         toast(`« ${expense.libelle} » est complète : tout le monde a payé !`)
@@ -158,6 +214,10 @@ export default function Expenses({ group }) {
       return
     }
     const montantCentimes = Math.round(euros * 100)
+    if (dateReservation < aujourdhuiIso()) {
+      setError('La date limite de réservation ne peut pas être dans le passé.')
+      return
+    }
     if (montantCentimes <= 0) {
       setError('Le montant doit être supérieur à 0 €.')
       return
@@ -176,6 +236,7 @@ export default function Expenses({ group }) {
       if (!db.groups.some((candidate) => candidate.id === group.id && candidate.membres.includes(currentUser?.id))) return
       db.expenses.push({
         id: newId('e'),
+        statut: 'ouverte',
         groupId: group.id,
         createurId: currentUser.id,
         libelle: cleanLabel,
@@ -206,7 +267,7 @@ export default function Expenses({ group }) {
       ) : (
         <div className="depenses__liste">
           {expenses.map((expense) => (
-            <Depense key={expense.id} expense={expense} users={users} currentUser={currentUser} onPayer={payPart} paiement={paiement} />
+            <Depense key={expense.id} expense={expense} users={users} currentUser={currentUser} onPayer={payPart} paiement={paiement} onChangerStatut={changerStatut} />
           ))}
         </div>
       )}

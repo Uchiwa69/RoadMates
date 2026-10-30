@@ -3,13 +3,8 @@ import { Ban, Flag } from 'lucide-react'
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { Button, useToast } from '../../shared/ui/index.js'
+import { estBloque } from './securite.js'
 import './securite.css'
-
-export function estBloque(db, userId, autreId) {
-  return (db.blocages ?? []).some(({ bloqueurId, bloqueId }) =>
-    (bloqueurId === userId && bloqueId === autreId) || (bloqueurId === autreId && bloqueId === userId),
-  )
-}
 
 export default function ActionsSecurite({ cible, groupId = null }) {
   const user = useCurrentUser()

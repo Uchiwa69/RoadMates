@@ -162,6 +162,11 @@
 .conversation__envoyer:active { transform: scale(.94); }
 .conversation__erreur { grid-column: 1 / -1; }
 
+.lieux-publics { display: grid; gap: var(--e-2); padding: var(--e-4); border: 1px solid var(--bord); border-radius: var(--r-l); background: var(--surface); }
+.lieux-publics h2 { display: flex; align-items: center; gap: var(--e-2); margin: 0; font-size: 1.05rem; }
+.lieux-publics p { margin: 0; color: var(--texte-2); font-size: .9rem; }
+.lieux-publics ul { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); margin: 0; padding-left: 1.2rem; }
+
 .securite-membres { display: grid; gap: var(--e-2); padding: var(--e-3); border: 1px solid var(--bord); border-radius: var(--r-l); background: var(--surface-2); }
 .securite-membres__ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2); }
 

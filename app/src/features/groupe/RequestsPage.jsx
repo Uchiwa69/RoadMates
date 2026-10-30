@@ -8,7 +8,8 @@ import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, Badge, Button, EmptyState, EntetePage, Tabs, TabPanel, useToast } from '../../shared/ui/index.js'
 import { formatMoment } from './format.js'
-import ActionsSecurite, { estBloque } from '../securite/ActionsSecurite.jsx'
+import ActionsSecurite from '../securite/ActionsSecurite.jsx'
+import { estBloque } from '../securite/securite.js'
 
 function Statut({ statut, recue }) {
   if (statut === 'en_attente') return <Badge ton="alerte" icon={Clock}>{recue ? 'À traiter' : 'En attente de réponse'}</Badge>
@@ -36,6 +37,10 @@ export default function RequestsPage() {
     const cible = person(requestCourante?.fromId)
     if (cible && estBloque({ blocages }, currentUser?.id, cible.id)) {
       toast('Cette interaction est désactivée car un blocage est actif.')
+      return
+    }
+    if (status === 'acceptee' && (!currentUser?.verifie || !cible?.verifie)) {
+      toast('L’identité doit être vérifiée des deux côtés avant de devenir contacts.')
       return
     }
     updateDb((db) => {
