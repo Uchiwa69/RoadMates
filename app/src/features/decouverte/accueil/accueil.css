@@ -44,7 +44,7 @@
   font-size: .85rem; font-weight: 650; color: var(--primaire-texte);
 }
 .hero__titre {
-  margin: 0; font-size: clamp(2.3rem, 1.5rem + 3.4vw, 4rem); line-height: 1.04; letter-spacing: -.025em;
+  margin: 0; font-size: clamp(2.3rem, 1.4rem + 3.2vw, 4.6rem); line-height: 1.04; letter-spacing: -.025em;
 }
 .hero__titre em { font-style: italic; font-weight: 500; color: var(--primaire-texte); }
 .hero__intro { margin: 0; font-size: 1.1rem; color: var(--texte-2); max-width: 46ch; }
@@ -139,6 +139,27 @@
 .hero__ville-nb { grid-area: nb; font-size: .85rem; color: var(--texte-2); }
 .hero__ville-action { grid-area: action; display: inline-flex; align-items: center; gap: 4px; font-size: .85rem; font-weight: 650; color: var(--primaire-texte); }
 .hero__pays-vide { margin: 0; color: var(--texte-2); }
+
+/* Ordinateur : le hero sort de la colonne de lecture (1 120 px) pour occuper jusqu'à 1 440 px,
+   avec 32 px de marge, et grandit avec la hauteur de l'écran. Le reste de la page garde sa largeur. */
+@media (min-width: 1024px) {
+  .hero {
+    --largeur-hero: max(100%, min(1440px, calc(100vw - 64px)));
+    width: var(--largeur-hero);
+    margin-inline: calc((100% - var(--largeur-hero)) / 2);
+    min-height: clamp(640px, 78vh, 860px);
+    padding: var(--e-12) var(--e-16) var(--e-10);
+    gap: var(--e-10);
+  }
+  .hero__intro { font-size: clamp(1.1rem, .9rem + .4vw, 1.25rem); max-width: 50ch; }
+  /* Le canevas du globe suit le padding droit élargi (64 px), comme sa fenêtre et ses commandes */
+  .hero__globe { --globe-commandes-droite: calc(var(--e-16) + var(--e-3)); }
+  .hero__globe > .globe { right: calc(var(--e-16) * -1); }
+  .hero--zoome .hero__globe > .globe,
+  .hero__globe > .globe:has(.globe__scene[data-proche]) {
+    clip-path: inset(var(--e-12) var(--e-16) var(--e-10) 40px round var(--r-xl));
+  }
+}
 
 /* ---------- Sections ---------- */
 .accueil__section { display: grid; gap: var(--e-8); }

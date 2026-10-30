@@ -5,9 +5,16 @@ import { feature } from 'topojson-client'
 import { geoArea, geoCentroid } from 'd3-geo'
 import { alpha2DepuisNumerique, nomPays } from './pays.js'
 
-// Sur ordinateur, le globe entier tient dans sa colonne ; sur mobile, il est plus proche.
 export const VUE_INITIALE = { lat: 36, lng: 6, altitude: 3.4 }
-export const vueInitiale = (compact) => (compact ? { ...VUE_INITIALE, altitude: 2.3 } : VUE_INITIALE)
+
+// Vue de départ adaptée au cadre : le globe entier occupe 90 % de la largeur du canevas
+// (72 % de sa hauteur au plus). La caméra de globe.gl a un champ vertical de 50° et le globe
+// un rayon de 1 en unités d'altitude : on en déduit la distance qui donne ce diamètre.
+export function vueInitiale(largeur, hauteur) {
+  const diametre = Math.min(largeur * 0.9, hauteur * 0.72)
+  const demiAngle = (diametre / hauteur) * 25 * (Math.PI / 180)
+  return { ...VUE_INITIALE, altitude: Math.min(4, Math.max(1.6, 1 / Math.sin(demiAngle) - 1)) }
+}
 
 // Centre et recul de la caméra : on vise le plus grand polygone du pays,
 // pour que la France ne soit pas centrée entre Paris et la Guyane.

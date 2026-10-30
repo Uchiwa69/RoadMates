@@ -30,6 +30,8 @@ export default function GlobeWebGL({
   // Altitude de la caméra, arrondie au quart (on ne redessine pas les points à chaque image).
   // Elle règle la taille des points et des arcs, et « proche » : le globe déborde de son cadre.
   const [altitude, setAltitude] = useState(null)
+  const minuteurMesure = useRef(null)
+  const dejaPlace = useRef(false)
   const minuteurAstuce = useRef(null)
   const c = COULEURS_GLOBE[theme] ?? COULEURS_GLOBE.light
   const compact = largeur < 560
@@ -87,16 +89,26 @@ export default function GlobeWebGL({
     }
   }, [])
 
+  // Déplace la caméra puis relève l'altitude à l'arrivée : les animations de pointOfView
+  // ne déclenchent pas les événements des contrôles, seuls les gestes de l'utilisateur le font.
+  const deplacer = useCallback((vue, ms) => {
+    if (!g) return
+    g.pointOfView(vue, ms)
+    clearTimeout(minuteurMesure.current)
+    minuteurMesure.current = setTimeout(() => setAltitude(Math.round(g.pointOfView().altitude * 4) / 4), ms + 60)
+  }, [g])
+  useEffect(() => () => clearTimeout(minuteurMesure.current), [])
+
   const duree = mouvementReduit ? 0 : 450
   const zoomer = (facteur) => {
     if (!g) return
     g.controls().autoRotate = false
     const vue = g.pointOfView()
-    g.pointOfView({ ...vue, altitude: borner(vue.altitude * facteur) }, duree)
+    deplacer({ ...vue, altitude: borner(vue.altitude * facteur) }, duree)
   }
   const recentrer = () => {
     if (!g) return
-    g.pointOfView(focus ? vuePays(focus, compact) : vueInitiale(compact), mouvementReduit ? 0 : 900)
+    deplacer(focus ? vuePays(focus, compact) : vueInitiale(largeur, hauteur), mouvementReduit ? 0 : 900)
     g.controls().autoRotate = rotation && !focus && !mouvementReduit
   }
 
@@ -133,9 +145,13 @@ export default function GlobeWebGL({
   // Pays choisi : on arrête de tourner, on pivote et on zoome dessus.
   useEffect(() => {
     if (!pret || !g) return
-    g.pointOfView(focus ? vuePays(focus, compact) : vueInitiale(compact), mouvementReduit ? 0 : 1500)
+    // Premier placement immédiat : partir de la vue par défaut de globe.gl ferait croire un instant
+    // le globe « proche » (fenêtre qui clignote). L'apparition reste animée par animateIn.
+    const instantane = mouvementReduit || !dejaPlace.current
+    dejaPlace.current = true
+    deplacer(focus ? vuePays(focus, compact) : vueInitiale(largeur, hauteur), instantane ? 0 : 1500)
     g.controls().autoRotate = rotation && !focus && !mouvementReduit
-  }, [focus, pret, g, mouvementReduit, rotation, compact])
+  }, [focus, pret, g, mouvementReduit, rotation, compact, largeur, hauteur, deplacer])
 
   // Rendu en pause quand le globe est hors écran ou l'onglet masqué (RSE-05, RSE-06).
   useEffect(() => {
@@ -153,7 +169,7 @@ export default function GlobeWebGL({
 
   const estChoisi = (d) => d.iso2 && d.iso2 === pays
   // « Proche » dès qu'on s'est approché de 10 % par rapport à la vue de départ.
-  const reference = vueInitiale(compact).altitude
+  const reference = vueInitiale(largeur, hauteur).altitude
   const proche = altitude !== null && altitude < reference * 0.9
   // Les tailles sont en degrés : on les réduit avec l'altitude pour garder une taille constante à l'écran.
   const echelle = Math.min(1, Math.max(0.12, (altitude ?? reference) / reference))
