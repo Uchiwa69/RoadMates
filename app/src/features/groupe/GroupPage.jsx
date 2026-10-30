@@ -5,6 +5,7 @@ import { ArrowLeft, Lock, LogOut, MapPin, MessagesSquare, SendHorizontal, Wallet
 import { useDb, updateDb, newId } from '../../shared/db.js'
 import { useCurrentUser } from '../../shared/session.js'
 import { chiffrerMessage, dechiffrerMessage } from '../../shared/chiffrement.js'
+import OffreDansMessage from '../partenaires/OffreDansMessage.jsx'
 import { profilMasque } from '../../shared/confidentialite.js'
 import { paths } from '../../shared/paths.js'
 import { Avatar, AvatarStack, Button, EmptyState, useToast } from '../../shared/ui/index.js'
@@ -120,6 +121,7 @@ function Conversation({ groupId, groupMembers, currentUser, users }) {
                     </p>
                   )}
                   <p className="bulle__texte">{textesDechiffres[message.id] ?? (message.chiffre ? 'Déchiffrement…' : message.texte)}</p>
+                  {message.offreId && <OffreDansMessage offreId={message.offreId} />}
                 </div>
               </article>
             )

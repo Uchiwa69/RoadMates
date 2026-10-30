@@ -7,7 +7,8 @@
 //   trips     A  { id, userId, destination, etapes: [{ ville, pays, debut, fin }] }  dates 'AAAA-MM-JJ'
 //   requests  B  { id, fromId, toId, message, statut: 'en_attente'|'acceptee'|'refusee', creeLe }
 //   groups    B  { id, nom, destination, membres: userId[], creeLe }
-//   messages  B  { id, groupId, auteurId, texte, envoyeLe, systeme?: bool }  (systeme : « X a quitté le groupe »)
+//   messages  B  { id, groupId, auteurId, texte, envoyeLe, systeme?: bool, offreId?: string }
+//                (systeme : « X a quitté le groupe » ; offreId : offre partenaire proposée au groupe)
 //   avis      B  { id, groupId, auteurId, cibleId, note, commentaire, creeLe }
 //   blocages  A { id, bloqueurId, bloqueId, creeLe }
 //   expenses  B { id, groupId, createurId, libelle, categorie, montantCentimes, dateReservation,

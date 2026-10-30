@@ -20,6 +20,15 @@ export function offreEnCours(offre, partenaire, today = aujourdhui()) {
   return Boolean(partenaire?.valide && offre.active && offre.debut <= today && today <= offre.fin)
 }
 
+// État d'une offre vu par son partenaire.
+export function statutOffre(offre, partenaire, today = aujourdhui()) {
+  if (!partenaire?.valide) return { cle: 'validation', libelle: 'En attente de validation', ton: 'alerte' }
+  if (offre.fin < today) return { cle: 'expiree', libelle: 'Expirée', ton: 'neutre' }
+  if (!offre.active) return { cle: 'suspendue', libelle: 'Suspendue', ton: 'erreur' }
+  if (offre.debut > today) return { cle: 'a-venir', libelle: 'Programmée', ton: 'violet' }
+  return { cle: 'en-ligne', libelle: 'En ligne', ton: 'succes' }
+}
+
 // Les bons plans d'une ville, triés par réduction décroissante : [{ offre, partenaire }].
 export function offresDeLaVille(db, ville, today = aujourdhui()) {
   return (db.offres ?? [])

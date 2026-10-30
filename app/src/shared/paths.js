@@ -28,6 +28,10 @@ export const paths = {
   monProfil: '/profil',
   avis: '/avis',                        // redirige vers profilAvis
 
+  // Espace partenaire (US-20), accessible en incarnant un partenaire dans le mode démo
+  partenaire: '/partenaire',
+  partenaireProfil: '/partenaire/profil',
+
   // Espace « Mon profil » : accueil et sous-pages
   profilModifier: '/profil/modifier',
   profilModifierChamp: (champ) => `/profil/modifier?champ=${champ}`,

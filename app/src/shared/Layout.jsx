@@ -3,10 +3,10 @@
 import { Component, Suspense, useEffect, useRef } from 'react'
 import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom'
 import { LazyMotion, MotionConfig, m } from 'motion/react'
-import { CloudOff, Home, Map, MessagesSquare, Moon, RotateCcw, Sun, Users } from 'lucide-react'
+import { CloudOff, Eye, Home, Map, MessagesSquare, Moon, RotateCcw, Store, Sun, Users } from 'lucide-react'
 import { useDb } from './db.js'
 import { paths } from './paths.js'
-import { useCurrentUser } from './session.js'
+import { useCurrentUser, usePartenaire } from './session.js'
 import { basculerTheme, useTheme } from './theme.js'
 import { Avatar, Button, EmptyState, ToastProvider } from './ui/index.js'
 import Logo from './Logo.jsx'
@@ -30,6 +30,13 @@ const liens = [
     to: paths.monProfil, label: 'Profil', avatar: true,
     actif: (p) => [paths.monProfil, paths.confidentialite, paths.avis].some((prefixe) => sousChemin(p, prefixe)),
   },
+]
+
+// Partenaire incarné (mode démo) : navigation réduite à son offre, l'aperçu de sa ville et son profil.
+const liensPartenaire = (partenaire) => [
+  { to: paths.partenaire, label: 'Mon offre', icon: Store, actif: (p) => p === paths.partenaire },
+  { to: paths.destinationOnglet(partenaire.ville, 'bons-plans'), label: 'Aperçu', icon: Eye, actif: (p) => p.startsWith('/destination/') },
+  { to: paths.partenaireProfil, label: 'Profil', avatar: true, actif: (p) => p === paths.partenaireProfil },
 ]
 
 // Le moteur d'animation arrive après le premier affichage : la page n'attend pas ses ~20 Ko.
@@ -75,8 +82,11 @@ export default function Layout() {
   const location = useLocation()
   const outlet = useOutlet()
   const main = useRef(null)
-  const moi = useCurrentUser()
-  const aFaireProfil = useDb((db) => profilAAction(db, moi))
+  const voyageur = useCurrentUser()
+  const partenaire = usePartenaire()
+  const moi = partenaire ? { id: partenaire.id, prenom: partenaire.nom } : voyageur
+  const liensAffiches = partenaire ? liensPartenaire(partenaire) : liens
+  const aFaireProfil = useDb((db) => !partenaire && profilAAction(db, voyageur))
   const enAttente = useDb((db) => db.requests.filter((r) => r.toId === db.session.userId && r.statut === 'en_attente').length)
 
   // À chaque changement de page : retour en haut, titre de l'onglet tiré du h1 de la page
@@ -127,8 +137,8 @@ export default function Layout() {
               </NavLink>
 
               <nav className="nav" aria-label="Navigation principale">
-                <ul>
-                  {liens.map(({ to, label, icon: Icon, notif, avatar, actif }) => {
+                <ul style={{ '--n': liensAffiches.length }}>
+                  {liensAffiches.map(({ to, label, icon: Icon, notif, avatar, actif }) => {
                     const courant = actif(location.pathname)
                     return (
                       <li key={to}>
